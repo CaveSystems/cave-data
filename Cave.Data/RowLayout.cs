@@ -671,7 +671,7 @@ namespace Cave.Data
         /// <summary>Saves the fieldproperties to the specified writer.</summary>
         /// <param name="writer">The writer.</param>
         /// <param name="field">Field properties to save.</param>
-        void Save(DataWriter writer, IFieldProperties field)
+        static void Save(DataWriter writer, IFieldProperties field)
         {
             if (writer == null)
             {

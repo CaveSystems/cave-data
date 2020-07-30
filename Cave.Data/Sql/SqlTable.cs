@@ -206,7 +206,7 @@ namespace Cave.Data.Sql
         public override double Sum(string fieldName, Search search = null)
         {
             var field = Layout[fieldName];
-            search ??= Search.None;
+            if (search == null) { search = Search.None; }
             var s = ToSqlSearch(search);
             var command = new StringBuilder();
             command.Append("SELECT SUM(");

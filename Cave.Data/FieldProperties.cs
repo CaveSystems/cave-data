@@ -667,7 +667,7 @@ namespace Cave
                 TypeAtDatabase = DataType;
             }
 
-            NameAtDatabase ??= RowLayout.GetNameByStrategy(namingStrategy, fieldInfo.Name);
+            if (NameAtDatabase == null) { NameAtDatabase = RowLayout.GetNameByStrategy(namingStrategy, fieldInfo.Name); }
             Validate();
         }
 

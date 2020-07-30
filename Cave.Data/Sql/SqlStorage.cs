@@ -114,7 +114,7 @@ namespace Cave.Data.Sql
         #endregion
 
         /// <summary>closes the connection to the storage engine.</summary>
-        public override void Close() { Dispose(); }
+        public override void Close() => Dispose();
 
         /// <summary>Releases all resources used by the SqlConnection.</summary>
         public void Dispose()
@@ -224,13 +224,14 @@ namespace Cave.Data.Sql
                     return timeSpan.TotalSeconds.ToString("R", CultureInfo.InvariantCulture);
                 case DateTime dateTime:
                 {
-                    DateTime dt = properties.DateTimeKind switch
+                    DateTime dt;
+                    switch (properties.DateTimeKind)
                     {
-                        DateTimeKind.Unspecified => dateTime,
-                        DateTimeKind.Utc => dateTime.ToUniversalTime(),
-                        DateTimeKind.Local => dateTime.ToLocalTime(),
-                        _ => throw new NotSupportedException($"DateTimeKind {properties.DateTimeKind} not supported!")
-                    };
+                        case DateTimeKind.Unspecified: dt = dateTime; break;
+                        case DateTimeKind.Utc: dt = dateTime.ToUniversalTime(); break;
+                        case DateTimeKind.Local: dt = dateTime.ToLocalTime(); break;
+                        default: throw new NotSupportedException($"DateTimeKind {properties.DateTimeKind} not supported!");
+                    }
                     switch (properties.DateTimeType)
                     {
                         case DateTimeType.Undefined:

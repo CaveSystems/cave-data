@@ -219,15 +219,16 @@ namespace Cave.Data
             string[] GetNameParts(string text)
                 => text.ReplaceInvalidChars(ASCII.Strings.Letters + ASCII.Strings.Digits, "_").Split('_').SelectMany(s => s.SplitCamelCase()).ToArray();
 
-            // TODO: use NamingStrategy
-            string GetName(string text) => namingStrategy switch
+            string GetName(string text)
             {
-                NamingStrategy.CamelCase => GetNameParts(text).JoinCamelCase(),
-                NamingStrategy.SnakeCase => GetNameParts(text).JoinSnakeCase(),
-                NamingStrategy.Exact => text,
-                _ => throw new NotImplementedException($"Unknown NamingStrategy {namingStrategy}.")
-            };
-
+                switch (namingStrategy)
+                {
+                    case NamingStrategy.CamelCase: return GetNameParts(text).JoinCamelCase();
+                    case NamingStrategy.SnakeCase: return GetNameParts(text).JoinSnakeCase();
+                    case NamingStrategy.Exact: return text;
+                    default: throw new NotImplementedException($"Unknown NamingStrategy {namingStrategy}.");
+                }
+            }
             #endregion
 
             if (databaseName == null)
