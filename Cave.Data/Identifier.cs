@@ -41,7 +41,7 @@ namespace Cave.Data
         public override string ToString() => data.Select(d => $"{d}").Join('|');
 
         /// <inheritdoc />
-        public override bool Equals(object obj) => obj is Identifier other ? Equals(other) : false;
+        public override bool Equals(object obj) => obj is Identifier other && Equals(other);
 
         /// <inheritdoc />
         public override int GetHashCode()
