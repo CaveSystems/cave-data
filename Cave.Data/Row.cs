@@ -1,12 +1,14 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Cave.Collections;
 
 namespace Cave.Data
 {
     /// <summary>Provides a data row implementation providing untyped data to strong typed struct interop.</summary>
-    public sealed class Row : IEquatable<Row>
+    public sealed class Row : IEquatable<Row>, IEnumerable<KeyValuePair<string, object>>
     {
         /// <summary>Gets the row layout.</summary>
         public readonly RowLayout Layout;
@@ -85,6 +87,7 @@ namespace Cave.Data
         public TStruct GetStruct<TStruct>(RowLayout layout)
             where TStruct : struct
         {
+            if (layout == null) throw new ArgumentNullException(nameof(layout));
             if (!layout.IsTyped)
             {
                 throw new NotSupportedException("This Row was not created from a typed layout!");
@@ -185,5 +188,11 @@ namespace Cave.Data
 
             return hash;
         }
+
+        /// <inheritdoc/>
+        public IEnumerator<KeyValuePair<string, object>> GetEnumerator() => ToDictionary().GetEnumerator();
+
+        /// <inheritdoc/>
+        IEnumerator IEnumerable.GetEnumerator() => ToDictionary().GetEnumerator();
     }
 }
