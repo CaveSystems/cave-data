@@ -54,12 +54,8 @@ namespace Cave.Data.Sql
             get
             {
                 var value = Storage.QueryValue(database: Database.Name, table: Name, cmd: "SELECT COUNT(*) FROM " + FQTN);
-                if (value == null)
-                {
-                    throw new InvalidDataException($"Could not read value from {FQTN}!");
-                }
-
-                return Convert.ToInt64(value);
+                if (value == null) return -1;
+                return Convert.ToInt64(value, Storage.Culture);
             }
         }
 
@@ -156,7 +152,7 @@ namespace Cave.Data.Sql
             var result = new List<TValue>();
             foreach (var row in rows)
             {
-                var value = (TValue) Fields.ConvertValue(typeof(TValue), row[0], CultureInfo.InvariantCulture);
+                var value = (TValue) Fields.ConvertValue(typeof(TValue), row[0], Storage.Culture);
                 result.Add(value);
             }
 
@@ -237,18 +233,18 @@ namespace Cave.Data.Sql
                         case DateTimeType.Undefined:
                             throw new NotSupportedException($"Sum() is not supported for field {field}!");
                         case DateTimeType.BigIntTicks:
-                            result = Convert.ToDouble(value) / TimeSpan.TicksPerSecond;
+                            result = Convert.ToDouble(value, CultureInfo.CurrentCulture) / TimeSpan.TicksPerSecond;
                             break;
                         case DateTimeType.DecimalSeconds:
                         case DateTimeType.Native:
                         case DateTimeType.DoubleSeconds:
-                            result = Convert.ToDouble(value);
+                            result = Convert.ToDouble(value, CultureInfo.CurrentCulture);
                             break;
                     }
 
                     break;
                 default:
-                    result = Convert.ToDouble(value);
+                    result = Convert.ToDouble(value, CultureInfo.CurrentCulture);
                     break;
             }
 
@@ -323,7 +319,7 @@ namespace Cave.Data.Sql
                 throw new InvalidDataException($"Could not read row count from {FQTN}!");
             }
 
-            return Convert.ToInt64(value);
+            return Convert.ToInt64(value, Storage.Culture);
         }
 
         #endregion
@@ -592,9 +588,9 @@ namespace Cave.Data.Sql
 
         /// <summary>Searches for grouped datasets and returns the id of the first occurence (sql handles this differently).</summary>
         /// <param name="search">Search definition.</param>
-        /// <param name="option">Options for the search.</param>
+        /// <param name="opt">Options for the search.</param>
         /// <returns>Returns a list of rows matching the specified criteria.</returns>
-        protected internal virtual IList<Row> SqlGetGroupRows(SqlSearch search, ResultOption option)
+        protected internal virtual IList<Row> SqlGetGroupRows(SqlSearch search, ResultOption opt)
         {
             RowLayout layout;
             var command = new StringBuilder();
@@ -624,7 +620,7 @@ namespace Cave.Data.Sql
             command.Append(" WHERE ");
             command.Append(search);
             var groupCount = 0;
-            foreach (var o in option.Filter(ResultOptionMode.Group))
+            foreach (var o in opt.Filter(ResultOptionMode.Group))
             {
                 if (groupCount++ == 0)
                 {
@@ -641,20 +637,20 @@ namespace Cave.Data.Sql
             return Query(new SqlCmd(command.ToString(), search.Parameters.ToArray()), ref layout);
         }
 
-        /// <summary>Searches for grouped datasets and returns the number of items found.</summary>
+        /// <summary>Searches for grouped data-sets and returns the number of items found.</summary>
         /// <param name="search">Search definition.</param>
-        /// <param name="option">Options for the search.</param>
-        /// <returns>Numer of items found.</returns>
-        protected internal virtual long SqlCountGroupBy(SqlSearch search, ResultOption option)
+        /// <param name="opt">Options for the search.</param>
+        /// <returns>Number of items found.</returns>
+        protected internal virtual long SqlCountGroupBy(SqlSearch search, ResultOption opt)
         {
             if (search is null)
             {
                 throw new ArgumentNullException(nameof(search));
             }
 
-            if (option is null)
+            if (opt is null)
             {
-                throw new ArgumentNullException(nameof(option));
+                throw new ArgumentNullException(nameof(opt));
             }
 
             var command = new StringBuilder();
@@ -681,13 +677,13 @@ namespace Cave.Data.Sql
             command.Append(FQTN);
             command.Append(" WHERE ");
             command.Append(search);
-            if (option.Contains(ResultOptionMode.Limit) | option.Contains(ResultOptionMode.Offset))
+            if (opt.Contains(ResultOptionMode.Limit) | opt.Contains(ResultOptionMode.Offset))
             {
                 throw new InvalidOperationException("Cannot use Option.Group and Option.Limit/Offset at once!");
             }
 
             var groupCount = 0;
-            foreach (var o in option.Filter(ResultOptionMode.Group))
+            foreach (var o in opt.Filter(ResultOptionMode.Group))
             {
                 if (groupCount++ == 0)
                 {
@@ -712,23 +708,23 @@ namespace Cave.Data.Sql
 
         /// <summary>Searches the table for rows with given field value combinations.</summary>
         /// <param name="search">The search to run.</param>
-        /// <param name="option">Options for the search and the result set.</param>
+        /// <param name="opt">Options for the search and the result set.</param>
         /// <returns>Returns number of rows found.</returns>
-        protected internal virtual long SqlCount(SqlSearch search, ResultOption option)
+        protected internal virtual long SqlCount(SqlSearch search, ResultOption opt)
         {
             if (search is null)
             {
                 throw new ArgumentNullException(nameof(search));
             }
 
-            if (option is null)
+            if (opt is null)
             {
-                throw new ArgumentNullException(nameof(option));
+                throw new ArgumentNullException(nameof(opt));
             }
 
-            if (option.Contains(ResultOptionMode.Group))
+            if (opt.Contains(ResultOptionMode.Group))
             {
-                return SqlCountGroupBy(search, option);
+                return SqlCountGroupBy(search, opt);
             }
 
             var command = new StringBuilder();
@@ -736,7 +732,7 @@ namespace Cave.Data.Sql
             command.Append(FQTN);
             command.Append(" WHERE ");
             command.Append(search);
-            foreach (var o in option.ToArray())
+            foreach (var o in opt.ToArray())
             {
                 switch (o.Mode)
                 {
@@ -755,18 +751,18 @@ namespace Cave.Data.Sql
                 throw new InvalidDataException($"Could not read value from {FQTN}!");
             }
 
-            return Convert.ToInt64(value);
+            return Convert.ToInt64(value, Storage.Culture);
         }
 
         /// <summary>Searches the table for rows with given field value combinations.</summary>
         /// <param name="search">The search to run.</param>
-        /// <param name="option">Options for the search and the result set.</param>
+        /// <param name="opt">Options for the search and the result set.</param>
         /// <returns>Returns the ID of the row found or -1.</returns>
-        protected internal virtual IList<Row> SqlGetRows(SqlSearch search, ResultOption option)
+        protected internal virtual IList<Row> SqlGetRows(SqlSearch search, ResultOption opt)
         {
-            if (option.Contains(ResultOptionMode.Group))
+            if (opt.Contains(ResultOptionMode.Group))
             {
-                return SqlGetGroupRows(search, option);
+                return SqlGetGroupRows(search, opt);
             }
 
             var command = new StringBuilder();
@@ -775,7 +771,7 @@ namespace Cave.Data.Sql
             command.Append(" WHERE ");
             command.Append(search);
             var orderCount = 0;
-            foreach (var o in option.Filter(ResultOptionMode.SortAsc, ResultOptionMode.SortDesc))
+            foreach (var o in opt.Filter(ResultOptionMode.SortAsc, ResultOptionMode.SortDesc))
             {
                 if (orderCount++ == 0)
                 {
@@ -798,7 +794,7 @@ namespace Cave.Data.Sql
             }
 
             var limit = 0;
-            foreach (var o in option.Filter(ResultOptionMode.Limit))
+            foreach (var o in opt.Filter(ResultOptionMode.Limit))
             {
                 if (limit++ > 0)
                 {
@@ -809,7 +805,7 @@ namespace Cave.Data.Sql
             }
 
             var offset = 0;
-            foreach (var o in option.Filter(ResultOptionMode.Offset))
+            foreach (var o in opt.Filter(ResultOptionMode.Offset))
             {
                 if (offset++ > 0)
                 {

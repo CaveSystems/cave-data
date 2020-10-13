@@ -55,7 +55,7 @@ namespace Cave.Data.Mysql
         }
 
         /// <inheritdoc />
-        public override string[] DatabaseNames
+        public override IList<string> DatabaseNames
         {
             get
             {
@@ -66,7 +66,7 @@ namespace Cave.Data.Mysql
                     result.Add((string) row[0]);
                 }
 
-                return result.ToArray();
+                return result;
             }
         }
 
@@ -250,7 +250,7 @@ namespace Cave.Data.Mysql
                 throw new InvalidDataException("Could not read information_schema.tables!");
             }
 
-            return Convert.ToInt32(value) > 0;
+            return Convert.ToInt32(value, Culture) > 0;
         }
 
         /// <inheritdoc />

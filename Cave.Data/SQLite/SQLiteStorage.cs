@@ -20,7 +20,7 @@ namespace Cave.Data.SQLite
         }
 
         /// <inheritdoc />
-        public override string[] DatabaseNames
+        public override IList<string> DatabaseNames
         {
             get
             {
@@ -30,7 +30,7 @@ namespace Cave.Data.SQLite
                     result.Add(Path.GetFileNameWithoutExtension(directory));
                 }
 
-                return result.ToArray();
+                return result;
             }
         }
 

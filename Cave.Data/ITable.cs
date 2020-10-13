@@ -26,6 +26,7 @@ namespace Cave.Data
         RowLayout Layout { get; }
 
         /// <summary>Gets the RowCount.</summary>
+        /// <returns>Returns a value &gt;= 0 representing the number of rows available at the table. If the table does not exist or cannot be read a value &lt; 0 is returned.</returns>
         long RowCount { get; }
 
         /// <summary>Initializes the interface class. This is the first method to call after create.</summary>
@@ -34,7 +35,7 @@ namespace Cave.Data
         /// <param name="layout">Layout of the table.</param>
         void Connect(IDatabase database, TableFlags flags, RowLayout layout);
 
-        /// <summary>Updates the layout of the table (applies local fieldmappings and typeconversion).</summary>
+        /// <summary>Updates the layout of the table (applies local field mappings and type conversion).</summary>
         /// <param name="layout">The new layout.</param>
         void UseLayout(RowLayout layout);
 

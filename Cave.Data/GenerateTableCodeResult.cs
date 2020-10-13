@@ -1,8 +1,14 @@
-﻿namespace Cave.Data
+﻿using System;
+
+namespace Cave.Data
 {
     /// <summary>Provides the code generated as result of a ITable.GenerateX() function.</summary>
-    public struct GenerateTableCodeResult
+    public struct GenerateTableCodeResult : IEquatable<GenerateTableCodeResult>
     {
+        public static bool operator ==(GenerateTableCodeResult left, GenerateTableCodeResult right) => Equals(left, right);
+        
+        public static bool operator !=(GenerateTableCodeResult left, GenerateTableCodeResult right) => !Equals(left, right);
+
         /// <summary>Gets the name of the database.</summary>
         public string DatabaseName { get; internal set; }
 
@@ -17,5 +23,25 @@
 
         /// <summary>Gets the class name of the generated table structure.</summary>
         public string ClassName { get; internal set; }
+
+        /// <inheritdoc />
+        public bool Equals(GenerateTableCodeResult other) => DatabaseName == other.DatabaseName && TableName == other.TableName && Code == other.Code && FileName == other.FileName && ClassName == other.ClassName;
+
+        /// <inheritdoc />
+        public override bool Equals(object obj) => obj is GenerateTableCodeResult other && Equals(other);
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = (DatabaseName != null ? DatabaseName.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (TableName != null ? TableName.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (Code != null ? Code.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (FileName != null ? FileName.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (ClassName != null ? ClassName.GetHashCode() : 0);
+                return hashCode;
+            }
+        }
     }
 }

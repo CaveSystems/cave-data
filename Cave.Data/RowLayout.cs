@@ -12,7 +12,7 @@ using Cave.IO;
 namespace Cave.Data
 {
     /// <summary>Provides a row layout implementation.</summary>
-    [DebuggerDisplay("{"+nameof(RowLayout.Name)+ "} [{"+nameof(RowLayout.FieldCount)+"}]")]
+    [DebuggerDisplay("{" + nameof(Name) + "} [{" + nameof(FieldCount) + "}]")]
     public sealed class RowLayout : IEquatable<RowLayout>, IEnumerable<IFieldProperties>
     {
         /// <inheritdoc />
@@ -24,10 +24,7 @@ namespace Cave.Data
         /// <inheritdoc />
         public bool Equals(RowLayout layout)
         {
-            if (layout == null)
-            {
-                throw new ArgumentNullException(nameof(layout));
-            }
+            if (layout is null) return false;
 
             if (layout.FieldCount != FieldCount)
             {
@@ -396,8 +393,9 @@ namespace Cave.Data
         /// <summary>Gets the string representing the specified value using the field properties.</summary>
         /// <param name="fieldIndex">The field number.</param>
         /// <param name="value">The value.</param>
+        /// <param name="culture">The culture.</param>
         /// <returns>The string to display.</returns>
-        public string GetDisplayString(int fieldIndex, object value)
+        public string GetDisplayString(int fieldIndex, object value, CultureInfo culture = null)
         {
             var field = properties[fieldIndex];
             switch (field.DisplayFormat)
@@ -407,31 +405,31 @@ namespace Cave.Data
                     switch (field.DataType)
                     {
                         case DataType.TimeSpan: return ((TimeSpan) value).FormatTime();
-                        default: return Convert.ToDouble(value).FormatTime();
+                        default: return Convert.ToDouble(value, culture).FormatTime();
                     }
                 case "FormatValue":
                 case "Size":
-                    return Convert.ToDecimal(value).FormatSize();
+                    return Convert.ToDecimal(value, culture).FormatSize();
                 case "FormatBinary":
                 case "Binary":
-                    return Convert.ToDecimal(value).FormatSize();
+                    return Convert.ToDecimal(value, culture).FormatSize();
             }
 
             switch (field.DataType)
             {
-                case DataType.Int8: return ((sbyte) value).ToString(field.DisplayFormat);
-                case DataType.Int16: return ((short) value).ToString(field.DisplayFormat);
-                case DataType.Int32: return ((int) value).ToString(field.DisplayFormat);
-                case DataType.Int64: return ((long) value).ToString(field.DisplayFormat);
-                case DataType.UInt8: return ((byte) value).ToString(field.DisplayFormat);
-                case DataType.UInt16: return ((ushort) value).ToString(field.DisplayFormat);
-                case DataType.UInt32: return ((uint) value).ToString(field.DisplayFormat);
-                case DataType.UInt64: return ((ulong) value).ToString(field.DisplayFormat);
+                case DataType.Int8: return ((sbyte) value).ToString(field.DisplayFormat, culture);
+                case DataType.Int16: return ((short) value).ToString(field.DisplayFormat, culture);
+                case DataType.Int32: return ((int) value).ToString(field.DisplayFormat, culture);
+                case DataType.Int64: return ((long) value).ToString(field.DisplayFormat, culture);
+                case DataType.UInt8: return ((byte) value).ToString(field.DisplayFormat, culture);
+                case DataType.UInt16: return ((ushort) value).ToString(field.DisplayFormat, culture);
+                case DataType.UInt32: return ((uint) value).ToString(field.DisplayFormat, culture);
+                case DataType.UInt64: return ((ulong) value).ToString(field.DisplayFormat, culture);
                 case DataType.Binary: return Base64.NoPadding.Encode((byte[]) value);
-                case DataType.DateTime: return ((DateTime) value).ToString(field.DisplayFormat);
-                case DataType.Single: return ((float) value).ToString(field.DisplayFormat);
-                case DataType.Double: return ((double) value).ToString(field.DisplayFormat);
-                case DataType.Decimal: return ((decimal) value).ToString(field.DisplayFormat);
+                case DataType.DateTime: return ((DateTime) value).ToString(field.DisplayFormat, culture);
+                case DataType.Single: return ((float) value).ToString(field.DisplayFormat, culture);
+                case DataType.Double: return ((double) value).ToString(field.DisplayFormat, culture);
+                case DataType.Decimal: return ((decimal) value).ToString(field.DisplayFormat, culture);
                 default: return value == null ? string.Empty : value.ToString();
             }
         }

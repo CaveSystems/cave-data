@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.Globalization;
 using System.Text;
 using Cave.Data.Sql;
 
@@ -50,7 +51,7 @@ namespace Cave.Data.Microsoft
 
             if (field.DataType == DataType.Int8)
             {
-                return Convert.ToInt16(localValue);
+                return Convert.ToInt16(localValue, CultureInfo.CurrentCulture);
             }
 
             if (field.DataType == DataType.Decimal)
@@ -252,7 +253,7 @@ namespace Cave.Data.Microsoft
         public override TimeSpan TimeSpanPrecision => TimeSpan.FromMilliseconds(1) - new TimeSpan(1);
 
         /// <inheritdoc />
-        public override string[] DatabaseNames
+        public override IList<string> DatabaseNames
         {
             get
             {
@@ -275,7 +276,7 @@ namespace Cave.Data.Microsoft
                     }
                 }
 
-                return result.ToArray();
+                return result;
             }
         }
 

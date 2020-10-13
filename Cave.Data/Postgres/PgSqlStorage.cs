@@ -54,7 +54,7 @@ namespace Cave.Data.Postgres
         public override TimeSpan TimeSpanPrecision => TimeSpan.FromMilliseconds(1);
 
         /// <inheritdoc />
-        public override string[] DatabaseNames
+        public override IList<string> DatabaseNames
         {
             get
             {
@@ -65,7 +65,7 @@ namespace Cave.Data.Postgres
                     result.Add((string) row[0]);
                 }
 
-                return result.ToArray();
+                return result;
             }
         }
 
@@ -149,7 +149,7 @@ namespace Cave.Data.Postgres
         {
             var value = QueryValue(database: "SCHEMATA",
                 cmd: "SELECT COUNT(*) FROM pg_database WHERE datname LIKE " + EscapeString(GetObjectName(database)) + ";");
-            return Convert.ToInt32(value) > 0;
+            return Convert.ToInt32(value, Culture) > 0;
         }
 
         /// <inheritdoc />

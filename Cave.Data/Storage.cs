@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 
 namespace Cave.Data
@@ -11,6 +13,11 @@ namespace Cave.Data
         public const long EpochTicks = 621355968000000000;
 
         bool closed;
+
+        /// <summary>
+        /// Gets or sets the storage culture.
+        /// </summary>
+        public CultureInfo Culture { get; set; }
 
         /// <summary>Initializes a new instance of the <see cref="Storage" /> class.</summary>
         /// <param name="connectionString">ConnectionString of the storage.</param>
@@ -34,7 +41,7 @@ namespace Cave.Data
         #region properties
 
         /// <inheritdoc />
-        public abstract string[] DatabaseNames { get; }
+        public abstract IList<string> DatabaseNames { get; }
 
         /// <inheritdoc />
         public virtual ConnectionString ConnectionString { get; }

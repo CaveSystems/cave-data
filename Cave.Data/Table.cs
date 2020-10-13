@@ -178,7 +178,7 @@ namespace Cave.Data
                 default:
                     foreach (var row in GetRows(search))
                     {
-                        sum += Convert.ToDouble(row[fieldNumber]);
+                        sum += Convert.ToDouble(row[fieldNumber], CultureInfo.CurrentCulture);
                     }
 
                     break;

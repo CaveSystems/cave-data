@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Cave.Data
 {
@@ -33,7 +34,7 @@ namespace Cave.Data
         bool Closed { get; }
 
         /// <summary>Gets all available database names.</summary>
-        string[] DatabaseNames { get; }
+        IList<string> DatabaseNames { get; }
 
         /// <summary>Gets the maximum <see cref="float" /> precision at the value of 1.0f of this storage engine.</summary>
         float FloatPrecision { get; }

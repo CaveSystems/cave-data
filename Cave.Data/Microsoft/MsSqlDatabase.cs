@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using Cave.Data.Sql;
@@ -33,7 +34,8 @@ namespace Cave.Data.Microsoft
                 catch (Exception ex)
                 {
                     error = true;
-                    throw new InvalidDataException("Could not retrieve connection state.", ex);
+                    Trace.TraceError(ex.ToString());
+                    return false;
                 }
                 finally
                 {

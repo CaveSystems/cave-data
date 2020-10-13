@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.IO;
 using Cave.IO;
 
@@ -83,7 +84,7 @@ namespace Cave.Data
                     }
                     case DataType.Enum:
                     {
-                        var value = Convert.ToInt64(row[i]);
+                        var value = Convert.ToInt64(row[i], CultureInfo.InvariantCulture);
                         writer.Write7BitEncoded64(value);
                         break;
                     }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -14,7 +15,7 @@ namespace Cave.Data.Sql
     {
         /// <summary>Gets or sets the native date time format.</summary>
         /// <value>The native date time format.</value>
-        public string NativeDateTimeFormat = "yyyy'-'MM'-'dd' 'HH':'mm':'ss";
+        public string NativeDateTimeFormat { get; set; } = "yyyy'-'MM'-'dd' 'HH':'mm':'ss";
 
         SqlConnectionPool pool;
         bool disposedValue;
@@ -106,9 +107,11 @@ namespace Cave.Data.Sql
         ///     Gets a value indicating whether the db connections can change the database with the Sql92 "USE Database"
         ///     command.
         /// </summary>
+        [SuppressMessage("Microsoft.Naming", "CA1721")]
         protected internal abstract bool DBConnectionCanChangeDataBase { get; }
 
         /// <summary>Gets the <see cref="IDbConnection" /> type.</summary>
+        [SuppressMessage("Microsoft.Naming", "CA1721")]
         protected internal Type DbConnectionType { get; }
 
         #endregion
@@ -276,7 +279,7 @@ namespace Cave.Data.Sql
                 switch (field.DataType)
                 {
                     case DataType.Enum:
-                        return Convert.ToInt64(localValue);
+                        return Convert.ToInt64(localValue, CultureInfo.CurrentCulture);
                     case DataType.User:
                         return localValue.ToString();
                     case DataType.TimeSpan:
@@ -286,7 +289,7 @@ namespace Cave.Data.Sql
                         {
                             case DateTimeType.Undefined:
                             case DateTimeType.Native: return value;
-                            case DateTimeType.BigIntHumanReadable: return long.Parse(new DateTime(value.Ticks).ToString(BigIntDateTimeFormat));
+                            case DateTimeType.BigIntHumanReadable: return long.Parse(new DateTime(value.Ticks).ToString(BigIntDateTimeFormat, CultureInfo.InvariantCulture), CultureInfo.InvariantCulture);
                             case DateTimeType.BigIntTicks: return value.Ticks;
                             case DateTimeType.DecimalSeconds: return (decimal) value.Ticks / TimeSpan.TicksPerSecond;
                             case DateTimeType.DoubleSeconds: return (double) value.Ticks / TimeSpan.TicksPerSecond;
@@ -334,7 +337,7 @@ namespace Cave.Data.Sql
                         {
                             case DateTimeType.Undefined:
                             case DateTimeType.Native: return value;
-                            case DateTimeType.BigIntHumanReadable: return long.Parse(value.ToString(BigIntDateTimeFormat));
+                            case DateTimeType.BigIntHumanReadable: return long.Parse(value.ToString(BigIntDateTimeFormat, CultureInfo.InvariantCulture), CultureInfo.InvariantCulture);
                             case DateTimeType.BigIntTicks: return value.Ticks;
                             case DateTimeType.DecimalSeconds: return value.Ticks / (decimal) TimeSpan.TicksPerSecond;
                             case DateTimeType.DoubleSeconds: return value.Ticks / (double) TimeSpan.TicksPerSecond;
@@ -390,7 +393,7 @@ namespace Cave.Data.Sql
                         default: throw new NotSupportedException($"DateTimeType {field.DateTimeType} is not supported");
                         case DateTimeType.BigIntHumanReadable:
                         {
-                            var text = ((long) databaseValue).ToString();
+                            var text = ((long) databaseValue).ToString(CultureInfo.InvariantCulture);
                             ticks = DateTime.ParseExact(text, BigIntDateTimeFormat, CultureInfo.InvariantCulture).Ticks;
                             break;
                         }
@@ -437,13 +440,13 @@ namespace Cave.Data.Sql
                 }
                 case DataType.TimeSpan:
                 {
-                    long ticks = 0;
+                    long ticks;
                     switch (field.DateTimeType)
                     {
                         default: throw new NotSupportedException($"DateTimeType {field.DateTimeType} is not supported");
                         case DateTimeType.BigIntHumanReadable:
                         {
-                            var text = ((long) databaseValue).ToString();
+                            var text = ((long) databaseValue).ToString(CultureInfo.InvariantCulture);
                             ticks = DateTime.ParseExact(text, BigIntDateTimeFormat, CultureInfo.InvariantCulture).Ticks;
                             break;
                         }
@@ -1004,9 +1007,10 @@ namespace Cave.Data.Sql
         /// <summary>Gets a connection string for the <see cref="DbConnectionType" />.</summary>
         /// <param name="database">The database to connect to.</param>
         /// <returns>The connection string for the specified database.</returns>
+        [SuppressMessage("Microsoft.Naming", "CA1721")]
         protected abstract string GetConnectionString(string database);
 
-        /// <summary>Generates an command for the databaseconnection.</summary>
+        /// <summary>Generates an command for the database connection.</summary>
         /// <param name="connection">The connection the command will be executed at.</param>
         /// <param name="cmd">The sql command.</param>
         /// <returns>A new <see cref="IDbCommand" /> instance.</returns>
@@ -1083,7 +1087,7 @@ namespace Cave.Data.Sql
                 var fieldName = (string) row["ColumnName"];
                 if (string.IsNullOrEmpty(fieldName))
                 {
-                    fieldName = i.ToString();
+                    fieldName = $"{i}";
                 }
 
                 var fieldSize = (uint) (int) row["ColumnSize"];
@@ -1158,7 +1162,7 @@ namespace Cave.Data.Sql
         Row ReadRow(RowLayout layout, IDataReader reader)
         {
             var values = new object[layout.FieldCount];
-            var read = reader.GetValues(values);
+            reader.GetValues(values);
             if (reader.FieldCount != layout.FieldCount)
             {
                 throw new InvalidDataException($"Error while reading row data at table {layout}!" + "\n" + "Invalid field count!");

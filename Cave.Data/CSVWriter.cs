@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using Cave.IO;
@@ -291,7 +292,7 @@ namespace Cave.Data
                         }
                         case DataType.Enum:
                         {
-                            if (!properties.SaveDefaultValues && Convert.ToInt32(values[i]).Equals(0))
+                            if (!properties.SaveDefaultValues && Convert.ToInt32(values[i], properties.Format).Equals(0))
                             {
                                 break;
                             }

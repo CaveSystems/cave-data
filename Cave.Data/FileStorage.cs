@@ -49,7 +49,7 @@ namespace Cave.Data
         #endregion
 
         /// <inheritdoc />
-        public override string[] DatabaseNames
+        public override IList<string> DatabaseNames
         {
             get
             {
@@ -64,7 +64,7 @@ namespace Cave.Data
                     result.Add(Path.GetFileName(directory));
                 }
 
-                return result.ToArray();
+                return result;
             }
         }
 

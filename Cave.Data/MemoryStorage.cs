@@ -24,7 +24,7 @@ namespace Cave.Data
         public override bool SupportsNativeTransactions { get; } = false;
 
         /// <inheritdoc />
-        public override string[] DatabaseNames
+        public override IList<string> DatabaseNames
         {
             get
             {

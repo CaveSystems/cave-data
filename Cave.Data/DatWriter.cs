@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using Cave.IO;
@@ -166,7 +167,7 @@ namespace Cave.Data
 
         #endregion
 
-        void WriteFieldDefinition(DataWriter writer, RowLayout layout, int version)
+        static void WriteFieldDefinition(DataWriter writer, RowLayout layout, int version)
         {
             if (version < 1)
             {
@@ -219,7 +220,8 @@ namespace Cave.Data
 
                     if ((field.DataType & DataType.MaskRequireValueType) != 0)
                     {
-                        var typeName = field.ValueType.AssemblyQualifiedName;
+                        var typeName = field.ValueType.AssemblyQualifiedName ??
+                            throw new InvalidOperationException($"Field[{i}].ValueType {field.ValueType} cannot be resolved!");
                         var parts = typeName.Split(',');
                         typeName = $"{parts[0]},{parts[1]}";
                         writer.WritePrefixed(typeName);
@@ -275,7 +277,7 @@ namespace Cave.Data
                             break;
                         }
                         case DataType.Bool:
-                            writer.Write(Convert.ToBoolean(row[i] ?? default(bool)));
+                            writer.Write(Convert.ToBoolean(row[i] ?? default(bool), CultureInfo.CurrentCulture));
                             break;
                         case DataType.TimeSpan:
                             writer.Write(((TimeSpan) (row[i] ?? default(TimeSpan))).Ticks);
@@ -382,7 +384,7 @@ namespace Cave.Data
                         }
                         case DataType.Enum:
                         {
-                            var value = Convert.ToInt64(row[i] ?? 0);
+                            var value = Convert.ToInt64(row[i] ?? 0, CultureInfo.CurrentCulture);
                             writer.Write7BitEncoded64(value);
                             break;
                         }
