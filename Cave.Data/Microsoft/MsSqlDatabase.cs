@@ -34,7 +34,7 @@ namespace Cave.Data.Microsoft
                 catch (Exception ex)
                 {
                     error = true;
-                    Trace.TraceError(ex.ToString());
+                    Trace.TraceError($"Exception during MySqlDatabase.IsSecure: {ex}");
                     return false;
                 }
                 finally
