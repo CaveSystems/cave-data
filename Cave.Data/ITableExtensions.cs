@@ -27,8 +27,9 @@ namespace Cave.Data
                 table.Insert(row);
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                Trace.TraceWarning($"Exception during TryInsert(): {ex}");
                 return false;
             }
         }
@@ -49,8 +50,9 @@ namespace Cave.Data
                 table.Update(row);
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                Trace.TraceWarning($"Exception during TryUpdate(): {ex}");
                 return false;
             }
         }
@@ -288,7 +290,7 @@ namespace Cave.Data
             code.AppendLine();
             code.AppendLine("namespace Database");
             code.AppendLine("{");
-            code.AppendLine($"\t/// <summary>Table structure for {layout}.</summary>");
+            code.AppendLine($"\t/// <summary>Table structure for {layout.Name}.</summary>");
             code.AppendLine($"\t[Table(\"{layout.Name}\")]");
             code.AppendLine($"\tpublic partial struct {className} : IEquatable<{className}>");
             code.AppendLine("\t{");
