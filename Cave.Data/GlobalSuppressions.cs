@@ -10,3 +10,4 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Usage", "CA2225", Justification = "No named operator overloading")]
 [assembly: SuppressMessage("Globalization", "CA1303", Justification = "Messages will not be globalized")]
 [assembly: SuppressMessage("Reliability", "CA2008", Justification = "Parallel code requires Task.Factory.StartNew()")]
+[assembly: SuppressMessage("Design", "CA1051", Justification = "Database structures are using visible public fields.")]

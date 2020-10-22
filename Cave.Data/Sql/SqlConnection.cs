@@ -1,5 +1,6 @@
 using System;
 using System.Data;
+using System.Diagnostics;
 
 namespace Cave.Data.Sql
 {
@@ -137,7 +138,10 @@ namespace Cave.Data.Sql
                 {
                     connection.Dispose();
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    Trace.TraceWarning($"Exception during connection.Dispose(): {ex}");
+                }
 
                 connection = null;
             }
