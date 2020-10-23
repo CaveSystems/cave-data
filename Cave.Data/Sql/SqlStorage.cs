@@ -969,7 +969,7 @@ namespace Cave.Data.Sql
 
         /// <summary>Logs the query in verbose mode.</summary>
         /// <param name="command">The command.</param>
-        protected internal void LogQuery(IDbCommand command)
+        internal protected static void LogQuery(IDbCommand command)
         {
             if (command.Parameters.Count > 0)
             {

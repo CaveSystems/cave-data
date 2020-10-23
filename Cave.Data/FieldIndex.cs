@@ -139,7 +139,7 @@ namespace Cave.Data
             Count--;
         }
 
-        int GetRowIndex(IList<object[]> rows, object[] row)
+        static int GetRowIndex(IList<object[]> rows, object[] row)
         {
             for (var i = 0; i < rows.Count; i++)
             {

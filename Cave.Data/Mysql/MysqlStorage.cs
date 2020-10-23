@@ -250,7 +250,7 @@ namespace Cave.Data.Mysql
                 throw new InvalidDataException("Could not read information_schema.tables!");
             }
 
-            return Convert.ToInt32(value, Culture) > 0;
+            return Convert.ToInt32(value) > 0;
         }
 
         /// <inheritdoc />

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Text;
 using Cave.Data.Sql;
@@ -34,8 +33,7 @@ namespace Cave.Data.Microsoft
                 catch (Exception ex)
                 {
                     error = true;
-                    Trace.TraceError($"Exception during MySqlDatabase.IsSecure: {ex}");
-                    return false;
+                    throw new NotSupportedException("Could not retrieve connection state.", ex);
                 }
                 finally
                 {
@@ -73,7 +71,7 @@ namespace Cave.Data.Microsoft
                 var fieldProperties = layout[i];
                 if (i > 0)
                 {
-                    queryText.Append(",");
+                    queryText.Append(',');
                 }
 
                 queryText.Append(fieldProperties.NameAtDatabase + " ");
@@ -259,7 +257,7 @@ namespace Cave.Data.Microsoft
                 }
             }
 
-            queryText.Append(")");
+            queryText.Append(')');
             SqlStorage.Execute(database: Name, table: layout.Name, cmd: queryText.ToString());
             for (var i = 0; i < layout.FieldCount; i++)
             {

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Text;
 using Cave.IO;
@@ -129,6 +128,8 @@ namespace Cave.Data
         /// <returns>Returns a new string representing the row.</returns>
         public static string RowToString(CsvProperties properties, RowLayout layout, Row row)
         {
+            if (row == null) throw new ArgumentNullException(nameof(row));
+            if (layout == null) throw new ArgumentNullException(nameof(layout));
             var result = new StringBuilder();
             var values = row.Values;
             for (var i = 0; i < layout.FieldCount; i++)
@@ -261,7 +262,7 @@ namespace Cave.Data
 
                             if (str.Length == 0)
                             {
-                                result.Append(" ");
+                                result.Append(' ');
                             }
                             else
                             {
@@ -269,7 +270,7 @@ namespace Cave.Data
                                 {
                                     if (str.StartsWith(properties.StringMarker.ToString()))
                                     {
-                                        result.Append(" ");
+                                        result.Append(' ');
                                     }
                                 }
 
@@ -278,7 +279,7 @@ namespace Cave.Data
                                 {
                                     if (str.EndsWith(properties.StringMarker.ToString()))
                                     {
-                                        result.Append(" ");
+                                        result.Append(' ');
                                     }
                                 }
                             }
@@ -292,7 +293,7 @@ namespace Cave.Data
                         }
                         case DataType.Enum:
                         {
-                            if (!properties.SaveDefaultValues && Convert.ToInt32(values[i], properties.Format).Equals(0))
+                            if (!properties.SaveDefaultValues && Convert.ToInt32(values[i]).Equals(0))
                             {
                                 break;
                             }

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
-using System.Globalization;
 using System.Text;
 using Cave.Data.Sql;
 
@@ -51,7 +50,7 @@ namespace Cave.Data.Microsoft
 
             if (field.DataType == DataType.Int8)
             {
-                return Convert.ToInt16(localValue, CultureInfo.CurrentCulture);
+                return Convert.ToInt16(localValue);
             }
 
             if (field.DataType == DataType.Decimal)
@@ -219,17 +218,17 @@ namespace Cave.Data.Microsoft
             result.Append(ConnectionString.Server);
             if (ConnectionString.Port > 0)
             {
-                result.Append(",");
+                result.Append(',');
                 result.Append(ConnectionString.Port);
             }
 
             if (!string.IsNullOrEmpty(ConnectionString.Location))
             {
-                result.Append("\\");
+                result.Append('\\');
                 result.Append(ConnectionString.Location);
             }
 
-            result.Append(";");
+            result.Append(';');
             if (string.IsNullOrEmpty(ConnectionString.UserName))
             {
                 result.Append("Trusted_Connection=yes;");

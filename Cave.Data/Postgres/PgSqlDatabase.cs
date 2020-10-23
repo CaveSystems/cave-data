@@ -73,12 +73,12 @@ namespace Cave.Data.Postgres
                 var fieldProperties = layout[i];
                 if (i > 0)
                 {
-                    queryText.Append(",");
+                    queryText.Append(',');
                 }
 
                 var fieldName = SqlStorage.EscapeFieldName(fieldProperties);
                 queryText.Append(fieldName);
-                queryText.Append(" ");
+                queryText.Append(' ');
                 switch (fieldProperties.TypeAtDatabase)
                 {
                     case DataType.Binary:
@@ -305,7 +305,7 @@ namespace Cave.Data.Postgres
                 }
             }
 
-            queryText.Append(")");
+            queryText.Append(')');
             SqlStorage.Execute(database: Name, table: layout.Name, cmd: queryText.ToString());
             for (var i = 0; i < layout.FieldCount; i++)
             {

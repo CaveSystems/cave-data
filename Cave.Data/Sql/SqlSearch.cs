@@ -69,7 +69,7 @@ namespace Cave.Data.Sql
                     fieldNames.Include(search.FieldName);
                     var fieldName = storage.EscapeFieldName(search.FieldProperties);
                     sb.Append(fieldName);
-                    sb.Append(" ");
+                    sb.Append(' ');
                     if (search.Inverted)
                     {
                         sb.Append("NOT ");
@@ -81,7 +81,7 @@ namespace Cave.Data.Sql
                     {
                         if (i++ > 0)
                         {
-                            sb.Append(",");
+                            sb.Append(',');
                         }
 
                         var dbValue = storage.GetDatabaseValue(search.FieldProperties, value);
@@ -89,7 +89,7 @@ namespace Cave.Data.Sql
                         sb.Append(parameter.Name);
                     }
 
-                    sb.Append(")");
+                    sb.Append(')');
                     return;
                 }
                 case SearchMode.Equals:
@@ -175,11 +175,11 @@ namespace Cave.Data.Sql
                         sb.Append("NOT ");
                     }
 
-                    sb.Append("(");
+                    sb.Append('(');
                     Flatten(sb, search.SearchA);
                     sb.Append(" AND ");
                     Flatten(sb, search.SearchB);
-                    sb.Append(")");
+                    sb.Append(')');
                     break;
                 }
                 case SearchMode.Or:
@@ -189,11 +189,11 @@ namespace Cave.Data.Sql
                         sb.Append("NOT ");
                     }
 
-                    sb.Append("(");
+                    sb.Append('(');
                     Flatten(sb, search.SearchA);
                     sb.Append(" OR ");
                     Flatten(sb, search.SearchB);
-                    sb.Append(")");
+                    sb.Append(')');
                     break;
                 }
                 default: throw new NotImplementedException($"Mode {search.Mode} not implemented!");

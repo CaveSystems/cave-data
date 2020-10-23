@@ -67,11 +67,11 @@ namespace Cave.Data.Mysql
                 var field = layout[i];
                 if (i > 0)
                 {
-                    queryText.Append(",");
+                    queryText.Append(',');
                 }
 
                 queryText.Append(SqlStorage.EscapeFieldName(field));
-                queryText.Append(" ");
+                queryText.Append(' ');
                 switch (field.TypeAtDatabase)
                 {
                     case DataType.Binary:
@@ -300,16 +300,16 @@ namespace Cave.Data.Mysql
                 {
                     if (count++ > 0)
                     {
-                        queryText.Append(",");
+                        queryText.Append(',');
                     }
 
                     queryText.Append(SqlStorage.EscapeFieldName(field));
                 }
 
-                queryText.Append(")");
+                queryText.Append(')');
             }
 
-            queryText.Append(")");
+            queryText.Append(')');
             if ((flags & TableFlags.InMemory) != 0)
             {
                 queryText.Append(" ENGINE = MEMORY");

@@ -598,7 +598,7 @@ namespace Cave.Data.Sql
             if (Storage.SupportsAllFieldsGroupBy)
             {
                 layout = Layout;
-                command.Append("*");
+                command.Append('*');
             }
             else
             {
@@ -628,7 +628,7 @@ namespace Cave.Data.Sql
                 }
                 else
                 {
-                    command.Append(",");
+                    command.Append(',');
                 }
 
                 command.Append(Storage.EscapeFieldName(Layout[o.Parameter]));
@@ -657,7 +657,7 @@ namespace Cave.Data.Sql
             command.Append("SELECT COUNT(");
             if (Storage.SupportsAllFieldsGroupBy)
             {
-                command.Append("*");
+                command.Append('*');
             }
             else
             {
@@ -691,7 +691,7 @@ namespace Cave.Data.Sql
                 }
                 else
                 {
-                    command.Append(",");
+                    command.Append(',');
                 }
 
                 command.Append(Storage.EscapeFieldName(Layout[o.Parameter]));
@@ -779,7 +779,7 @@ namespace Cave.Data.Sql
                 }
                 else
                 {
-                    command.Append(",");
+                    command.Append(',');
                 }
 
                 command.Append(Storage.EscapeFieldName(Layout[o.Parameter]));

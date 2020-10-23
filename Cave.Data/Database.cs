@@ -55,7 +55,9 @@ namespace Cave.Data
         /// <inheritdoc />
         public string Name { get; }
 
+
         /// <inheritdoc />
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1721")]
         public IList<string> TableNames => GetTableNames();
 
         /// <inheritdoc />
