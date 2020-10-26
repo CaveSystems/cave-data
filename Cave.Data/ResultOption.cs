@@ -38,7 +38,7 @@ namespace Cave.Data
 
         /// <summary>Gets the field names.</summary>
         /// <value>The field names.</value>
-        public string[] FieldNames
+        public IList<string> FieldNames
         {
             get
             {
@@ -55,7 +55,7 @@ namespace Cave.Data
                     }
                 }
 
-                return result.ToArray();
+                return result;
             }
         }
 

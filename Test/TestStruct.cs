@@ -185,22 +185,22 @@ namespace Test.Cave
             if (!(obj is TestStructClean)) return false;
             var other = (TestStructClean)obj;
             return
-                DefaultComparer.Equals(this.Arr, other.Arr) &&
-                Equals(this.B, other.B) &&
-                Equals(this.C, other.C) &&
-                Equals(this.ConStr, other.ConStr) &&
-                Equals(this.D, other.D) &&
-                Equals(this.Date, other.Date) &&
-                Equals(this.Dec, other.Dec) &&
-                Equals(this.F, other.F) &&
-                Equals(this.I, other.I) &&
-                Equals(this.S, other.S) &&
-                Equals(this.SB, other.SB) &&
-                Equals(this.Text, other.Text) &&
-                Equals(this.Time, other.Time) &&
-                Equals(this.UI, other.UI) &&
-                Equals(this.Uri, other.Uri) &&
-                Equals(this.US, other.US);
+                DefaultComparer.Equals(Arr, other.Arr) &&
+                Equals(B, other.B) &&
+                Equals(C, other.C) &&
+                Equals(ConStr, other.ConStr) &&
+                Equals(D, other.D) &&
+                Equals(Date, other.Date) &&
+                Equals(Dec, other.Dec) &&
+                Equals(F, other.F) &&
+                Equals(I, other.I) &&
+                Equals(S, other.S) &&
+                Equals(SB, other.SB) &&
+                Equals(Text, other.Text) &&
+                Equals(Time, other.Time) &&
+                Equals(UI, other.UI) &&
+                Equals(Uri, other.Uri) &&
+                Equals(US, other.US);
         }
 
         public override int GetHashCode()

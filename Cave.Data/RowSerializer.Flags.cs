@@ -1,9 +1,12 @@
-﻿namespace Cave.Data
+﻿using System;
+
+namespace Cave.Data
 {
     /// <summary>Provides Row based serialization.</summary>
     public static partial class RowSerializer
     {
         /// <summary>Settings used during de/serialization.</summary>
+        [Flags]
         public enum Flags
         {
             /// <summary>No flags</summary>

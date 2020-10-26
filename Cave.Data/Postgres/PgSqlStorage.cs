@@ -149,7 +149,7 @@ namespace Cave.Data.Postgres
         {
             var value = QueryValue(database: "SCHEMATA",
                 cmd: "SELECT COUNT(*) FROM pg_database WHERE datname LIKE " + EscapeString(GetObjectName(database)) + ";");
-            return Convert.ToInt32(value, Culture) > 0;
+            return Convert.ToInt32(value) > 0;
         }
 
         /// <inheritdoc />

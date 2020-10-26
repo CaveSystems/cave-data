@@ -1,10 +1,12 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Cave.IO;
 
 namespace Cave.Data
 {
     /// <summary>Provides properties for CSV files.</summary>
+    [SuppressMessage("Design", "CA1051")]
     public struct CsvProperties : IEquatable<CsvProperties>
     {
         #region public fields

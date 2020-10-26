@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -13,6 +14,7 @@ namespace Cave.Data
 {
     /// <summary>Provides a row layout implementation.</summary>
     [DebuggerDisplay("{" + nameof(Name) + "} [{" + nameof(FieldCount) + "}]")]
+    [SuppressMessage("Design", "CA1051")]
     public sealed class RowLayout : IEquatable<RowLayout>, IEnumerable<IFieldProperties>
     {
         /// <inheritdoc />

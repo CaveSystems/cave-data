@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Text;
 using Cave.Data.Sql;
@@ -34,8 +33,7 @@ namespace Cave.Data.Microsoft
                 catch (Exception ex)
                 {
                     error = true;
-                    Trace.TraceError($"Exception during MySqlDatabase.IsSecure: {ex}");
-                    return false;
+                    throw new NotSupportedException("Could not retrieve connection state.", ex);
                 }
                 finally
                 {

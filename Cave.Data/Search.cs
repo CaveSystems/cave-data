@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -188,6 +189,7 @@ namespace Cave.Data
         /// <returns>Rows containing all specified parts.</returns>
         public static Search FieldContainsAllOf(string fieldName, string[] parts)
         {
+            if (parts == null) throw new ArgumentNullException(nameof(parts));
             var result = None;
             foreach (var part in parts)
             {
@@ -203,6 +205,7 @@ namespace Cave.Data
         /// <returns>A new search instance.</returns>
         public static Search FieldContainsOneOf(string fieldName, string[] parts)
         {
+            if (parts == null) throw new ArgumentNullException(nameof(parts));
             var result = None;
             foreach (var part in parts)
             {
@@ -218,6 +221,7 @@ namespace Cave.Data
         /// <remarks>Space, Point, Star, Percent, Underscore and Questionmark are used as wildcard.</remarks>
         public static string TextLike(string text)
         {
+            if (text == null) throw new ArgumentNullException(nameof(text));
             var result = text.ReplaceChars(" .*%_?", "%");
             while (result.Contains("%%"))
             {
@@ -234,6 +238,8 @@ namespace Cave.Data
         /// <returns>A new search instance.</returns>
         public static Search FullMatch(ITable table, Row row, params string[] fieldNames)
         {
+            if (table == null) throw new ArgumentNullException(nameof(table));
+            if (fieldNames == null) throw new ArgumentNullException(nameof(fieldNames));
             var search = None;
             foreach (var field in fieldNames)
             {
@@ -251,6 +257,7 @@ namespace Cave.Data
         /// <returns>A new search instance.</returns>
         public static Search IdentifierMatch(ITable table, Row row)
         {
+            if (table == null) throw new ArgumentNullException(nameof(table));
             var search = None;
             foreach (var field in table.Layout.Identifier)
             {
@@ -268,15 +275,23 @@ namespace Cave.Data
         /// <param name="checkDefaultValues">if set to <c>true</c> [check default values].</param>
         /// <returns>Returns a new search instance.</returns>
         public static Search FullMatch<TStruct>(ITable table, TStruct row, bool checkDefaultValues = false)
-            where TStruct : struct =>
-            FullMatch(table, table.Layout.GetRow(row), checkDefaultValues);
+            where TStruct : struct
+        {
+            if (table == null) throw new ArgumentNullException(nameof(table));
+            return FullMatch(table, table.Layout.GetRow(row), checkDefaultValues);
+        }
 
         /// <summary>Creates a search for matching a given row excluding the ID field.</summary>
         /// <param name="table">The table.</param>
         /// <param name="row">The row data to search for.</param>
         /// <param name="checkDefaultValues">if set to <c>true</c> [check default values].</param>
         /// <returns>Returns a new search instance.</returns>
-        public static Search FullMatch(ITable table, Row row, bool checkDefaultValues = false) => FullMatch(table, row, checkDefaultValues);
+        public static Search FullMatch(ITable table, Row row, bool checkDefaultValues = false)
+        {
+            if (table == null) throw new ArgumentNullException(nameof(table));
+            if (row == null) throw new ArgumentNullException(nameof(row));
+            return FullMatch(table, row.Values, checkDefaultValues);
+        }
 
         /// <summary>Creates a search for matching a given row excluding the identifier fields.</summary>
         /// <param name="table">The table.</param>
@@ -285,6 +300,8 @@ namespace Cave.Data
         /// <returns>Returns a new search instance.</returns>
         public static Search FullMatch(ITable table, object[] fields, bool checkDefaultValues = false)
         {
+            if (table == null) throw new ArgumentNullException(nameof(table));
+            if (fields == null) throw new ArgumentNullException(nameof(fields));
             var search = None;
             for (var i = 0; i < table.Layout.FieldCount; i++)
             {
@@ -838,6 +855,7 @@ namespace Cave.Data
             return Expression.IsMatch(text);
         }
 
+        [SuppressMessage("Design", "CA1031")]
         object ConvertValue(object value)
         {
             try

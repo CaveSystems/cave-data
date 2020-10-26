@@ -1,6 +1,7 @@
 using System;
 using System.Data;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Cave.Data.Sql
 {
@@ -130,6 +131,7 @@ namespace Cave.Data.Sql
         }
 
         /// <summary>Disposes the connection.</summary>
+        [SuppressMessage("Design", "CA1031")]
         public void Dispose()
         {
             if (connection != null)
