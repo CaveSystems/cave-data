@@ -44,7 +44,7 @@ namespace Cave.Data
 #if USE_BOXING
             BoxedValue obj = new BoxedValue(value);
 #else
-            var obj = value == null ? nullValue : value;
+            var obj = value ?? nullValue;
 #endif
             return index.ContainsKey(obj) ? index[obj].ToArray() : new object[][] { };
         }
@@ -63,7 +63,7 @@ namespace Cave.Data
 #if USE_BOXING
             BoxedValue obj = new BoxedValue(value);
 #else
-            var obj = value == null ? nullValue : value;
+            var obj = value ?? nullValue;
 #endif
             if (index.ContainsKey(obj))
             {
@@ -109,7 +109,7 @@ namespace Cave.Data
 #if USE_BOXING
             BoxedValue obj = new BoxedValue(value);
 #else
-            var obj = value == null ? nullValue : value;
+            var obj = value ?? nullValue;
 #endif
 
             // remove ID from old hash
@@ -139,7 +139,7 @@ namespace Cave.Data
             Count--;
         }
 
-        int GetRowIndex(IList<object[]> rows, object[] row)
+        static int GetRowIndex(IList<object[]> rows, object[] row)
         {
             for (var i = 0; i < rows.Count; i++)
             {
@@ -158,7 +158,7 @@ namespace Cave.Data
 
             public BoxedValue(object value) => val = value;
 
-            public int CompareTo(object obj) => obj is BoxedValue ? CompareTo((BoxedValue) obj) : Comparer.Default.Compare(val, obj);
+            public int CompareTo(object obj) => obj is BoxedValue box ? CompareTo(box) : Comparer.Default.Compare(val, obj);
 
             public int CompareTo(BoxedValue other) => Comparer.Default.Compare(val, other.val);
 
@@ -166,7 +166,7 @@ namespace Cave.Data
 
             public override int GetHashCode() => val == null ? 0 : val.GetHashCode();
 
-            public override bool Equals(object obj) => obj is BoxedValue ? Equals((BoxedValue) obj) : Equals(obj, val);
+            public override bool Equals(object obj) => obj is BoxedValue box ? Equals(box) : Equals(obj, val);
 
             public override string ToString() => val == null ? "<null>" : val.ToString();
         }

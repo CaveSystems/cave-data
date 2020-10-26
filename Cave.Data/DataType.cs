@@ -1,6 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Cave
 {
     /// <summary>Provides available field data types.</summary>
+    [SuppressMessage("Naming", "CA1720")]
     public enum DataType
     {
         /// <summary>Unknown data</summary>

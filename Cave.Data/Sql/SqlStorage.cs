@@ -545,6 +545,10 @@ namespace Cave.Data.Sql
                 using (var command = connection.CreateCommand())
                 {
                     command.CommandText = NewConnectionCommand;
+                    if (LogVerboseMessages)
+                    {
+                        LogQuery(command);
+                    }
                     command.ExecuteNonQuery();
                 }
             }
@@ -647,6 +651,10 @@ namespace Cave.Data.Sql
                 {
                     using (var command = CreateCommand(connection, cmd))
                     {
+                        if (LogVerboseMessages)
+                        {
+                            LogQuery(command);
+                        }
                         return command.ExecuteNonQuery();
                     }
                 }
@@ -700,10 +708,16 @@ namespace Cave.Data.Sql
                 try
                 {
                     var fqtn = FQTN(database, table);
-                    using (var cmd = CreateCommand(connection, $"SELECT * FROM {fqtn} WHERE FALSE"))
-                    using (var reader = cmd.ExecuteReader(CommandBehavior.KeyInfo))
+                    using (var command = CreateCommand(connection, $"SELECT * FROM {fqtn} WHERE FALSE"))
                     {
-                        return ReadSchema(reader, table);
+                        if (LogVerboseMessages)
+                        {
+                            LogQuery(command);
+                        }
+                        using (var reader = command.ExecuteReader(CommandBehavior.KeyInfo))
+                        {
+                            return ReadSchema(reader, table);
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -770,41 +784,48 @@ namespace Cave.Data.Sql
                 try
                 {
                     using (var command = CreateCommand(connection, cmd))
-                    using (var reader = command.ExecuteReader(CommandBehavior.KeyInfo))
                     {
-                        var name = table ?? cmd.Text.GetValidChars(ASCII.Strings.SafeName);
-
-                        // read schema
-                        var layout = ReadSchema(reader, name);
-
-                        // load rows
-                        if (!reader.Read())
+                        if (LogVerboseMessages)
                         {
-                            return null;
+                            LogQuery(command);
                         }
 
-                        var fieldIndex = 0;
-                        if (fieldName == null)
+                        using (var reader = command.ExecuteReader(CommandBehavior.KeyInfo))
                         {
-                            if (layout.FieldCount != 1)
+                            var name = table ?? cmd.Text.GetValidChars(ASCII.Strings.SafeName);
+
+                            // read schema
+                            var layout = ReadSchema(reader, name);
+
+                            // load rows
+                            if (!reader.Read())
+                            {
+                                return null;
+                            }
+
+                            var fieldIndex = 0;
+                            if (fieldName == null)
+                            {
+                                if (layout.FieldCount != 1)
+                                {
+                                    throw new InvalidDataException(
+                                        $"Error while reading row data: More than one field returned!\n\tDatabase: {database}\n\tTable: {table}\n\tCommand: {cmd}");
+                                }
+                            }
+                            else
+                            {
+                                fieldIndex = layout.GetFieldIndex(fieldName, true);
+                            }
+
+                            var result = GetLocalValue(layout[fieldIndex], reader, reader.GetValue(fieldIndex));
+                            if (reader.Read())
                             {
                                 throw new InvalidDataException(
-                                    $"Error while reading row data: More than one field returned!\n\tDatabase: {database}\n\tTable: {table}\n\tCommand: {cmd}");
+                                    $"Error while reading row data: Additional data available (expected only one row of data)!\n\tDatabase: {database}\n\tTable: {table}\n\tCommand: {cmd}");
                             }
-                        }
-                        else
-                        {
-                            fieldIndex = layout.GetFieldIndex(fieldName, true);
-                        }
 
-                        var result = GetLocalValue(layout[fieldIndex], reader, reader.GetValue(fieldIndex));
-                        if (reader.Read())
-                        {
-                            throw new InvalidDataException(
-                                $"Error while reading row data: Additional data available (expected only one row of data)!\n\tDatabase: {database}\n\tTable: {table}\n\tCommand: {cmd}");
+                            return result;
                         }
-
-                        return result;
                     }
                 }
                 catch (Exception ex)
@@ -915,32 +936,39 @@ namespace Cave.Data.Sql
                 try
                 {
                     using (var command = CreateCommand(connection, cmd))
-                    using (var reader = command.ExecuteReader(CommandBehavior.KeyInfo))
                     {
-                        // load schema
-                        var schema = ReadSchema(reader, table);
-
-                        // layout specified ?
-                        if (layout == null)
+                        if (LogVerboseMessages)
                         {
-                            // no: use schema
-                            layout = schema;
-                        }
-                        else if (DoSchemaCheckOnQuery)
-                        {
-                            // yes: check schema
-                            CheckLayout(layout, schema);
+                            LogQuery(command);
                         }
 
-                        // load rows
-                        var result = new List<Row>();
-                        while (reader.Read())
+                        using (var reader = command.ExecuteReader(CommandBehavior.KeyInfo))
                         {
-                            var row = ReadRow(layout, reader);
-                            result.Add(row);
-                        }
+                            // load schema
+                            var schema = ReadSchema(reader, table);
 
-                        return result;
+                            // layout specified ?
+                            if (layout == null)
+                            {
+                                // no: use schema
+                                layout = schema;
+                            }
+                            else if (DoSchemaCheckOnQuery)
+                            {
+                                // yes: check schema
+                                CheckLayout(layout, schema);
+                            }
+
+                            // load rows
+                            var result = new List<Row>();
+                            while (reader.Read())
+                            {
+                                var row = ReadRow(layout, reader);
+                                result.Add(row);
+                            }
+
+                            return result;
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -969,8 +997,9 @@ namespace Cave.Data.Sql
 
         /// <summary>Logs the query in verbose mode.</summary>
         /// <param name="command">The command.</param>
-        protected internal void LogQuery(IDbCommand command)
+        protected internal static void LogQuery(IDbCommand command)
         {
+            if (command == null) throw new ArgumentNullException(nameof(command));
             if (command.Parameters.Count > 0)
             {
                 var paramText = new StringBuilder();

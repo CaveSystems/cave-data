@@ -71,12 +71,12 @@ namespace Cave.Data
         /// <returns>The result of the operator.</returns>
         public static bool operator ==(ResultOption left, ResultOption right)
         {
-            if (ReferenceEquals(right, null))
+            if (right is null)
             {
-                return ReferenceEquals(left, null);
+                return left is null;
             }
 
-            return !ReferenceEquals(left, null) && (left.Mode == right.Mode) && (left.Parameter == right.Parameter);
+            return left is object && (left.Mode == right.Mode) && (left.Parameter == right.Parameter);
         }
 
         /// <summary>Implements the operator !=.</summary>
@@ -207,9 +207,9 @@ namespace Cave.Data
                 result.Append(option.Mode.ToString());
                 if (Parameter != null)
                 {
-                    result.Append("[");
+                    result.Append('[');
                     result.Append(option.Parameter);
-                    result.Append("]");
+                    result.Append(']');
                 }
             }
 
@@ -220,7 +220,7 @@ namespace Cave.Data
         public override bool Equals(object obj)
         {
             var o = obj as ResultOption;
-            return o == null ? false : (o.Mode == Mode) && (o.Parameter == Parameter);
+            return o != null && (o.Mode == Mode) && (o.Parameter == Parameter);
         }
 
         /// <inheritdoc />

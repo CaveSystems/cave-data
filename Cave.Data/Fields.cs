@@ -170,7 +170,7 @@ namespace Cave.Data
                 throw new ArgumentNullException(nameof(provider));
             }
 
-            if (fieldType.Name.StartsWith("Nullable"))
+            if (fieldType.Name.StartsWith("Nullable", StringComparison.Ordinal))
             {
                 if (value == null)
                 {
@@ -196,17 +196,17 @@ namespace Cave.Data
 
             if (fieldType == typeof(bool))
             {
-                switch (value.ToString().ToLower())
+                switch ($"{value}".ToUpperInvariant())
                 {
-                    case "true":
-                    case "on":
-                    case "yes":
+                    case "TRUE":
+                    case "ON":
+                    case "YES":
                     case "1":
                         return true;
                     case "":
-                    case "false":
-                    case "off":
-                    case "no":
+                    case "FALSE":
+                    case "OFF":
+                    case "NO":
                     case "0":
                         return false;
                 }
@@ -228,34 +228,28 @@ namespace Cave.Data
             }
 
             // convert to string
-            string str;
+            if (!(value is string str))
             {
-                if (value is string)
+                // try to find public ToString(IFormatProvider) method in class
+                var method = value.GetType().GetMethod("ToString", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(IFormatProvider) },
+                    null);
+                if (method != null)
                 {
-                    str = (string) value;
+                    try
+                    {
+                        str = (string) method.Invoke(value, new object[] { provider });
+                    }
+                    catch (TargetInvocationException ex)
+                    {
+                        throw ex.InnerException ?? ex;
+                    }
                 }
                 else
                 {
-                    // try to find public ToString(IFormatProvider) method in class
-                    var method = value.GetType().GetMethod("ToString", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(IFormatProvider) },
-                        null);
-                    if (method != null)
-                    {
-                        try
-                        {
-                            str = (string) method.Invoke(value, new object[] { provider });
-                        }
-                        catch (TargetInvocationException ex)
-                        {
-                            throw ex.InnerException;
-                        }
-                    }
-                    else
-                    {
-                        str = value.ToString();
-                    }
+                    str = value.ToString();
                 }
             }
+
             if (fieldType == typeof(string))
             {
                 return str;
@@ -280,17 +274,21 @@ namespace Cave.Data
                 {
                     if (str.Contains(":"))
                     {
+#if NET20 || NET35
                         return TimeSpan.Parse(str);
+#else
+                        return TimeSpan.Parse(str, provider);
+#endif
                     }
 
-                    if (str.EndsWith("ms"))
+                    if (str.EndsWith("ms", StringComparison.Ordinal))
                     {
-                        return new TimeSpan((long) Math.Round(double.Parse(str.SubstringEnd(1)) * TimeSpan.TicksPerMillisecond));
+                        return new TimeSpan((long) Math.Round(double.Parse(str.SubstringEnd(2), provider) * TimeSpan.TicksPerMillisecond));
                     }
 
-                    return str.EndsWith("s")
-                        ? new TimeSpan((long) Math.Round(double.Parse(str.SubstringEnd(1)) * TimeSpan.TicksPerSecond))
-                        : (object) new TimeSpan(long.Parse(str));
+                    return str.EndsWith("s", StringComparison.Ordinal)
+                        ? new TimeSpan((long) Math.Round(double.Parse(str.SubstringEnd(1), provider) * TimeSpan.TicksPerSecond))
+                        : (object) new TimeSpan(long.Parse(str, provider));
                 }
                 catch (Exception ex)
                 {
@@ -338,7 +336,7 @@ namespace Cave.Data
             }
         }
 
-        /// <summary>Sets all fieldvalues of a struct/class object.</summary>
+        /// <summary>Sets all field values of a struct/class object.</summary>
         /// <param name="obj">structure object.</param>
         /// <param name="fields">fields to be set.</param>
         /// <param name="values">values to set.</param>
@@ -542,7 +540,7 @@ namespace Cave.Data
                 default: break;
             }
 
-            var s = value is IConvertible ? ((IConvertible) value).ToString(provider) : value.ToString();
+            var s = value is IConvertible convertible ? convertible.ToString(provider) : value.ToString();
             return s.EscapeUtf8().Box(stringMarker);
         }
     }

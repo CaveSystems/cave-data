@@ -591,7 +591,7 @@ namespace Cave.Data
         {
             for (var i = 0; i < FieldCount; i++)
             {
-                if (properties[i].Name.Equals(fieldName))
+                if (properties[i].Name.Equals(fieldName, StringComparison.Ordinal))
                 {
                     return i;
                 }

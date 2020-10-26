@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using Cave.Collections.Generic;
@@ -537,7 +538,7 @@ namespace Cave.Data
                                 throw new InvalidOperationException("Cannot set two different limits!");
                             }
 
-                            limit = Math.Abs(int.Parse(option.Parameter));
+                            limit = Math.Abs(int.Parse(option.Parameter, null));
                             break;
                         }
                         case ResultOptionMode.Offset:
@@ -547,7 +548,7 @@ namespace Cave.Data
                                 throw new InvalidOperationException("Cannot set two different offsets!");
                             }
 
-                            offset = Math.Abs(int.Parse(option.Parameter));
+                            offset = Math.Abs(int.Parse(option.Parameter, null));
                             break;
                         }
                         default: throw new NotSupportedException($"Option {option.Mode} is not supported!");

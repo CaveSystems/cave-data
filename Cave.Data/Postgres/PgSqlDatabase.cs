@@ -73,12 +73,12 @@ namespace Cave.Data.Postgres
                 var fieldProperties = layout[i];
                 if (i > 0)
                 {
-                    queryText.Append(",");
+                    queryText.Append(',');
                 }
 
                 var fieldName = SqlStorage.EscapeFieldName(fieldProperties);
                 queryText.Append(fieldName);
-                queryText.Append(" ");
+                queryText.Append(' ');
                 switch (fieldProperties.TypeAtDatabase)
                 {
                     case DataType.Binary:
@@ -184,7 +184,7 @@ namespace Cave.Data.Postgres
                             throw new NotSupportedException($"AutoIncrement is not supported on data type {fieldProperties.TypeAtDatabase}");
                         }
 
-                        queryText.AppendFormat("SMALLINT CHECK ({0} >= 0 AND {0} <= {1})", fieldName, byte.MaxValue);
+                        queryText.Append($"SMALLINT CHECK ({fieldName} >= 0 AND {fieldName} <= {byte.MaxValue})");
                         break;
                     case DataType.UInt16:
                         if ((fieldProperties.Flags & FieldFlags.AutoIncrement) != 0)
@@ -192,7 +192,7 @@ namespace Cave.Data.Postgres
                             throw new NotSupportedException($"AutoIncrement is not supported on data type {fieldProperties.TypeAtDatabase}");
                         }
 
-                        queryText.AppendFormat("INT CHECK ({0} >= 0 AND {0} <= {1})", fieldName, ushort.MaxValue);
+                        queryText.Append($"INT CHECK ({fieldName} >= 0 AND {fieldName} <= {ushort.MaxValue})");
                         break;
                     case DataType.UInt32:
                         if ((fieldProperties.Flags & FieldFlags.AutoIncrement) != 0)
@@ -200,7 +200,7 @@ namespace Cave.Data.Postgres
                             throw new NotSupportedException($"AutoIncrement is not supported on data type {fieldProperties.TypeAtDatabase}");
                         }
 
-                        queryText.AppendFormat("BIGINT CHECK ({0} >= 0 AND {0} <= {1})", fieldName, uint.MaxValue);
+                        queryText.Append($"BIGINT CHECK ({fieldName} >= 0 AND {fieldName} <= {uint.MaxValue})");
                         break;
                     case DataType.UInt64:
                         if ((fieldProperties.Flags & FieldFlags.AutoIncrement) != 0)
@@ -208,7 +208,7 @@ namespace Cave.Data.Postgres
                             throw new NotSupportedException($"AutoIncrement is not supported on data type {fieldProperties.TypeAtDatabase}");
                         }
 
-                        queryText.AppendFormat("NUMERIC(20,0) CHECK ({0} >= 0 AND {0} <= {1})", fieldName, ulong.MaxValue);
+                        queryText.Append($"NUMERIC(20,0) CHECK ({fieldName} >= 0 AND {fieldName} <= {ulong.MaxValue})");
                         break;
                     case DataType.User:
                     case DataType.String:
@@ -223,7 +223,7 @@ namespace Cave.Data.Postgres
                         }
                         else
                         {
-                            queryText.AppendFormat("VARCHAR({0})", fieldProperties.MaximumLength);
+                            queryText.Append($"VARCHAR({fieldProperties.MaximumLength})");
                         }
 
                         break;
@@ -235,16 +235,15 @@ namespace Cave.Data.Postgres
 
                         if (fieldProperties.MaximumLength > 0)
                         {
-                            var prec = (int) fieldProperties.MaximumLength;
-                            var temp = (fieldProperties.MaximumLength - prec) * 100;
-                            var scale = (int) temp;
-                            if ((scale >= prec) || (scale != temp))
+                            var precision = (int) fieldProperties.MaximumLength;
+                            var scale = (int)((fieldProperties.MaximumLength - precision) * 100);
+                            if (scale >= precision)
                             {
                                 throw new ArgumentOutOfRangeException(
-                                    $"Field {fieldProperties.Name} has an invalid MaximumLength of {prec},{scale}. Correct values range from s,p = 1,0 to 65,30(default value) with 0 < s < p!");
+                                    $"Field {fieldProperties.Name} has an invalid MaximumLength of {precision},{scale}. Correct values range from s,p = 1,0 to 65,30(default value) with 0 < s < p!");
                             }
 
-                            queryText.AppendFormat("DECIMAL({0},{1})", prec, scale);
+                            queryText.Append($"DECIMAL({precision},{scale})");
                         }
                         else
                         {
@@ -305,7 +304,7 @@ namespace Cave.Data.Postgres
                 }
             }
 
-            queryText.Append(")");
+            queryText.Append(')');
             SqlStorage.Execute(database: Name, table: layout.Name, cmd: queryText.ToString());
             for (var i = 0; i < layout.FieldCount; i++)
             {

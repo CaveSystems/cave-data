@@ -98,6 +98,10 @@ namespace Cave.Data.Microsoft
                 {
                     using (var command = CreateCommand(connection, cmd))
                     {
+                        if (LogVerboseMessages)
+                        {
+                            LogQuery(command);
+                        }
                         var result = command.ExecuteNonQuery();
                         if (result == 0)
                         {
@@ -219,17 +223,17 @@ namespace Cave.Data.Microsoft
             result.Append(ConnectionString.Server);
             if (ConnectionString.Port > 0)
             {
-                result.Append(",");
+                result.Append(',');
                 result.Append(ConnectionString.Port);
             }
 
             if (!string.IsNullOrEmpty(ConnectionString.Location))
             {
-                result.Append("\\");
+                result.Append('\\');
                 result.Append(ConnectionString.Location);
             }
 
-            result.Append(";");
+            result.Append(';');
             if (string.IsNullOrEmpty(ConnectionString.UserName))
             {
                 result.Append("Trusted_Connection=yes;");

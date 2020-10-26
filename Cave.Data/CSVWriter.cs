@@ -119,7 +119,7 @@ namespace Cave.Data
             where TStruct : struct
         {
             var layout = RowLayout.CreateTyped(typeof(TStruct));
-            return RowToString(CsvProperties.Default, layout, layout.GetRow(row));
+            return RowToString(CsvProperties.Default, layout, layout.GetRow(row), provider);
         }
 
         /// <summary>Creates a string representation of the specified row.</summary>
@@ -129,6 +129,18 @@ namespace Cave.Data
         /// <returns>Returns a new string representing the row.</returns>
         public static string RowToString(CsvProperties properties, RowLayout layout, Row row)
         {
+            return RowToString(properties, layout, row, null);
+        }
+
+        /// <summary>Creates a string representation of the specified row.</summary>
+        /// <param name="properties">The csv properties.</param>
+        /// <param name="layout">The row layout.</param>
+        /// <param name="row">The row.</param>
+        /// <param name="provider">The format provider used for each field (optional, defaults to properties.Format).</param>
+        /// <returns>Returns a new string representing the row.</returns>
+        public static string RowToString(CsvProperties properties, RowLayout layout, Row row, IFormatProvider provider)
+        {
+            if (provider == null) provider = properties.Format;
             var result = new StringBuilder();
             var values = row.Values;
             for (var i = 0; i < layout.FieldCount; i++)
@@ -187,7 +199,7 @@ namespace Cave.Data
                             }
 
                             var value = (decimal) values[i];
-                            result.Append(value.ToString(properties.Format));
+                            result.Append(value.ToString(provider));
                             break;
                         }
                         case DataType.Single:
@@ -198,7 +210,7 @@ namespace Cave.Data
                             }
 
                             var value = (float) values[i];
-                            result.Append(value.ToString("R", properties.Format));
+                            result.Append(value.ToString("R", provider));
                             break;
                         }
                         case DataType.Double:
@@ -209,7 +221,7 @@ namespace Cave.Data
                             }
 
                             var value = (double) values[i];
-                            result.Append(value.ToString("R", properties.Format));
+                            result.Append(value.ToString("R", provider));
                             break;
                         }
                         case DataType.TimeSpan:
@@ -219,7 +231,7 @@ namespace Cave.Data
                                 break;
                             }
 
-                            var str = field.GetString(values[i], $"{properties.StringMarker}", properties.Format);
+                            var str = field.GetString(values[i], $"{properties.StringMarker}", provider);
                             result.Append(str);
                             break;
                         }
@@ -233,11 +245,11 @@ namespace Cave.Data
                             string str;
                             if (properties.DateTimeFormat != null)
                             {
-                                str = ((DateTime) values[i]).ToString(properties.DateTimeFormat, properties.Format);
+                                str = ((DateTime) values[i]).ToString(properties.DateTimeFormat, provider);
                             }
                             else
                             {
-                                str = field.GetString(values[i], $"{properties.StringMarker}", properties.Format);
+                                str = field.GetString(values[i], $"{properties.StringMarker}", provider);
                             }
 
                             result.Append(str);
@@ -261,24 +273,24 @@ namespace Cave.Data
 
                             if (str.Length == 0)
                             {
-                                result.Append(" ");
+                                result.Append(' ');
                             }
                             else
                             {
                                 if (properties.StringMarker.HasValue)
                                 {
-                                    if (str.StartsWith(properties.StringMarker.ToString()))
+                                    if (str.StartsWith(properties.StringMarker.ToString(), StringComparison.Ordinal))
                                     {
-                                        result.Append(" ");
+                                        result.Append(' ');
                                     }
                                 }
 
                                 result.Append(str);
                                 if (properties.StringMarker.HasValue)
                                 {
-                                    if (str.EndsWith(properties.StringMarker.ToString()))
+                                    if (str.EndsWith(properties.StringMarker.ToString(), StringComparison.Ordinal))
                                     {
-                                        result.Append(" ");
+                                        result.Append(' ');
                                     }
                                 }
                             }
@@ -292,7 +304,7 @@ namespace Cave.Data
                         }
                         case DataType.Enum:
                         {
-                            if (!properties.SaveDefaultValues && Convert.ToInt32(values[i], properties.Format).Equals(0))
+                            if (!properties.SaveDefaultValues && Convert.ToInt32(values[i], provider).Equals(0))
                             {
                                 break;
                             }

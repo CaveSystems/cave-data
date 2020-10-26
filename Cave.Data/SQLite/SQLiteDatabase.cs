@@ -65,11 +65,11 @@ namespace Cave.Data.SQLite
                 var fieldProperties = layout[i];
                 if (i > 0)
                 {
-                    queryText.Append(",");
+                    queryText.Append(',');
                 }
 
                 queryText.Append(fieldProperties.NameAtDatabase);
-                queryText.Append(" ");
+                queryText.Append(' ');
                 var valueType = SQLiteStorage.GetValueType(fieldProperties.DataType);
                 switch (valueType)
                 {
@@ -104,7 +104,7 @@ namespace Cave.Data.SQLite
                 }
             }
 
-            queryText.Append(")");
+            queryText.Append(')');
             SqlStorage.Execute(database: Name, table: layout.Name, cmd: queryText.ToString());
             for (var i = 0; i < layout.FieldCount; i++)
             {

@@ -64,30 +64,30 @@ namespace Cave.Data.Mysql
             queryText.Append($"CREATE TABLE {SqlStorage.FQTN(Name, layout.Name)} (");
             for (var i = 0; i < layout.FieldCount; i++)
             {
-                var field = layout[i];
+                var fieldProperties = layout[i];
                 if (i > 0)
                 {
-                    queryText.Append(",");
+                    queryText.Append(',');
                 }
 
-                queryText.Append(SqlStorage.EscapeFieldName(field));
-                queryText.Append(" ");
-                switch (field.TypeAtDatabase)
+                queryText.Append(SqlStorage.EscapeFieldName(fieldProperties));
+                queryText.Append(' ');
+                switch (fieldProperties.TypeAtDatabase)
                 {
                     case DataType.Binary:
-                        if (field.MaximumLength <= 0)
+                        if (fieldProperties.MaximumLength <= 0)
                         {
                             queryText.Append("LONGBLOB");
                         }
-                        else if (field.MaximumLength <= 255)
+                        else if (fieldProperties.MaximumLength <= 255)
                         {
-                            queryText.AppendFormat("TINYBLOB", field.MaximumLength);
+                            queryText.Append("TINYBLOB");
                         }
-                        else if (field.MaximumLength <= 65535)
+                        else if (fieldProperties.MaximumLength <= 65535)
                         {
                             queryText.Append("BLOB");
                         }
-                        else if (field.MaximumLength <= 16777215)
+                        else if (fieldProperties.MaximumLength <= 16777215)
                         {
                             queryText.Append("MEDIUMBLOB");
                         }
@@ -101,7 +101,7 @@ namespace Cave.Data.Mysql
                         queryText.Append("TINYINT(1)");
                         break;
                     case DataType.DateTime:
-                        switch (field.DateTimeType)
+                        switch (fieldProperties.DateTimeType)
                         {
                             case DateTimeType.Undefined:
                             case DateTimeType.Native:
@@ -123,7 +123,7 @@ namespace Cave.Data.Mysql
 
                         break;
                     case DataType.TimeSpan:
-                        switch (field.DateTimeType)
+                        switch (fieldProperties.DateTimeType)
                         {
                             case DateTimeType.Undefined:
                             case DateTimeType.Native:
@@ -179,19 +179,19 @@ namespace Cave.Data.Mysql
                         break;
                     case DataType.User:
                     case DataType.String:
-                        if (field.MaximumLength <= 0)
+                        if (fieldProperties.MaximumLength <= 0)
                         {
                             queryText.Append("LONGTEXT");
                         }
-                        else if (field.MaximumLength <= 255)
+                        else if (fieldProperties.MaximumLength <= 255)
                         {
-                            queryText.AppendFormat("VARCHAR({0})", field.MaximumLength);
+                            queryText.AppendFormat("VARCHAR({0})", fieldProperties.MaximumLength);
                         }
-                        else if (field.MaximumLength <= 65535)
+                        else if (fieldProperties.MaximumLength <= 65535)
                         {
                             queryText.Append("TEXT");
                         }
-                        else if (field.MaximumLength <= 16777215)
+                        else if (fieldProperties.MaximumLength <= 16777215)
                         {
                             queryText.Append("MEDIUMTEXT");
                         }
@@ -200,7 +200,7 @@ namespace Cave.Data.Mysql
                             queryText.Append("LONGTEXT");
                         }
 
-                        switch (field.StringEncoding)
+                        switch (fieldProperties.StringEncoding)
                         {
                             case StringEncoding.Undefined:
                             case StringEncoding.ASCII:
@@ -215,23 +215,22 @@ namespace Cave.Data.Mysql
                             case StringEncoding.UTF32:
                                 queryText.Append(" CHARACTER SET utf32 COLLATE utf32_general_ci");
                                 break;
-                            default: throw new NotSupportedException($"MYSQL Server does not support {field.StringEncoding}!");
+                            default: throw new NotSupportedException($"MYSQL Server does not support {fieldProperties.StringEncoding}!");
                         }
 
                         break;
                     case DataType.Decimal:
-                        if (field.MaximumLength > 0)
+                        if (fieldProperties.MaximumLength > 0)
                         {
-                            var value = (int) field.MaximumLength;
-                            var temp = (field.MaximumLength - value) * 100;
-                            var decimalValue = (int) temp;
-                            if ((decimalValue >= value) || (decimalValue != temp))
+                            var precision = (int)fieldProperties.MaximumLength;
+                            var scale = (int)((fieldProperties.MaximumLength - precision) * 100);
+                            if (scale >= precision)
                             {
                                 throw new ArgumentOutOfRangeException(
-                                    $"Field {field.Name} has an invalid MaximumLength of {value},{decimalValue}. Correct values range from s,p = 1,0 to 65,30(default value) with 0 < s < p!");
+                                    $"Field {fieldProperties.Name} has an invalid MaximumLength of {precision},{scale}. Correct values range from s,p = 1,0 to 65,30(default value) with 0 < s < p!");
                             }
 
-                            queryText.AppendFormat("DECIMAL({0},{1})", value, decimalValue);
+                            queryText.Append($"DECIMAL({precision},{scale})");
                         }
                         else
                         {
@@ -239,18 +238,18 @@ namespace Cave.Data.Mysql
                         }
 
                         break;
-                    default: throw new NotImplementedException($"Unknown DataType {field.DataType}!");
+                    default: throw new NotImplementedException($"Unknown DataType {fieldProperties.DataType}!");
                 }
 
-                if ((field.Flags & FieldFlags.AutoIncrement) != 0)
+                if ((fieldProperties.Flags & FieldFlags.AutoIncrement) != 0)
                 {
                     queryText.Append(" AUTO_INCREMENT");
                 }
 
-                if ((field.Flags & FieldFlags.Unique) != 0)
+                if ((fieldProperties.Flags & FieldFlags.Unique) != 0)
                 {
                     queryText.Append(" UNIQUE");
-                    switch (field.TypeAtDatabase)
+                    switch (fieldProperties.TypeAtDatabase)
                     {
                         case DataType.Bool:
                         case DataType.Char:
@@ -270,25 +269,25 @@ namespace Cave.Data.Mysql
                         case DataType.TimeSpan:
                             break;
                         case DataType.String:
-                            if (field.MaximumLength <= 0)
+                            if (fieldProperties.MaximumLength <= 0)
                             {
                                 throw new NotSupportedException(
-                                    $"Unique string fields without length are not supported! Please define Field.MaxLength at table {layout.Name} field {field.Name}");
+                                    $"Unique string fields without length are not supported! Please define Field.MaxLength at table {layout.Name} field {fieldProperties.Name}");
                             }
 
                             break;
-                        default: throw new NotSupportedException($"Uniqueness for table {layout.Name} field {field.Name} is not supported!");
+                        default: throw new NotSupportedException($"Uniqueness for table {layout.Name} field {fieldProperties.Name} is not supported!");
                     }
                 }
 
-                if (field.Description != null)
+                if (fieldProperties.Description != null)
                 {
-                    if (field.Description.HasInvalidChars(ASCII.Strings.Printable))
+                    if (fieldProperties.Description.HasInvalidChars(ASCII.Strings.Printable))
                     {
-                        throw new ArgumentException("Description of field '{0}' contains invalid chars!", field.Name);
+                        throw new ArgumentException("Description of field '{0}' contains invalid chars!", fieldProperties.Name);
                     }
 
-                    queryText.Append(" COMMENT '" + field.Description.Substring(0, 60) + "'");
+                    queryText.Append(" COMMENT '" + fieldProperties.Description.Substring(0, 60) + "'");
                 }
             }
 
@@ -300,16 +299,16 @@ namespace Cave.Data.Mysql
                 {
                     if (count++ > 0)
                     {
-                        queryText.Append(",");
+                        queryText.Append(',');
                     }
 
                     queryText.Append(SqlStorage.EscapeFieldName(field));
                 }
 
-                queryText.Append(")");
+                queryText.Append(')');
             }
 
-            queryText.Append(")");
+            queryText.Append(')');
             if ((flags & TableFlags.InMemory) != 0)
             {
                 queryText.Append(" ENGINE = MEMORY");

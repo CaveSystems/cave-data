@@ -21,7 +21,7 @@ namespace Cave.Data
         public static MemoryStorage Default { get; } = new MemoryStorage();
 
         /// <inheritdoc />
-        public override bool SupportsNativeTransactions { get; } = false;
+        public override bool SupportsNativeTransactions { get; }
 
         /// <inheritdoc />
         public override IList<string> DatabaseNames

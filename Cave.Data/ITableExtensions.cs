@@ -190,6 +190,31 @@ namespace Cave.Data
             NamingStrategy namingStrategy = NamingStrategy.CamelCase)
             => GenerateStruct(table.Layout, databaseName ?? table.Database.Name, tableName, className, namingStrategy);
 
+        /// <summary>Builds the csharp code file containing the row layout structure.</summary>
+        /// <param name="table">The table to use.</param>
+        /// <param name="databaseName">The database name (only used for the structure name).</param>
+        /// <param name="tableName">The table name (only used for the structure name).</param>
+        /// <param name="className">The name of the class to generate.</param>
+        /// <param name="structFile">The struct file name (defaults to classname.cs).</param>
+        /// <param name="nameSpace">The namespace to use for the class (defaults to "Database").</param>
+        /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
+        /// <returns>The struct file name.</returns>
+        public static GenerateTableCodeResult GenerateStructFile(this ITable table, string databaseName = null, string tableName = null,
+            string className = null, string structFile = null, string nameSpace = null, NamingStrategy namingStrategy = NamingStrategy.CamelCase)
+            => GenerateStruct(table.Layout, databaseName, tableName, className, nameSpace, namingStrategy).SaveStructFile(structFile);
+
+        /// <summary>Builds the csharp code containing the row layout structure.</summary>
+        /// <param name="table">The table to use.</param>
+        /// <param name="databaseName">The database name (only used for the structure name).</param>
+        /// <param name="tableName">The table name (only used for the structure name).</param>
+        /// <param name="className">The name of the class to generate.</param>
+        /// <param name="nameSpace">The namespace to use for the class (defaults to "Database").</param>
+        /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
+        /// <returns>Returns a string containing csharp code.</returns>
+        public static GenerateTableCodeResult GenerateStruct(this ITable table, string databaseName = null, string tableName = null, string className = null,
+            string nameSpace = null, NamingStrategy namingStrategy = NamingStrategy.CamelCase)
+            => GenerateStruct(table.Layout, databaseName ?? table.Database.Name, tableName, className, nameSpace, namingStrategy);
+
         #endregion
 
         #region GenerateStruct/-File (RowLayout)
@@ -206,6 +231,19 @@ namespace Cave.Data
             string className = null, string structFile = null, NamingStrategy namingStrategy = NamingStrategy.CamelCase)
             => GenerateStruct(layout, databaseName, tableName, className, namingStrategy).SaveStructFile(structFile);
 
+        /// <summary>Builds the csharp code file containing the row layout structure.</summary>
+        /// <param name="layout">The layout to use.</param>
+        /// <param name="databaseName">The database name (only used for the structure name).</param>
+        /// <param name="tableName">The table name (only used for the structure name).</param>
+        /// <param name="className">The name of the class to generate.</param>
+        /// <param name="structFile">The struct file name (defaults to classname.cs).</param>
+        /// <param name="nameSpace">The namespace to use for the class (defaults to "Database").</param>
+        /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
+        /// <returns>The struct file name.</returns>
+        public static GenerateTableCodeResult GenerateStructFile(this RowLayout layout, string databaseName = null, string tableName = null,
+            string className = null, string structFile = null, string nameSpace = null, NamingStrategy namingStrategy = NamingStrategy.CamelCase)
+            => GenerateStruct(layout, databaseName, tableName, className, nameSpace, namingStrategy).SaveStructFile(structFile);
+
         /// <summary>Builds the csharp code containing the row layout structure.</summary>
         /// <param name="layout">The layout to use.</param>
         /// <param name="databaseName">The database name (only used for the structure name).</param>
@@ -214,7 +252,19 @@ namespace Cave.Data
         /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
         /// <returns>Returns a string containing csharp code.</returns>
         public static GenerateTableCodeResult GenerateStruct(this RowLayout layout, string databaseName, string tableName = null, string className = null,
-            NamingStrategy namingStrategy = NamingStrategy.CamelCase)
+            NamingStrategy namingStrategy = NamingStrategy.CamelCase) =>
+            GenerateStruct(layout, databaseName, tableName, className, null, namingStrategy);
+
+        /// <summary>Builds the csharp code containing the row layout structure.</summary>
+        /// <param name="layout">The layout to use.</param>
+        /// <param name="databaseName">The database name (only used for the structure name).</param>
+        /// <param name="tableName">The table name (only used for the structure name).</param>
+        /// <param name="className">The name of the class to generate.</param>
+        /// <param name="nameSpace">The namespace to use for the class (defaults to "Database").</param>
+        /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
+        /// <returns>Returns a string containing csharp code.</returns>
+        public static GenerateTableCodeResult GenerateStruct(this RowLayout layout, string databaseName, string tableName = null, string className = null,
+            string nameSpace = null, NamingStrategy namingStrategy = NamingStrategy.CamelCase)
         {
             #region GetName()
 
@@ -232,6 +282,11 @@ namespace Cave.Data
                 }
             }
             #endregion
+
+            if (nameSpace == null)
+            {
+                nameSpace = "Database";
+            }
 
             if (databaseName == null)
             {
@@ -288,7 +343,7 @@ namespace Cave.Data
             }
 
             code.AppendLine();
-            code.AppendLine("namespace Database");
+            code.AppendLine($"namespace {nameSpace}");
             code.AppendLine("{");
             code.AppendLine($"\t/// <summary>Table structure for {layout.Name}.</summary>");
             code.AppendLine($"\t[Table(\"{layout.Name}\")]");

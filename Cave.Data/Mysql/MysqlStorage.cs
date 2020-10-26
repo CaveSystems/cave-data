@@ -221,7 +221,7 @@ namespace Cave.Data.Mysql
             var connection = base.CreateNewConnection(databaseName);
             using (var command = connection.CreateCommand())
             {
-                command.CommandText = string.Format("SET NAMES `{0}` COLLATE `{0}_unicode_ci`; SET CHARACTER SET `{0}`;", CharacterSet);
+                command.CommandText = $"SET NAMES `{CharacterSet}` COLLATE `{CharacterSet}_unicode_ci`; SET CHARACTER SET `{CharacterSet}`;";
                 if (LogVerboseMessages)
                 {
                     LogQuery(command);

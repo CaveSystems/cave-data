@@ -446,7 +446,7 @@ namespace Cave.Data
 
             return FieldValue == null
                 ? "[{0}] {1} <null>".Format(FieldName, operation)
-                : "[{0}] {1} '{2}'".Format(FieldName, operation, StringExtensions.ToString(FieldValue));
+                : "[{0}] {1} '{2}'".Format(FieldName, operation, StringExtensions.ToString(FieldValue, null));
         }
 
         /// <inheritdoc />
@@ -654,9 +654,9 @@ namespace Cave.Data
                 case SearchMode.Greater:
                 {
                     var tableValue = (IComparable) row.GetValue(FieldNumber);
-                    if (FieldValue is DateTime)
+                    if (FieldValue is DateTime time)
                     {
-                        result = Compare((DateTime) tableValue, (DateTime) FieldValue) > 0;
+                        result = Compare((DateTime) tableValue, time) > 0;
                     }
                     else
                     {
@@ -668,9 +668,9 @@ namespace Cave.Data
                 case SearchMode.GreaterOrEqual:
                 {
                     var tableValue = (IComparable) row.GetValue(FieldNumber);
-                    if (FieldValue is DateTime)
+                    if (FieldValue is DateTime time)
                     {
-                        result = Compare((DateTime) tableValue, (DateTime) FieldValue) >= 0;
+                        result = Compare((DateTime) tableValue, time) >= 0;
                     }
                     else
                     {
@@ -682,9 +682,9 @@ namespace Cave.Data
                 case SearchMode.Smaller:
                 {
                     var tableValue = (IComparable) row.GetValue(FieldNumber);
-                    if (FieldValue is DateTime)
+                    if (FieldValue is DateTime time)
                     {
-                        result = Compare((DateTime) tableValue, (DateTime) FieldValue) < 0;
+                        result = Compare((DateTime) tableValue, time) < 0;
                     }
                     else
                     {
@@ -696,9 +696,9 @@ namespace Cave.Data
                 case SearchMode.SmallerOrEqual:
                 {
                     var tableValue = (IComparable) row.GetValue(FieldNumber);
-                    if (FieldValue is DateTime)
+                    if (FieldValue is DateTime time)
                     {
-                        result = Compare((DateTime) tableValue, (DateTime) FieldValue) <= 0;
+                        result = Compare((DateTime) tableValue, time) <= 0;
                     }
                     else
                     {
@@ -715,9 +715,9 @@ namespace Cave.Data
                     break;
                 case SearchMode.Equals:
                 {
-                    if (FieldValue is DateTime)
+                    if (FieldValue is DateTime time)
                     {
-                        result = Compare((DateTime) row.GetValue(FieldNumber), (DateTime) FieldValue) == 0;
+                        result = Compare((DateTime) row.GetValue(FieldNumber), time) == 0;
                     }
                     else
                     {
@@ -757,7 +757,7 @@ namespace Cave.Data
         /// <returns>The inverted selection.</returns>
         static IEnumerable<Row> Invert(IEnumerable<Row> all, IEnumerable<Row> items) => all.Except(items);
 
-        int Compare(DateTime tableValue, DateTime checkValue)
+        static int Compare(DateTime tableValue, DateTime checkValue)
         {
             if (checkValue.Kind == DateTimeKind.Local)
             {
@@ -805,7 +805,7 @@ namespace Cave.Data
                             sb.Append(".*");
                             continue;
                         case '_':
-                            sb.Append(".");
+                            sb.Append('.');
                             continue;
                         case ' ':
                         case '\\':

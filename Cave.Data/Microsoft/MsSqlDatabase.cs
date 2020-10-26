@@ -73,7 +73,7 @@ namespace Cave.Data.Microsoft
                 var fieldProperties = layout[i];
                 if (i > 0)
                 {
-                    queryText.Append(",");
+                    queryText.Append(',');
                 }
 
                 queryText.Append(fieldProperties.NameAtDatabase + " ");
@@ -157,7 +157,7 @@ namespace Cave.Data.Microsoft
                             case StringEncoding.ASCII:
                                 if ((fieldProperties.MaximumLength > 0) && (fieldProperties.MaximumLength <= 255))
                                 {
-                                    queryText.AppendFormat("VARCHAR({0})", fieldProperties.MaximumLength);
+                                    queryText.Append($"VARCHAR({fieldProperties.MaximumLength})");
                                 }
                                 else
                                 {
@@ -169,7 +169,7 @@ namespace Cave.Data.Microsoft
                             case StringEncoding.UTF8:
                                 if ((fieldProperties.MaximumLength > 0) && (fieldProperties.MaximumLength <= 255))
                                 {
-                                    queryText.AppendFormat("NVARCHAR({0})", fieldProperties.MaximumLength);
+                                    queryText.Append($"NVARCHAR({fieldProperties.MaximumLength})");
                                 }
                                 else
                                 {
@@ -184,16 +184,15 @@ namespace Cave.Data.Microsoft
                     case DataType.Decimal:
                         if (fieldProperties.MaximumLength > 0)
                         {
-                            var l_PreDecimal = (int) fieldProperties.MaximumLength;
-                            var l_Temp = (fieldProperties.MaximumLength - l_PreDecimal) * 100;
-                            var l_Decimal = (int) l_Temp;
-                            if ((l_Decimal >= l_PreDecimal) || (l_Decimal != l_Temp))
+                            var precision = (int)fieldProperties.MaximumLength;
+                            var scale = (int)((fieldProperties.MaximumLength - precision) * 100);
+                            if (scale >= precision)
                             {
                                 throw new ArgumentOutOfRangeException(
-                                    $"Field {fieldProperties.Name} has an invalid MaximumLength of {l_PreDecimal},{l_Decimal}. Correct values range from s,p = 1,0 to 28,27 with 0 < s < p!");
+                                    $"Field {fieldProperties.Name} has an invalid MaximumLength of {precision},{scale}. Correct values range from s,p = 1,0 to 28,27 with 0 < s < p!");
                             }
 
-                            queryText.AppendFormat("NUMERIC({0},{1})", l_PreDecimal, l_Decimal);
+                            queryText.Append($"NUMERIC({precision},{scale})");
                         }
                         else
                         {
@@ -259,7 +258,7 @@ namespace Cave.Data.Microsoft
                 }
             }
 
-            queryText.Append(")");
+            queryText.Append(')');
             SqlStorage.Execute(database: Name, table: layout.Name, cmd: queryText.ToString());
             for (var i = 0; i < layout.FieldCount; i++)
             {

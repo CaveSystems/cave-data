@@ -60,7 +60,7 @@ namespace Cave.Data.SQLite
             try
             {
                 var svnEntries = ReadEntries(svnRoot);
-                return int.Parse(svnEntries[3]);
+                return int.Parse(svnEntries[3], null);
             }
             catch
             {
