@@ -54,8 +54,7 @@ namespace Cave.Data.Sql
             get
             {
                 var value = Storage.QueryValue(database: Database.Name, table: Name, cmd: "SELECT COUNT(*) FROM " + FQTN);
-                if (value == null) return -1;
-                return Convert.ToInt64(value, Storage.Culture);
+                return value == null ? -1 : Convert.ToInt64(value, Storage.Culture);
             }
         }
 
@@ -71,6 +70,8 @@ namespace Cave.Data.Sql
         /// <inheritdoc />
         public override void Connect(IDatabase database, TableFlags flags, RowLayout layout)
         {
+            if (database == null) throw new ArgumentNullException(nameof(database));
+            if (layout == null) throw new ArgumentNullException(nameof(layout));
             Storage = database.Storage as SqlStorage;
             if (Storage == null)
             {
@@ -89,7 +90,7 @@ namespace Cave.Data.Sql
         /// <param name="tableName">Table name to load.</param>
         public void Initialize(IDatabase database, TableFlags flags, string tableName)
         {
-            Storage = database.Storage as SqlStorage;
+            Storage = database?.Storage as SqlStorage;
             if (Storage == null)
             {
                 throw new InvalidOperationException("Database has to be a SqlDatabase!");
@@ -343,6 +344,7 @@ namespace Cave.Data.Sql
         /// <inheritdoc />
         public override bool Exist(Row row)
         {
+            if (row == null) throw new ArgumentNullException(nameof(row));
             var search = Search.None;
             var i = 0;
             foreach (var field in Layout.Identifier)
@@ -409,6 +411,7 @@ namespace Cave.Data.Sql
         /// <inheritdoc />
         public override void Delete(Row row)
         {
+            if (row == null) throw new ArgumentNullException(nameof(row));
             var commandBuilder = new SqlCommandBuilder(Storage);
             commandBuilder.Append("DELETE FROM ");
             commandBuilder.Append(FQTN);
@@ -519,6 +522,7 @@ namespace Cave.Data.Sql
         /// <inheritdoc />
         public override int Commit(IEnumerable<Transaction> transactions, TransactionFlags flags = TransactionFlags.Default)
         {
+            if (transactions == null) throw new ArgumentNullException(nameof(transactions));
             try
             {
                 return InternalCommit(transactions, true);
@@ -592,6 +596,8 @@ namespace Cave.Data.Sql
         /// <returns>Returns a list of rows matching the specified criteria.</returns>
         protected internal virtual IList<Row> SqlGetGroupRows(SqlSearch search, ResultOption opt)
         {
+            if (search == null) throw new ArgumentNullException(nameof(search));
+            if (opt == null) throw new ArgumentNullException(nameof(opt));
             RowLayout layout;
             var command = new StringBuilder();
             command.Append("SELECT ");
@@ -703,7 +709,7 @@ namespace Cave.Data.Sql
                 throw new InvalidDataException($"Could not read value from {FQTN}!");
             }
 
-            return Convert.ToInt64(value);
+            return Convert.ToInt64(value, null);
         }
 
         /// <summary>Searches the table for rows with given field value combinations.</summary>
@@ -760,6 +766,8 @@ namespace Cave.Data.Sql
         /// <returns>Returns the ID of the row found or -1.</returns>
         protected internal virtual IList<Row> SqlGetRows(SqlSearch search, ResultOption opt)
         {
+            if (search == null) throw new ArgumentNullException(nameof(search));
+            if (opt == null) throw new ArgumentNullException(nameof(opt));
             if (opt.Contains(ResultOptionMode.Group))
             {
                 return SqlGetGroupRows(search, opt);
@@ -834,6 +842,8 @@ namespace Cave.Data.Sql
         /// <param name="useParameters">Use database parameters instead of escaped command string.</param>
         protected virtual void CreateInsert(SqlCommandBuilder commandBuilder, Row row, bool useParameters)
         {
+            if (row == null) throw new ArgumentNullException(nameof(row));
+            if (commandBuilder == null) throw new ArgumentNullException(nameof(commandBuilder));
             commandBuilder.Append("INSERT INTO ");
             commandBuilder.Append(FQTN);
             commandBuilder.Append(" (");
@@ -891,6 +901,8 @@ namespace Cave.Data.Sql
         /// <param name="useParameters">Use database parameters instead of escaped command string.</param>
         protected virtual void CreateUpdate(SqlCommandBuilder commandBuilder, Row row, bool useParameters)
         {
+            if (commandBuilder == null) throw new ArgumentNullException(nameof(commandBuilder));
+            if (row == null) throw new ArgumentNullException(nameof(row));
             commandBuilder.Append("UPDATE ");
             commandBuilder.Append(FQTN);
             commandBuilder.Append(" SET ");
@@ -933,41 +945,43 @@ namespace Cave.Data.Sql
         }
 
         /// <summary>Creates a replace command.</summary>
-        /// <param name="cb">The command builder.</param>
+        /// <param name="commandBuilder">The command builder.</param>
         /// <param name="row">The row.</param>
         /// <param name="useParameters">Use database parameters instead of escaped command string.</param>
-        protected virtual void CreateReplace(SqlCommandBuilder cb, Row row, bool useParameters)
+        protected virtual void CreateReplace(SqlCommandBuilder commandBuilder, Row row, bool useParameters)
         {
-            cb.Append("REPLACE INTO ");
-            cb.Append(FQTN);
-            cb.Append(" VALUES (");
+            if (row == null) throw new ArgumentNullException(nameof(row));
+            if (commandBuilder == null) throw new ArgumentNullException(nameof(commandBuilder));
+            commandBuilder.Append("REPLACE INTO ");
+            commandBuilder.Append(FQTN);
+            commandBuilder.Append(" VALUES (");
             for (var i = 0; i < Layout.FieldCount; i++)
             {
                 if (i > 0)
                 {
-                    cb.Append(",");
+                    commandBuilder.Append(",");
                 }
 
                 var value = row[i];
                 if (value == null)
                 {
-                    cb.Append("NULL");
+                    commandBuilder.Append("NULL");
                 }
                 else
                 {
                     value = Storage.GetDatabaseValue(Layout[i], value);
                     if (useParameters)
                     {
-                        cb.CreateAndAddParameter(value);
+                        commandBuilder.CreateAndAddParameter(value);
                     }
                     else
                     {
-                        cb.Append(Storage.EscapeFieldValue(Layout[i], value));
+                        commandBuilder.Append(Storage.EscapeFieldValue(Layout[i], value));
                     }
                 }
             }
 
-            cb.AppendLine(");");
+            commandBuilder.AppendLine(");");
         }
 
         #endregion

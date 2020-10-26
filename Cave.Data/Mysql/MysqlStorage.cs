@@ -192,17 +192,12 @@ namespace Cave.Data.Mysql
                 }
                 case DataType.Double:
                 {
-                    var d = Convert.ToDouble(localValue);
-                    if (double.IsPositiveInfinity(d))
-                    {
-                        return double.MaxValue;
-                    }
-
-                    return double.IsNegativeInfinity(d) ? double.MinValue : (object) d;
+                    var d = Convert.ToDouble(localValue, Culture);
+                    return double.IsPositiveInfinity(d) ? double.MaxValue : double.IsNegativeInfinity(d) ? double.MinValue : (object) d;
                 }
                 case DataType.Single:
                 {
-                    var f = Convert.ToSingle(localValue);
+                    var f = Convert.ToSingle(localValue, Culture);
                     if (float.IsPositiveInfinity(f))
                     {
                         return float.MaxValue;
@@ -250,7 +245,7 @@ namespace Cave.Data.Mysql
                 throw new InvalidDataException("Could not read information_schema.tables!");
             }
 
-            return Convert.ToInt32(value) > 0;
+            return Convert.ToInt32(value, Culture) > 0;
         }
 
         /// <inheritdoc />

@@ -17,6 +17,7 @@ namespace Cave.Data
             params string[] excludedFields)
             where TStruct : struct
         {
+            if (database == null) throw new ArgumentNullException(nameof(database));
             var layout = RowLayout.CreateTyped(typeof(TStruct), tableName, database.Storage, excludedFields);
             var table = database.CreateTable(layout, flags);
             return new Table<TStruct>(table);
@@ -33,6 +34,7 @@ namespace Cave.Data
             params string[] excludedFields)
             where TStruct : struct
         {
+            if (database == null) throw new ArgumentNullException(nameof(database));
             var table = GetTable<TStruct>(database, tableName, flags, excludedFields);
             return table.GetStructs();
         }
@@ -48,6 +50,7 @@ namespace Cave.Data
             params string[] excludedFields)
             where TStruct : struct
         {
+            if (database == null) throw new ArgumentNullException(nameof(database));
             var layout = RowLayout.CreateTyped(typeof(TStruct), tableName, database.Storage, excludedFields);
             if (flags.HasFlag(TableFlags.IgnoreMissingFields))
             {
@@ -71,6 +74,7 @@ namespace Cave.Data
             where TKey : IComparable<TKey>
             where TStruct : struct
         {
+            if (database == null) throw new ArgumentNullException(nameof(database));
             var layout = RowLayout.CreateTyped(typeof(TStruct), tableName, database.Storage, excludedFields);
             var table = database.CreateTable(layout, flags);
             return new Table<TKey, TStruct>(table);
@@ -89,6 +93,7 @@ namespace Cave.Data
             where TKey : IComparable<TKey>
             where TStruct : struct
         {
+            if (database == null) throw new ArgumentNullException(nameof(database));
             var table = GetTable<TKey, TStruct>(database, tableName, flags, excludedFields);
             return table.GetDictionary();
         }
@@ -106,6 +111,7 @@ namespace Cave.Data
             where TKey : IComparable<TKey>
             where TStruct : struct
         {
+            if (database == null) throw new ArgumentNullException(nameof(database));
             var layout = RowLayout.CreateTyped(typeof(TStruct), tableName, database.Storage, excludedFields);
             if (flags.HasFlag(TableFlags.IgnoreMissingFields))
             {

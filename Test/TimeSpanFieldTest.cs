@@ -78,21 +78,21 @@ namespace Test
         {
             var layout = RowLayout.CreateTyped(typeof(TestStruct));
 
-            TestStruct t1 = new TestStruct();
+            var t1 = new TestStruct();
             t1.Init(TimeSpan.MinValue);
-            TestStruct t2 = new TestStruct();
+            var t2 = new TestStruct();
             t2.Init(TimeSpan.MaxValue);
-            TestStruct t3 = new TestStruct();
+            var t3 = new TestStruct();
             t3.Init(DateTime.Now.TimeOfDay);
 
             var ms = new MemoryStream();
-            DatWriter w = new DatWriter(layout, ms);
+            var w = new DatWriter(layout, ms);
             w.Write(t1);
             w.Write(t2);
             w.Write(t3);
             w.Close();
             var ms2 = new MemoryStream(ms.ToArray());
-            DatReader r = new DatReader(ms2);
+            var r = new DatReader(ms2);
             var list = r.ReadList<TestStruct>();
             Assert.AreEqual(3, list.Count);
             Assert.AreEqual(t1, list[0]);
@@ -105,21 +105,21 @@ namespace Test
         {
             var layout = RowLayout.CreateTyped(typeof(TestStruct));
 
-            TestStruct t1 = new TestStruct();
+            var t1 = new TestStruct();
             t1.Init(TimeSpan.MinValue);
-            TestStruct t2 = new TestStruct();
+            var t2 = new TestStruct();
             t2.Init(TimeSpan.MaxValue);
-            TestStruct t3 = new TestStruct();
+            var t3 = new TestStruct();
             t3.Init(DateTime.Now.TimeOfDay);
 
             var ms = new MemoryStream();
-            CsvWriter w = new CsvWriter(layout, ms);
+            var w = new CsvWriter(layout, ms);
             w.Write(t1);
             w.Write(t2);
             w.Write(t3);
             w.Close();
             var ms2 = new MemoryStream(ms.ToArray());
-            CsvReader r = new CsvReader(layout, ms2);
+            var r = new CsvReader(layout, ms2);
             var list = r.ReadList<TestStruct>();
             Assert.AreEqual(3, list.Count);
             Assert.AreEqual(t1, list[0]);

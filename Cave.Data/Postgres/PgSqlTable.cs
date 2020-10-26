@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Cave.Data.Sql;
 
 namespace Cave.Data.Postgres
@@ -39,6 +40,8 @@ namespace Cave.Data.Postgres
         /// <inheritdoc />
         protected override void CreateLastInsertedRowCommand(SqlCommandBuilder commandBuilder, Row row)
         {
+            if (commandBuilder == null) throw new ArgumentNullException(nameof(commandBuilder));
+            if (row == null) throw new ArgumentNullException(nameof(row));
             var idField = Layout.Identifier.Single();
             commandBuilder.AppendLine($"SELECT * FROM {FQTN} WHERE {Storage.EscapeFieldName(idField)} = LASTVAL();");
         }

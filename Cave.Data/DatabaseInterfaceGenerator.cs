@@ -25,7 +25,7 @@ namespace Cave.Data
         /// <param name="nameSpace">The namespace to use for all classes (defaults to "Database").</param>
         public DatabaseInterfaceGenerator(IDatabase database, string className = null, string nameSpace = null)
         {
-            Database = database;
+            Database = database ?? throw new ArgumentNullException(nameof(database));
             ClassName = className ?? (GetName(database.Name) + "Db");
             NameSpace = nameSpace ?? "Database";
             var code = new StringBuilder();
@@ -104,6 +104,7 @@ namespace Cave.Data
         /// <param name="getterName">Name of the getter in the resulting class (optional).</param>
         public void Add(ITable table, string className = null, string getterName = null)
         {
+            if (table == null) throw new ArgumentNullException(nameof(table));
             if (Database != table.Database)
             {
                 throw new ArgumentOutOfRangeException(nameof(table), "Database has to match!");

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cave.Data.Sql;
@@ -33,12 +34,15 @@ namespace Cave.Data.Mysql
         /// <inheritdoc />
         protected override void CreateLastInsertedRowCommand(SqlCommandBuilder commandBuilder, Row row)
         {
+            if (commandBuilder == null) throw new ArgumentNullException(nameof(commandBuilder));
+            if (row == null) throw new ArgumentNullException(nameof(row));
             var idField = Layout.Identifier.Single();
             commandBuilder.AppendLine($"SELECT * FROM {FQTN} WHERE {Storage.EscapeFieldName(idField)} = LAST_INSERT_ID();");
         }
 
         string[] MysqlInternalCommand(string cmd)
         {
+            if (cmd == null) throw new ArgumentNullException(nameof(cmd));
             var results = new List<string>();
             var rows = Storage.Query(database: Database.Name, table: Name, cmd: cmd);
             foreach (var row in rows)

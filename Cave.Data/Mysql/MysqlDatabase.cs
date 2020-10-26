@@ -185,7 +185,7 @@ namespace Cave.Data.Mysql
                         }
                         else if (fieldProperties.MaximumLength <= 255)
                         {
-                            queryText.AppendFormat("VARCHAR({0})", fieldProperties.MaximumLength);
+                            queryText.Append($"VARCHAR({fieldProperties.MaximumLength})");
                         }
                         else if (fieldProperties.MaximumLength <= 65535)
                         {

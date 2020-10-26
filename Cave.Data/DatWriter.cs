@@ -88,6 +88,7 @@ namespace Cave.Data
         /// <param name="row">Row to write.</param>
         public void Write(Row row)
         {
+            if (row == null) throw new ArgumentNullException(nameof(row));
             var data = GetData(row, CurrentVersion);
             WriteData(data);
         }
@@ -250,7 +251,7 @@ namespace Cave.Data
 
             using (var buffer = new MemoryStream())
             {
-                var writer = new DataWriter(buffer);
+                var w = new DataWriter(buffer);
                 for (var i = 0; i < layout.FieldCount; i++)
                 {
                     var fieldProperties = layout[i];
@@ -266,84 +267,84 @@ namespace Cave.Data
                                     data = new byte[0];
                                 }
 
-                                writer.Write(data.Length);
-                                writer.Write(data);
+                                w.Write(data.Length);
+                                w.Write(data);
                             }
                             else
                             {
-                                writer.WritePrefixed(data);
+                                w.WritePrefixed(data);
                             }
 
                             break;
                         }
                         case DataType.Bool:
-                            writer.Write(Convert.ToBoolean(row[i] ?? default(bool), CultureInfo.CurrentCulture));
+                            w.Write(Convert.ToBoolean(row[i] ?? default(bool), CultureInfo.CurrentCulture));
                             break;
                         case DataType.TimeSpan:
-                            writer.Write(((TimeSpan) (row[i] ?? default(TimeSpan))).Ticks);
+                            w.Write(((TimeSpan) (row[i] ?? default(TimeSpan))).Ticks);
                             break;
                         case DataType.DateTime:
-                            writer.Write(((DateTime) (row[i] ?? default(DateTime))).Ticks);
+                            w.Write(((DateTime) (row[i] ?? default(DateTime))).Ticks);
                             break;
                         case DataType.Single:
-                            writer.Write((float) (row[i] ?? default(float)));
+                            w.Write((float) (row[i] ?? default(float)));
                             break;
                         case DataType.Double:
-                            writer.Write((double) (row[i] ?? default(double)));
+                            w.Write((double) (row[i] ?? default(double)));
                             break;
                         case DataType.Int8:
-                            writer.Write((sbyte) (row[i] ?? default(sbyte)));
+                            w.Write((sbyte) (row[i] ?? default(sbyte)));
                             break;
                         case DataType.Int16:
-                            writer.Write((short) (row[i] ?? default(short)));
+                            w.Write((short) (row[i] ?? default(short)));
                             break;
                         case DataType.UInt8:
-                            writer.Write((byte) (row[i] ?? default(byte)));
+                            w.Write((byte) (row[i] ?? default(byte)));
                             break;
                         case DataType.UInt16:
-                            writer.Write((ushort) (row[i] ?? default(ushort)));
+                            w.Write((ushort) (row[i] ?? default(ushort)));
                             break;
                         case DataType.Int32:
                             if (version == 1)
                             {
-                                writer.Write((int) row[i]);
+                                w.Write((int) row[i]);
                                 break;
                             }
 
-                            writer.Write7BitEncoded32((int) (row[i] ?? default(int)));
+                            w.Write7BitEncoded32((int) (row[i] ?? default(int)));
                             break;
                         case DataType.Int64:
                             if (version == 1)
                             {
-                                writer.Write((long) row[i]);
+                                w.Write((long) row[i]);
                                 break;
                             }
 
-                            writer.Write7BitEncoded64((long) (row[i] ?? default(long)));
+                            w.Write7BitEncoded64((long) (row[i] ?? default(long)));
                             break;
                         case DataType.UInt32:
                             if (version == 1)
                             {
-                                writer.Write((uint) row[i]);
+                                w.Write((uint) row[i]);
                                 break;
                             }
 
-                            writer.Write7BitEncoded32((uint) (row[i] ?? default(uint)));
+                            w.Write7BitEncoded32((uint) (row[i] ?? default(uint)));
                             break;
                         case DataType.UInt64:
                             if (version == 1)
                             {
-                                writer.Write((ulong) row[i]);
+                                w.Write((ulong) row[i]);
                                 break;
                             }
 
-                            writer.Write7BitEncoded64((ulong) (row[i] ?? default(ulong)));
+                            w.Write7BitEncoded64((ulong) (row[i] ?? default(ulong)));
                             break;
                         case DataType.Char:
-                            writer.Write((char) (row[i] ?? default(char)));
+                            w.Write((char) (row[i] ?? default(char)));
                             break;
                         case DataType.Decimal:
-                            writer.Write((decimal) (row[i] ?? default(decimal)));
+                            w.Write((decimal) (row[i] ?? default(decimal)));
                             break;
                         case DataType.String:
                         case DataType.User:
@@ -351,7 +352,7 @@ namespace Cave.Data
                             var data = row[i];
                             if (data == null)
                             {
-                                writer.WritePrefixed((string) null);
+                                w.WritePrefixed((string) null);
                             }
                             else
                             {
@@ -377,7 +378,7 @@ namespace Cave.Data
                                     default: throw new NotImplementedException();
                                 }
 
-                                writer.WritePrefixed(text);
+                                w.WritePrefixed(text);
                             }
 
                             break;
@@ -385,7 +386,7 @@ namespace Cave.Data
                         case DataType.Enum:
                         {
                             var value = Convert.ToInt64(row[i] ?? 0, CultureInfo.CurrentCulture);
-                            writer.Write7BitEncoded64(value);
+                            w.Write7BitEncoded64(value);
                             break;
                         }
                         default:

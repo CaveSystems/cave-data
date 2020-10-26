@@ -175,12 +175,7 @@ namespace Cave.Data
                 throw new ArgumentNullException(nameof(right));
             }
 
-            if (right.Mode == SearchMode.None)
-            {
-                return left;
-            }
-
-            return left.Mode == SearchMode.None ? right : new Search(SearchMode.Or, false, left, right);
+            return right.Mode == SearchMode.None ? left : left.Mode == SearchMode.None ? right : new Search(SearchMode.Or, false, left, right);
         }
 
         /// <summary>Prepares a search using like to find a full match of all of the specified parts.</summary>
@@ -238,6 +233,7 @@ namespace Cave.Data
         /// <returns>A new search instance.</returns>
         public static Search FullMatch(ITable table, Row row, params string[] fieldNames)
         {
+            if (row == null) throw new ArgumentNullException(nameof(row));
             if (table == null) throw new ArgumentNullException(nameof(table));
             if (fieldNames == null) throw new ArgumentNullException(nameof(fieldNames));
             var search = None;
@@ -257,6 +253,7 @@ namespace Cave.Data
         /// <returns>A new search instance.</returns>
         public static Search IdentifierMatch(ITable table, Row row)
         {
+            if (row == null) throw new ArgumentNullException(nameof(row));
             if (table == null) throw new ArgumentNullException(nameof(table));
             var search = None;
             foreach (var field in table.Layout.Identifier)
@@ -356,6 +353,7 @@ namespace Cave.Data
         /// <returns>A new search instance.</returns>
         public static Search FieldIn(string name, params object[] values)
         {
+            if (values == null) throw new ArgumentNullException(nameof(values));
             var s = new Set<object>();
             foreach (var val in values)
             {
@@ -371,6 +369,7 @@ namespace Cave.Data
         /// <returns>A new search instance.</returns>
         public static Search FieldIn(string name, IEnumerable values)
         {
+            if (values == null) throw new ArgumentNullException(nameof(values));
             var s = new Set<object>();
             foreach (var val in values)
             {

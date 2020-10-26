@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Cave.Data
@@ -27,6 +28,7 @@ namespace Cave.Data
         /// <param name="layout">The layout.</param>
         protected void LogCreateTable(RowLayout layout)
         {
+            if (layout == null) throw new ArgumentNullException(nameof(layout));
             Trace.TraceInformation("Creating table <cyan>{0}.{1}<default> with <cyan>{2}<default> fields.", Name, layout.Name, layout.FieldCount);
             if (Storage.LogVerboseMessages)
             {
@@ -55,9 +57,8 @@ namespace Cave.Data
         /// <inheritdoc />
         public string Name { get; }
 
-
         /// <inheritdoc />
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1721")]
+        [SuppressMessage("Naming", "CA1721")]
         public IList<string> TableNames => GetTableNames();
 
         /// <inheritdoc />

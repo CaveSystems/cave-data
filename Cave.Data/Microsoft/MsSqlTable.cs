@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Cave.Data.Sql;
 
@@ -31,6 +32,8 @@ namespace Cave.Data.Microsoft
         /// <inheritdoc />
         protected override void CreateLastInsertedRowCommand(SqlCommandBuilder commandBuilder, Row row)
         {
+            if (commandBuilder == null) throw new ArgumentNullException(nameof(commandBuilder));
+            if (row == null) throw new ArgumentNullException(nameof(row));
             var idField = Layout.Identifier.Single();
             commandBuilder.AppendLine($"SELECT * FROM {FQTN} WHERE {Storage.EscapeFieldName(idField)} = (SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]);");
         }

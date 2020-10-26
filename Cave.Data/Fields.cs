@@ -186,12 +186,7 @@ namespace Cave.Data
             }
             else if (value == null)
             {
-                if (fieldType.IsValueType)
-                {
-                    return Activator.CreateInstance(fieldType);
-                }
-
-                return null;
+                return fieldType.IsValueType ? Activator.CreateInstance(fieldType) : null;
             }
 
             if (fieldType == typeof(bool))
@@ -219,7 +214,7 @@ namespace Cave.Data
 
             if (fieldType.IsAssignableFrom(value.GetType()))
             {
-                return Convert.ChangeType(value, fieldType);
+                return Convert.ChangeType(value, fieldType, null);
             }
 
             if (fieldType.IsEnum)
@@ -507,12 +502,9 @@ namespace Cave.Data
                 case DataType.Single:
                 {
                     var f = (float) value;
-                    if (float.IsNaN(f) || float.IsInfinity(f))
-                    {
-                        throw new InvalidDataException($"Cannot serialize float with value {f}!");
-                    }
-
-                    return f.ToString(provider);
+                    return float.IsNaN(f) || float.IsInfinity(f)
+                        ? throw new InvalidDataException($"Cannot serialize float with value {f}!")
+                        : f.ToString(provider);
                 }
                 case DataType.Double:
                 {

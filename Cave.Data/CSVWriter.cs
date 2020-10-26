@@ -125,20 +125,12 @@ namespace Cave.Data
         /// <param name="properties">The csv properties.</param>
         /// <param name="layout">The row layout.</param>
         /// <param name="row">The row.</param>
-        /// <returns>Returns a new string representing the row.</returns>
-        public static string RowToString(CsvProperties properties, RowLayout layout, Row row)
-        {
-            return RowToString(properties, layout, row, null);
-        }
-
-        /// <summary>Creates a string representation of the specified row.</summary>
-        /// <param name="properties">The csv properties.</param>
-        /// <param name="layout">The row layout.</param>
-        /// <param name="row">The row.</param>
         /// <param name="provider">The format provider used for each field (optional, defaults to properties.Format).</param>
         /// <returns>Returns a new string representing the row.</returns>
-        public static string RowToString(CsvProperties properties, RowLayout layout, Row row, IFormatProvider provider)
+        public static string RowToString(CsvProperties properties, RowLayout layout, Row row, IFormatProvider provider = null)
         {
+            if (layout == null) throw new ArgumentNullException(nameof(layout));
+            if (row == null) throw new ArgumentNullException(nameof(row));
             if (provider == null) provider = properties.Format;
             var result = new StringBuilder();
             var values = row.Values;

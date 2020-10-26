@@ -5,8 +5,20 @@ namespace Cave.Data
     /// <summary>Provides the code generated as result of a ITable.GenerateX() function.</summary>
     public struct GenerateTableCodeResult : IEquatable<GenerateTableCodeResult>
     {
+        /// <summary>
+        /// The equality operator == returns true if its operands are equal, false otherwise.
+        /// </summary>
+        /// <param name="left">First operand.</param>
+        /// <param name="right">Second operand.</param>
+        /// <returns>true if its operands are equal, false otherwise.</returns>
         public static bool operator ==(GenerateTableCodeResult left, GenerateTableCodeResult right) => Equals(left, right);
-        
+
+        /// <summary>
+        /// The inequality operator != returns true if its operands are not equal, false otherwise.
+        /// </summary>
+        /// <param name="left">First operand.</param>
+        /// <param name="right">Second operand.</param>
+        /// <returns>true if its operands are not equal, false otherwise.</returns>
         public static bool operator !=(GenerateTableCodeResult left, GenerateTableCodeResult right) => !Equals(left, right);
 
         /// <summary>Gets the name of the database.</summary>
@@ -35,7 +47,7 @@ namespace Cave.Data
         {
             unchecked
             {
-                var hashCode = (DatabaseName != null ? DatabaseName.GetHashCode() : 0);
+                var hashCode = DatabaseName != null ? DatabaseName.GetHashCode() : 0;
                 hashCode = (hashCode * 397) ^ (TableName != null ? TableName.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (Code != null ? Code.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (FileName != null ? FileName.GetHashCode() : 0);

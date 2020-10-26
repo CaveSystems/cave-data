@@ -50,7 +50,7 @@ namespace Cave.Data.Microsoft
 
             if (field.DataType == DataType.Int8)
             {
-                return Convert.ToInt16(localValue);
+                return Convert.ToInt16(localValue, Culture);
             }
 
             if (field.DataType == DataType.Decimal)

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -134,12 +135,9 @@ namespace Cave.Data
         /// <returns>A new <see cref="ResultOption" /> instance.</returns>
         public static ResultOption Limit(int resultCount)
         {
-            if (resultCount < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(resultCount));
-            }
-
-            return new ResultOption(ResultOptionMode.Limit, resultCount.ToString());
+            return resultCount < 0
+                ? throw new ArgumentOutOfRangeException(nameof(resultCount))
+                : new ResultOption(ResultOptionMode.Limit, resultCount.ToString(CultureInfo.InvariantCulture));
         }
 
         /// <summary>Set start offset of result sets.</summary>
@@ -147,12 +145,9 @@ namespace Cave.Data
         /// <returns>A new <see cref="ResultOption" /> instance.</returns>
         public static ResultOption Offset(int offset)
         {
-            if (offset < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(offset));
-            }
-
-            return new ResultOption(ResultOptionMode.Offset, offset.ToString());
+            return offset < 0
+                ? throw new ArgumentOutOfRangeException(nameof(offset))
+                : new ResultOption(ResultOptionMode.Offset, offset.ToString(CultureInfo.InvariantCulture));
         }
 
         /// <summary>Group the fields with the specified fieldname.</summary>

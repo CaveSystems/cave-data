@@ -149,18 +149,13 @@ namespace Cave.Data.Postgres
         {
             var value = QueryValue(database: "SCHEMATA",
                 cmd: "SELECT COUNT(*) FROM pg_database WHERE datname LIKE " + EscapeString(GetObjectName(database)) + ";");
-            return Convert.ToInt32(value) > 0;
+            return Convert.ToInt32(value, Culture) > 0;
         }
 
         /// <inheritdoc />
         public override IDatabase GetDatabase(string database)
         {
-            if (!HasDatabase(database))
-            {
-                throw new ArgumentException("Database does not exist!");
-            }
-
-            return new PgSqlDatabase(this, database);
+            return HasDatabase(database) ? new PgSqlDatabase(this, database) : throw new ArgumentException("Database does not exist!");
         }
 
         /// <inheritdoc />

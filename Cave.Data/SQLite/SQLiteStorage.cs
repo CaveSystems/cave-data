@@ -127,12 +127,12 @@ namespace Cave.Data.SQLite
             }
 
             var path = GetFileName(database);
-            return string.Format(StaticConnectionString, path);
+            return string.Format(null, StaticConnectionString, path);
         }
 
         /// <summary>Gets the fileName for the specified database name.</summary>
         /// <param name="database">Name of the database (file).</param>
-        /// <returns>Fullpath to the database file.</returns>
+        /// <returns>Full path to the database file.</returns>
         string GetFileName(string database) => Path.GetFullPath(Path.Combine(ConnectionString.Location, database + ".db"));
 
         #region IStorage functions
@@ -159,12 +159,7 @@ namespace Cave.Data.SQLite
         /// <inheritdoc />
         public override string EscapeFieldName(IFieldProperties field)
         {
-            if (field == null)
-            {
-                throw new ArgumentNullException(nameof(field));
-            }
-
-            return "[" + field.NameAtDatabase + "]";
+            return field == null ? throw new ArgumentNullException(nameof(field)) : "[" + field.NameAtDatabase + "]";
         }
 
         /// <inheritdoc />

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -109,6 +110,7 @@ namespace Cave.Data
         /// <returns>Returns a field index array or null.</returns>
         public static FieldIndex[] CreateIndex(RowLayout layout, MemoryTableOptions options = 0)
         {
+            if (layout == null) throw new ArgumentNullException(nameof(layout));
             if ((options & MemoryTableOptions.DisableIndex) == 0)
             {
                 var indexCount = 0;
@@ -255,6 +257,7 @@ namespace Cave.Data
         /// <inheritdoc />
         public override bool Exist(Search search)
         {
+            if (search == null) throw new ArgumentNullException(nameof(search));
             search.LoadLayout(Layout);
             return rows.Values.Any(row => search.Check(row));
         }
@@ -269,6 +272,7 @@ namespace Cave.Data
         /// <inheritdoc />
         public override void Replace(Row row)
         {
+            if (row == null) throw new ArgumentNullException(nameof(row));
             var id = new Identifier(row, Layout);
             if (Exist(id))
             {
@@ -283,6 +287,7 @@ namespace Cave.Data
         /// <inheritdoc />
         public override void Replace(IEnumerable<Row> rows)
         {
+            if (rows == null) throw new ArgumentNullException(nameof(rows));
             foreach (var row in rows)
             {
                 Replace(row);
@@ -296,6 +301,7 @@ namespace Cave.Data
         /// <inheritdoc />
         public override Row Insert(Row row)
         {
+            if (row == null) throw new ArgumentNullException(nameof(row));
             var id = new Identifier(row, Layout);
             return Insert(row, id);
         }
@@ -303,6 +309,7 @@ namespace Cave.Data
         /// <inheritdoc />
         public override void Insert(IEnumerable<Row> rows)
         {
+            if (rows == null) throw new ArgumentNullException(nameof(rows));
             foreach (var row in rows)
             {
                 Insert(row);
@@ -316,6 +323,7 @@ namespace Cave.Data
         /// <inheritdoc />
         public override void Update(Row row)
         {
+            if (row == null) throw new ArgumentNullException(nameof(row));
             var id = new Identifier(row, Layout);
             Update(row, id);
         }
@@ -323,6 +331,7 @@ namespace Cave.Data
         /// <inheritdoc />
         public override void Update(IEnumerable<Row> rows)
         {
+            if (rows == null) throw new ArgumentNullException(nameof(rows));
             foreach (var row in rows)
             {
                 Update(row);
@@ -336,6 +345,7 @@ namespace Cave.Data
         /// <inheritdoc />
         public override void Delete(Row row)
         {
+            if (row == null) throw new ArgumentNullException(nameof(row));
             if (isReadonly)
             {
                 throw new ReadOnlyException($"Table {this} is readonly!");
@@ -378,6 +388,7 @@ namespace Cave.Data
         /// <inheritdoc />
         public override void Delete(IEnumerable<Row> rows)
         {
+            if (rows == null) throw new ArgumentNullException(nameof(rows));
             foreach (var row in rows)
             {
                 Delete(row);
@@ -432,7 +443,8 @@ namespace Cave.Data
         #region Count
 
         /// <inheritdoc />
-        public override long Count(Search search = null, ResultOption resultOption = null) => GetRows(search, resultOption).Count;
+        [SuppressMessage("Design", "CA1062")]
+        public override long Count(Search search = default, ResultOption resultOption = null) => GetRows(search, resultOption, false).Count;
 
         #endregion
 
@@ -446,14 +458,16 @@ namespace Cave.Data
         #region GetRows
 
         /// <inheritdoc />
-        public override IList<Row> GetRows(Search search = null, ResultOption resultOption = null) => GetRows(search, resultOption);
+        [SuppressMessage("Design", "CA1062")]
+        public override IList<Row> GetRows(Search search = default, ResultOption resultOption = null) => GetRows(search, resultOption, false);
 
         #endregion
 
         #region GetRow
 
         /// <inheritdoc />
-        public override Row GetRow(Search search = null, ResultOption resultOption = null) => GetRows(search, resultOption).Single();
+        [SuppressMessage("Design", "CA1062")]
+        public override Row GetRow(Search search = default, ResultOption resultOption = null) => GetRows(search, resultOption, false).Single();
 
         #endregion
 
@@ -474,6 +488,7 @@ namespace Cave.Data
         /// <returns>The rows.</returns>
         public IList<Row> GetRows(IEnumerable<Identifier> ids)
         {
+            if (ids == null) throw new ArgumentNullException(nameof(ids));
             var result = new List<Row>();
             foreach (var id in ids)
             {

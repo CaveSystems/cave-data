@@ -16,7 +16,7 @@ namespace Cave.Data
         /// <param name="table">The table instance to wrap.</param>
         public Table(ITable table)
         {
-            BaseTable = table;
+            BaseTable = table ?? throw new ArgumentNullException(nameof(table));
             var layout = RowLayout.CreateTyped(typeof(TStruct));
             if (table.Flags.HasFlag(TableFlags.IgnoreMissingFields))
             {

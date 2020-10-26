@@ -38,6 +38,9 @@ namespace Cave.Data
         /// <returns>Returns a new <see cref="Row" /> instance.</returns>
         public static Row ParseRow(CsvProperties properties, RowLayout layout, string data)
         {
+            if (properties == null) throw new ArgumentNullException(nameof(properties));
+            if (layout == null) throw new ArgumentNullException(nameof(layout));
+            if (data == null) throw new ArgumentNullException(nameof(data));
             try
             {
                 var fieldCount = layout.FieldCount;
@@ -216,7 +219,7 @@ namespace Cave.Data
                             throw new InvalidDataException($"Fieldposition of Field '{fieldName}' does not match!");
                         }
 
-                        if (!string.Equals(Layout[fieldIndex].Name, fieldName))
+                        if (!string.Equals(Layout[fieldIndex].Name, fieldName, StringComparison.Ordinal))
                         {
                             throw new InvalidDataException(
                                 $"Invalid header value at field number '{i}' name '{fieldName}' expected '{Layout[fieldIndex].Name}'!");
@@ -322,6 +325,7 @@ namespace Cave.Data
         public static List<TStruct> ReadList<TStruct>(string[] lines)
             where TStruct : struct
         {
+            if (lines == null) throw new ArgumentNullException(nameof(lines));
             using (var ms = new MemoryStream())
             {
                 var w = new DataWriter(ms);

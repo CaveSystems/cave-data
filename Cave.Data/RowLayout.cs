@@ -451,11 +451,12 @@ namespace Cave.Data
         /// <summary>Enums the value.</summary>
         /// <param name="index">The field index.</param>
         /// <param name="value">The value.</param>
+        /// <param name="provider">The format provider.</param>
         /// <returns>The enum value.</returns>
-        public object EnumValue(int index, long value)
+        public object EnumValue(int index, long value, IFormatProvider provider = null)
         {
             var field = properties[index];
-            return Enum.Parse(field.ValueType, value.ToString(), true);
+            return Enum.Parse(field.ValueType, value.ToString(provider), true);
         }
 
         /// <summary>Gets the name of the field with the given number.</summary>
@@ -481,7 +482,8 @@ namespace Cave.Data
         /// <param name="index">The field index.</param>
         /// <param name="item">The struct to set the value at.</param>
         /// <param name="value">The value to set.</param>
-        public void SetValue(int index, ref object item, object value)
+        /// <param name="culture">Culture to use to convert values.</param>
+        public void SetValue(int index, ref object item, object value, CultureInfo culture = null)
         {
             if (!IsTyped)
             {
@@ -490,7 +492,7 @@ namespace Cave.Data
 
             if ((value != null) && (value.GetType() != properties[index].ValueType))
             {
-                value = Convert.ChangeType(value, properties[index].ValueType);
+                value = Convert.ChangeType(value, properties[index].ValueType, culture);
             }
 
             properties[index].FieldInfo.SetValue(item, value);
@@ -538,7 +540,8 @@ namespace Cave.Data
         /// <summary>Sets all values of the struct.</summary>
         /// <param name="item">The struct to set the values at.</param>
         /// <param name="values">The values to set.</param>
-        public void SetValues(ref object item, object[] values)
+        /// <param name="culture">Culture to use when converting values.</param>
+        public void SetValues(ref object item, object[] values, CultureInfo culture = null)
         {
             if (values == null)
             {
@@ -565,7 +568,7 @@ namespace Cave.Data
                             value = Enum.Parse(field.ValueType, value.ToString(), true);
                             break;
                         default:
-                            value = Convert.ChangeType(values[i], properties[i].ValueType);
+                            value = Convert.ChangeType(values[i], properties[i].ValueType, culture);
                             break;
                     }
                 }
@@ -608,12 +611,7 @@ namespace Cave.Data
                 }
             }
 
-            if (throwException)
-            {
-                throw new ArgumentOutOfRangeException(nameof(fieldName), $"FieldName {fieldName} is not present at layout {this}!");
-            }
-
-            return -1;
+            return !throwException ? -1 : throw new ArgumentOutOfRangeException(nameof(fieldName), $"FieldName {fieldName} is not present at layout {this}!");
         }
 
         /// <summary>Creates a copy of this layout without the specified field.</summary>

@@ -11,3 +11,4 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Globalization", "CA1303", Justification = "Messages will not be globalized")]
 [assembly: SuppressMessage("Reliability", "CA2008", Justification = "Parallel code requires Task.Factory.StartNew()")]
 [assembly: SuppressMessage("Design", "CA1051", Justification = "Database structures are using visible public fields.")]
+[assembly: SuppressMessage("Style", "IDE0011", Justification = "")]

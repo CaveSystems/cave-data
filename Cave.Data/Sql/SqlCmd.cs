@@ -41,6 +41,6 @@ namespace Cave.Data.Sql
 
         /// <summary>Implicit conversion from <see cref="SqlCmd" /> instance to string (command text).</summary>
         /// <param name="command">Command instance.</param>
-        public static implicit operator string(SqlCmd command) => command.Text;
+        public static implicit operator string(SqlCmd command) => command?.Text;
     }
 }

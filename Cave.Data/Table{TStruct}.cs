@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,7 +16,7 @@ namespace Cave.Data
         /// <param name="table">The table instance to wrap.</param>
         public Table(ITable table)
         {
-            BaseTable = table;
+            BaseTable = table ?? throw new ArgumentNullException(nameof(table));
             if (table.Flags.HasFlag(TableFlags.IgnoreMissingFields))
             {
                 var result = new List<IFieldProperties>();

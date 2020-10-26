@@ -24,6 +24,7 @@ namespace Cave.Data.Sql
         /// <param name="search">Search to perform.</param>
         public SqlSearch(SqlStorage storage, RowLayout layout, Search search)
         {
+            if (search == null) throw new ArgumentNullException(nameof(search));
             this.storage = storage ?? throw new ArgumentNullException(nameof(storage));
             this.layout = layout ?? throw new ArgumentNullException(nameof(layout));
             Parameters = new ReadOnlyCollection<SqlParam>(parameters);
@@ -43,6 +44,7 @@ namespace Cave.Data.Sql
         /// <param name="option">Options to check.</param>
         public void CheckFieldsPresent(ResultOption option)
         {
+            if (option == null) throw new ArgumentNullException(nameof(option));
             foreach (var fieldName in option.FieldNames)
             {
                 if (!FieldNames.Contains(fieldName))

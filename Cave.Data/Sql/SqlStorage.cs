@@ -241,9 +241,9 @@ namespace Cave.Data.Sql
                         case DateTimeType.Native: return $"'{dt:NativeDateTimeFormat}'";
                         case DateTimeType.BigIntHumanReadable: return $"{dt:BigIntDateTimeFormat}";
                         case DateTimeType.BigIntTicks: return $"{dt.Ticks}";
-                        case DateTimeType.DecimalSeconds: return $"{(dt.Ticks / (decimal) TimeSpan.TicksPerSecond)}";
-                        case DateTimeType.DoubleSeconds: return $"{(dt.Ticks / (double) TimeSpan.TicksPerSecond)}";
-                        case DateTimeType.DoubleEpoch: return $"{((dt.Ticks - EpochTicks) / (double) TimeSpan.TicksPerSecond)}";
+                        case DateTimeType.DecimalSeconds: return $"{dt.Ticks / (decimal) TimeSpan.TicksPerSecond}";
+                        case DateTimeType.DoubleSeconds: return $"{dt.Ticks / (double) TimeSpan.TicksPerSecond}";
+                        case DateTimeType.DoubleEpoch: return $"{(dt.Ticks - EpochTicks) / (double) TimeSpan.TicksPerSecond}";
                         default: throw new NotImplementedException();
                     }
                 }
@@ -368,6 +368,8 @@ namespace Cave.Data.Sql
         /// <returns>Returns a value as local csharp value type.</returns>
         public virtual object GetLocalValue(IFieldProperties field, IDataReader reader, object databaseValue)
         {
+            if (field == null) throw new ArgumentNullException(nameof(field));
+            if (reader == null) throw new ArgumentNullException(nameof(reader));
             if (databaseValue is DBNull || databaseValue is null)
             {
                 return null;
@@ -772,6 +774,7 @@ namespace Cave.Data.Sql
         /// <returns>The result value or null.</returns>
         public virtual object QueryValue(SqlCmd cmd, string database = null, string table = null, string fieldName = null)
         {
+            if (cmd == null) throw new ArgumentNullException(nameof(cmd));
             if (Closed)
             {
                 throw new ObjectDisposedException(ToString());

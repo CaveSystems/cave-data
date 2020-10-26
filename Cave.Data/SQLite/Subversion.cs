@@ -22,7 +22,7 @@ namespace Cave.Data.SQLite
                     case "9":
                     case "10":
                     case "12":
-                        return int.Parse(svnEntries[0]);
+                        return int.Parse(svnEntries[0], null);
                     default:
                         throw new InvalidDataException($"Unknown svn version {svnEntries[0]}!");
                 }

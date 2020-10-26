@@ -14,6 +14,8 @@ namespace Cave.Data
         /// <param name="layout">Table layout.</param>
         public Identifier(Row row, RowLayout layout)
         {
+            if (layout == null) throw new ArgumentNullException(nameof(layout));
+            if (row == null) throw new ArgumentNullException(nameof(row));
             if (!layout.Identifier.Any())
             {
                 data = row.Values;
@@ -26,16 +28,16 @@ namespace Cave.Data
 
         /// <summary>Initializes a new instance of the <see cref="Identifier" /> class.</summary>
         /// <param name="row">Row to create to create identifier for.</param>
-        /// <param name="fields">The fields to use for the itentifier.</param>
+        /// <param name="fields">The fields to use for the identifier.</param>
         public Identifier(Row row, params int[] fields) => data = GetData(row, fields);
 
         /// <summary>Initializes a new instance of the <see cref="Identifier" /> class.</summary>
         /// <param name="row">Row to create to create identifier for.</param>
-        /// <param name="fields">The fields to use for the itentifier.</param>
+        /// <param name="fields">The fields to use for the identifier.</param>
         public Identifier(Row row, IEnumerable<int> fields) => data = GetData(row, fields);
 
         /// <inheritdoc />
-        public bool Equals(Identifier other) => other.data.SequenceEqual(data);
+        public bool Equals(Identifier other) => other != null && data.SequenceEqual(other.data);
 
         /// <inheritdoc />
         public override string ToString() => data.Select(d => $"{d}").Join('|');

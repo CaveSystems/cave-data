@@ -34,7 +34,7 @@ namespace Cave.Data.Sql
 
         /// <summary>Converts to a <see cref="SqlCmd" /> instance.</summary>
         /// <param name="builder">The builder to convert.</param>
-        public static implicit operator SqlCmd(SqlCommandBuilder builder) => new SqlCmd(builder.ToString(), builder.Parameters);
+        public static implicit operator SqlCmd(SqlCommandBuilder builder) => builder == null ? null : new SqlCmd(builder.ToString(), builder.Parameters);
 
         /// <summary>Appends a command text.</summary>
         /// <param name="text">Text to add.</param>

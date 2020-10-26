@@ -104,6 +104,7 @@ namespace Cave.Data
         /// <returns>The string to display.</returns>
         public string GetDisplayString(RowLayout layout, int index)
         {
+            if (layout == null) throw new ArgumentNullException(nameof(layout));
             var value = Values[index];
             return value == null ? string.Empty : layout.GetDisplayString(index, value);
         }
@@ -113,6 +114,7 @@ namespace Cave.Data
         /// <returns>An array containing the display strings for all fields.</returns>
         public string[] GetDisplayStrings(RowLayout layout)
         {
+            if (layout == null) throw new ArgumentNullException(nameof(layout));
             var strings = new string[Values.Length];
             for (var i = 0; i < Values.Length; i++)
             {
