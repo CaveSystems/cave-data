@@ -81,9 +81,7 @@ namespace Cave.Data
         /// </summary>
         public NamingStrategy NamingStrategy { get; set; } = NamingStrategy.CamelCase;
 
-        /// <summary>
-        /// 
-        /// </summary>
+        /// <summary>Builds the csharp code file containing the row layout structure and adds it to the interface.</summary>
         /// <param name="table"></param>
         /// <param name="databaseName">The database name (only used for the structure name).</param>
         /// <param name="tableName">The table name (only used for the structure name).</param>

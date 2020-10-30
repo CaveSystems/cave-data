@@ -207,8 +207,8 @@ namespace Cave.Data
         /// <param name="structFile">The struct file name (defaults to classname.cs).</param>
         /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
         /// <returns>The struct file name.</returns>
-        public static GenerateTableCodeResult GenerateStructFile(this ITable table, string databaseName = null, string tableName = null,
-            string className = null, string structFile = null, NamingStrategy namingStrategy = NamingStrategy.CamelCase)
+        public static GenerateTableCodeResult GenerateStructFile(this ITable table, string databaseName, string tableName,
+            string className, string structFile, NamingStrategy namingStrategy)
         {
             if (table == null) throw new ArgumentNullException(nameof(table));
             return GenerateStruct(table.Layout, databaseName, tableName, className, namingStrategy).SaveStructFile(structFile);
@@ -221,8 +221,8 @@ namespace Cave.Data
         /// <param name="className">The name of the class to generate.</param>
         /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
         /// <returns>Returns a string containing csharp code.</returns>
-        public static GenerateTableCodeResult GenerateStruct(this ITable table, string databaseName = null, string tableName = null, string className = null,
-            NamingStrategy namingStrategy = NamingStrategy.CamelCase)
+        public static GenerateTableCodeResult GenerateStruct(this ITable table, string databaseName, string tableName, string className,
+            NamingStrategy namingStrategy)
         {
             if (table == null) throw new ArgumentNullException(nameof(table));
             return GenerateStruct(table.Layout, databaseName ?? table.Database.Name, tableName, className, namingStrategy);
@@ -241,7 +241,7 @@ namespace Cave.Data
             string className = null, string structFile = null, string nameSpace = null, NamingStrategy namingStrategy = NamingStrategy.CamelCase)
         {
             if (table == null) throw new ArgumentNullException(nameof(table)); 
-            return GenerateStruct(table.Layout, databaseName, tableName, className, nameSpace, namingStrategy).SaveStructFile(structFile);
+            return GenerateStruct(table.Layout, databaseName ?? table.Database.Name, tableName, className, nameSpace, namingStrategy).SaveStructFile(structFile);
         }
 
         /// <summary>Builds the csharp code containing the row layout structure.</summary>
@@ -271,8 +271,7 @@ namespace Cave.Data
         /// <param name="structFile">The struct file name (defaults to classname.cs).</param>
         /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
         /// <returns>The struct file name.</returns>
-        public static GenerateTableCodeResult GenerateStructFile(this RowLayout layout, string databaseName = null, string tableName = null,
-            string className = null, string structFile = null, NamingStrategy namingStrategy = NamingStrategy.CamelCase)
+        public static GenerateTableCodeResult GenerateStructFile(this RowLayout layout, string databaseName, string tableName, string className, string structFile, NamingStrategy namingStrategy)
         {
             if (layout == null) throw new ArgumentNullException(nameof(layout)); 
             return GenerateStruct(layout, databaseName, tableName, className, namingStrategy).SaveStructFile(structFile);
@@ -301,8 +300,7 @@ namespace Cave.Data
         /// <param name="className">The name of the class to generate.</param>
         /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
         /// <returns>Returns a string containing csharp code.</returns>
-        public static GenerateTableCodeResult GenerateStruct(this RowLayout layout, string databaseName, string tableName = null, string className = null,
-            NamingStrategy namingStrategy = NamingStrategy.CamelCase)
+        public static GenerateTableCodeResult GenerateStruct(this RowLayout layout, string databaseName, string tableName, string className, NamingStrategy namingStrategy)
         {
             if (layout == null) throw new ArgumentNullException(nameof(layout));
             return GenerateStruct(layout, databaseName, tableName, className, null, namingStrategy);
