@@ -70,7 +70,7 @@
   <ItemGroup>
     <PackageReference Include="Cave.Extensions" Version="2.0.9" />
     <PackageReference Include="Cave.IO" Version="2.0.2" />
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.0">
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
