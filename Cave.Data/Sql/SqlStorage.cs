@@ -523,6 +523,7 @@ namespace Cave.Data.Sql
         /// <summary>Returns a connection to the connection pool for reuse.</summary>
         /// <param name="connection">The connection to return to the queue.</param>
         /// <param name="close">Force close of the connection.</param>
+        [SuppressMessage("Design", "CA1045")]
         public void ReturnConnection(ref SqlConnection connection, bool close)
         {
             if (connection == null)
@@ -752,6 +753,7 @@ namespace Cave.Data.Sql
         /// <param name="fieldName">Name of the field (optional, only needed if multiple columns are returned).</param>
         /// <returns>The result value or null.</returns>
         /// <typeparam name="TValue">Result type.</typeparam>
+        [SuppressMessage("Design", "CA1021")]
         public bool QueryValue<TValue>(SqlCmd cmd, out TValue value, string database = null, string table = null, string fieldName = null)
             where TValue : struct
         {
@@ -859,6 +861,7 @@ namespace Cave.Data.Sql
         /// <param name="database">The affected database (dependent on the storage engine this may be null).</param>
         /// <param name="table">The affected table (dependent on the storage engine this may be null).</param>
         /// <returns>The result row.</returns>
+        [SuppressMessage("Design", "CA1045")]
         public Row QueryRow(SqlCmd cmd, ref RowLayout layout, string database = null, string table = null) => Query(cmd, ref layout, database, table).Single();
 
         #endregion
@@ -919,6 +922,7 @@ namespace Cave.Data.Sql
         /// <param name="database">The databasename (optional, used with cached connections).</param>
         /// <param name="table">The tablename (optional, used with cached connections).</param>
         /// <returns>The result rows.</returns>
+        [SuppressMessage("Design", "CA1045")]
         public virtual IList<Row> Query(SqlCmd cmd, ref RowLayout layout, string database = null, string table = null)
         {
             if (Closed)

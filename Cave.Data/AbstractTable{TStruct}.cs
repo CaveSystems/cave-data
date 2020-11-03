@@ -59,7 +59,7 @@ namespace Cave.Data
         public Row GetRowAt(int index) => BaseTable.GetRowAt(index);
 
         /// <inheritdoc />
-        public void SetValue(string field, object value) => BaseTable.SetValue(field, value);
+        public void SetValue(string fieldName, object value) => BaseTable.SetValue(fieldName, value);
 
         /// <inheritdoc />
         public bool Exist(Search search) => BaseTable.Exist(search);
@@ -117,17 +117,17 @@ namespace Cave.Data
             => BaseTable.Minimum<TValue>(fieldName, search);
 
         /// <inheritdoc />
-        public IList<TValue> GetValues<TValue>(string field, Search search = null)
+        public IList<TValue> GetValues<TValue>(string fieldName, Search search = null)
             where TValue : struct, IComparable
-            => BaseTable.GetValues<TValue>(field, search);
+            => BaseTable.GetValues<TValue>(fieldName, search);
 
         /// <inheritdoc />
-        public IList<TValue> Distinct<TValue>(string field, Search search = null)
+        public IList<TValue> Distinct<TValue>(string fieldName, Search search = null)
             where TValue : struct, IComparable
-            => BaseTable.Distinct<TValue>(field, search);
+            => BaseTable.Distinct<TValue>(fieldName, search);
 
         /// <inheritdoc />
-        public int Commit(IEnumerable<Transaction> transactions, TransactionFlags flags = TransactionFlags.Default)
+        public int Commit(IEnumerable<Transaction> transactions, TransactionFlags flags = default)
             => BaseTable.Commit(transactions, flags);
 
         #endregion

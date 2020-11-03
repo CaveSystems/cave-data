@@ -84,18 +84,18 @@ namespace Cave.Data
         }
 
         /// <inheritdoc />
-        public override bool HasDatabase(string database)
+        public override bool HasDatabase(string databaseName)
         {
             if (Closed)
             {
                 throw new ObjectDisposedException(ToString());
             }
 
-            return Directory.Exists(Path.Combine(Folder, database));
+            return Directory.Exists(Path.Combine(Folder, databaseName));
         }
 
         /// <inheritdoc />
-        public override IDatabase CreateDatabase(string database)
+        public override IDatabase CreateDatabase(string databaseName)
         {
             if (Closed)
             {
@@ -104,12 +104,12 @@ namespace Cave.Data
 
             try
             {
-                Directory.CreateDirectory(Folder + database);
-                return GetDatabase(database);
+                Directory.CreateDirectory(Folder + databaseName);
+                return GetDatabase(databaseName);
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException($"The database {database} cannot be created!", ex);
+                throw new InvalidOperationException($"The databaseName {databaseName} cannot be created!", ex);
             }
         }
 

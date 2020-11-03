@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using Cave.IO;
 
@@ -277,7 +278,7 @@ namespace Cave.Data
         /// <param name="stream">The stream.</param>
         /// <returns>Returns a new <see cref="List{TStruct}" />.</returns>
         /// <typeparam name="TStruct">Structure type.</typeparam>
-        public static List<TStruct> ReadList<TStruct>(CsvProperties properties, Stream stream)
+        public static IList<TStruct> ReadList<TStruct>(CsvProperties properties, Stream stream)
             where TStruct : struct
         {
             var layout = RowLayout.CreateTyped(typeof(TStruct));
@@ -292,7 +293,7 @@ namespace Cave.Data
         /// <param name="fileName">File name of the csv file.</param>
         /// <returns>Returns a new <see cref="List{TStruct}" />.</returns>
         /// <typeparam name="TStruct">Structure type.</typeparam>
-        public static List<TStruct> ReadList<TStruct>(CsvProperties properties, string fileName)
+        public static IList<TStruct> ReadList<TStruct>(CsvProperties properties, string fileName)
             where TStruct : struct
         {
             var layout = RowLayout.CreateTyped(typeof(TStruct));
@@ -306,7 +307,7 @@ namespace Cave.Data
         /// <typeparam name="TStruct">Structure type.</typeparam>
         /// <param name="stream">The stream.</param>
         /// <returns>Returns a new <see cref="List{TStruct}" />.</returns>
-        public static List<TStruct> ReadList<TStruct>(Stream stream)
+        public static IList<TStruct> ReadList<TStruct>(Stream stream)
             where TStruct : struct =>
             ReadList<TStruct>(CsvProperties.Default, stream);
 
@@ -314,7 +315,7 @@ namespace Cave.Data
         /// <param name="fileName">File name of the csv file.</param>
         /// <returns>Returns a new <see cref="List{TStruct}" />.</returns>
         /// <typeparam name="TStruct">Structure type.</typeparam>
-        public static List<TStruct> ReadList<TStruct>(string fileName)
+        public static IList<TStruct> ReadList<TStruct>(string fileName)
             where TStruct : struct =>
             ReadList<TStruct>(CsvProperties.Default, fileName);
 
@@ -322,7 +323,7 @@ namespace Cave.Data
         /// <param name="lines">The lines.</param>
         /// <returns>Returns a new <see cref="List{TStruct}" />.</returns>
         /// <typeparam name="TStruct">Structure type.</typeparam>
-        public static List<TStruct> ReadList<TStruct>(string[] lines)
+        public static IList<TStruct> ReadList<TStruct>(string[] lines)
             where TStruct : struct
         {
             if (lines == null) throw new ArgumentNullException(nameof(lines));
@@ -350,6 +351,7 @@ namespace Cave.Data
         /// <summary>Reads a row from the file.</summary>
         /// <param name="row">The read row.</param>
         /// <returns>Returns true on success, false if no further row can be read.</returns>
+        [SuppressMessage("Design", "CA1021")]
         public bool ReadRow(out Row row)
         {
             if (reader == null)
@@ -365,6 +367,7 @@ namespace Cave.Data
         /// <param name="row">The read row.</param>
         /// <returns>Returns true on success, false if no further row can be read.</returns>
         /// <typeparam name="TStruct">Structure type.</typeparam>
+        [SuppressMessage("Design", "CA1021")]
         public bool ReadRow<TStruct>(out TStruct row)
             where TStruct : struct
         {
@@ -416,7 +419,7 @@ namespace Cave.Data
         /// <summary>Reads the whole file to a new list.</summary>
         /// <returns>Returns a new <see cref="List{TStruct}" />.</returns>
         /// <typeparam name="TStruct">Structure type.</typeparam>
-        public List<TStruct> ReadList<TStruct>()
+        public IList<TStruct> ReadList<TStruct>()
             where TStruct : struct
         {
             if (reader == null)

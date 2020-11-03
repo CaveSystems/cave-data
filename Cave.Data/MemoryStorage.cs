@@ -10,7 +10,7 @@ namespace Cave.Data
         readonly Dictionary<string, IDatabase> databases = new Dictionary<string, IDatabase>();
 
         /// <summary>Initializes a new instance of the <see cref="MemoryStorage" /> class.</summary>
-        /// <param name="options">Options for the database.</param>
+        /// <param name="options">Options for the databaseName.</param>
         public MemoryStorage(ConnectionFlags options = ConnectionFlags.None)
             : base("memory://", options)
         {
@@ -38,22 +38,22 @@ namespace Cave.Data
         }
 
         /// <inheritdoc />
-        public override bool HasDatabase(string database) => databases.ContainsKey(database);
+        public override bool HasDatabase(string databaseName) => databases.ContainsKey(databaseName);
 
         /// <inheritdoc />
-        public override IDatabase GetDatabase(string database)
+        public override IDatabase GetDatabase(string databaseName)
         {
             if (Closed)
             {
                 throw new ObjectDisposedException(ToString());
             }
 
-            if (!HasDatabase(database))
+            if (!HasDatabase(databaseName))
             {
-                throw new ArgumentException($"The requested database '{database}' was not found!");
+                throw new ArgumentException($"The requested databaseName '{databaseName}' was not found!");
             }
 
-            return databases[database];
+            return databases[databaseName];
         }
 
         /// <inheritdoc />
@@ -84,7 +84,7 @@ namespace Cave.Data
 
             if (!databases.Remove(database))
             {
-                throw new ArgumentException($"The requested database '{database}' was not found!");
+                throw new ArgumentException($"The requested databaseName '{database}' was not found!");
             }
         }
     }

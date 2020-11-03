@@ -24,18 +24,18 @@ namespace Cave.Data
         IEnumerator IEnumerable.GetEnumerator() => properties.GetEnumerator();
 
         /// <inheritdoc />
-        public bool Equals(RowLayout layout)
+        public bool Equals(RowLayout other)
         {
-            if (layout is null) return false;
+            if (other is null) return false;
 
-            if (layout.FieldCount != FieldCount)
+            if (other.FieldCount != FieldCount)
             {
                 return false;
             }
 
             for (var i = 0; i < FieldCount; i++)
             {
-                if (!layout.properties[i].Equals(properties[i]))
+                if (!other.properties[i].Equals(properties[i]))
                 {
                     return false;
                 }
@@ -483,6 +483,7 @@ namespace Cave.Data
         /// <param name="item">The struct to set the value at.</param>
         /// <param name="value">The value to set.</param>
         /// <param name="culture">Culture to use to convert values.</param>
+        [SuppressMessage("Design", "CA1045")]
         public void SetValue(int index, ref object item, object value, CultureInfo culture = null)
         {
             if (!IsTyped)
@@ -541,6 +542,7 @@ namespace Cave.Data
         /// <param name="item">The struct to set the values at.</param>
         /// <param name="values">The values to set.</param>
         /// <param name="culture">Culture to use when converting values.</param>
+        [SuppressMessage("Design", "CA1045")]
         public void SetValues(ref object item, object[] values, CultureInfo culture = null)
         {
             if (values == null)

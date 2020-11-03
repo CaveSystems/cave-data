@@ -237,11 +237,11 @@ namespace Cave.Data.Microsoft
                             if (fieldProperties.MaximumLength <= 0)
                             {
                                 throw new NotSupportedException(
-                                    $"Unique string fields without length are not supported! Please define Field.MaxLength at table {layout.Name} field {fieldProperties.Name}");
+                                    $"Unique string fields without length are not supported! Please define Field.MaxLength at tableName {layout.Name} field {fieldProperties.Name}");
                             }
 
                             break;
-                        default: throw new NotSupportedException($"Uniqueness for table {layout.Name} field {fieldProperties.Name} is not supported!");
+                        default: throw new NotSupportedException($"Uniqueness for tableName {layout.Name} field {fieldProperties.Name} is not supported!");
                     }
                 }
 

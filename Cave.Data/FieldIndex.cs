@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Cave.Data
@@ -39,6 +40,7 @@ namespace Cave.Data
         /// <summary>Obtains all IDs with the specified hashcode.</summary>
         /// <param name="value">The value.</param>
         /// <returns>The rows.</returns>
+        [SuppressMessage("Naming", "CA1725")]
         public IEnumerable<object[]> Find(object value)
         {
 #if USE_BOXING

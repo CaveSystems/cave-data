@@ -34,7 +34,7 @@ namespace Cave.Data
         public override bool IsClosed => tables == null;
 
         /// <inheritdoc />
-        public override ITable GetTable(string table, TableFlags flags = default) => tables[table];
+        public override ITable GetTable(string tableName, TableFlags flags = default) => tables[tableName];
 
         /// <inheritdoc />
         public override ITable CreateTable(RowLayout layout, TableFlags flags = default)
@@ -55,11 +55,11 @@ namespace Cave.Data
         }
 
         /// <inheritdoc />
-        public override void DeleteTable(string table)
+        public override void DeleteTable(string tableName)
         {
-            if (!tables.Remove(table))
+            if (!tables.Remove(tableName))
             {
-                throw new ArgumentException($"Table '{table}' does not exist!");
+                throw new ArgumentException($"Table '{tableName}' does not exist!");
             }
         }
 

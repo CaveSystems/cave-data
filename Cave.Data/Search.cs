@@ -749,7 +749,7 @@ namespace Cave.Data
                         FieldProperties = Layout[FieldNumber];
                         if ((FieldValue != null) && (FieldProperties.ValueType != FieldValue.GetType()))
                         {
-                            throw new Exception($"Search for field {FieldProperties}: Value has to be of type {FieldProperties.ValueType}");
+                            throw new ArgumentException($"Search for field {FieldProperties}: Value has to be of type {FieldProperties.ValueType}");
                         }
                     }
 

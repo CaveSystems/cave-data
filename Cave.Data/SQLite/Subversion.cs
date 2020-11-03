@@ -98,7 +98,7 @@ namespace Cave.Data.SQLite
                 path = Path.GetDirectoryName(path);
             }
 
-            throw new Exception("Could not find .svn directory!");
+            throw new DirectoryNotFoundException("Could not find .svn directory!");
         }
     }
 }

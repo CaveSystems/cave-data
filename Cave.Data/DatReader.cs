@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using Cave.IO;
 
@@ -73,6 +74,7 @@ namespace Cave.Data
         /// <param name="row">The read row.</param>
         /// <typeparam name="TStruct">Structure type.</typeparam>
         /// <returns>Returns true is the row was read, false otherwise.</returns>
+        [SuppressMessage("Design", "CA1021")]
         public bool ReadRow<TStruct>(bool checkLayout, out TStruct row)
             where TStruct : struct
         {
@@ -132,7 +134,7 @@ namespace Cave.Data
         /// <summary>Reads the whole file to a new list.</summary>
         /// <typeparam name="TStruct">Structure type.</typeparam>
         /// <returns>A new <see cref="List{TStruct}" />.</returns>
-        public List<TStruct> ReadList<TStruct>()
+        public IList<TStruct> ReadList<TStruct>()
             where TStruct : struct
         {
             var layout = RowLayout.CreateTyped(typeof(TStruct));

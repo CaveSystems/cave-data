@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -126,13 +127,13 @@ namespace Cave.Data.Sql
         #region GetValues
 
         /// <inheritdoc />
-        public override IList<TValue> GetValues<TValue>(string fieldname, Search search = null)
+        public override IList<TValue> GetValues<TValue>(string fieldName, Search search = null)
         {
-            var escapedFieldName = Storage.EscapeFieldName(Layout[fieldname]);
+            var escapedFieldName = Storage.EscapeFieldName(Layout[fieldName]);
             var field = new FieldProperties
             {
-                Name = fieldname,
-                NameAtDatabase = fieldname,
+                Name = fieldName,
+                NameAtDatabase = fieldName,
                 Flags = FieldFlags.None,
                 DataType = DataType.String,
                 TypeAtDatabase = DataType.String
@@ -161,13 +162,13 @@ namespace Cave.Data.Sql
         }
 
         /// <inheritdoc />
-        public override IList<TValue> Distinct<TValue>(string fieldname, Search search = null)
+        public override IList<TValue> Distinct<TValue>(string fieldName, Search search = null)
         {
-            var escapedFieldName = Storage.EscapeFieldName(Layout[fieldname]);
+            var escapedFieldName = Storage.EscapeFieldName(Layout[fieldName]);
             var field = new FieldProperties
             {
-                Name = fieldname,
-                NameAtDatabase = fieldname,
+                Name = fieldName,
+                NameAtDatabase = fieldName,
                 Flags = FieldFlags.None,
                 DataType = DataType.String,
                 TypeAtDatabase = DataType.String
@@ -226,13 +227,13 @@ namespace Cave.Data.Sql
                 case DataType.String:
                 case DataType.User:
                 case DataType.Unknown:
-                    throw new NotSupportedException($"Sum() is not supported for field {field}!");
+                    throw new NotSupportedException($"Sum() is not supported for fieldName {field}!");
                 case DataType.TimeSpan:
                     switch (field.DateTimeType)
                     {
                         case DateTimeType.BigIntHumanReadable:
                         case DateTimeType.Undefined:
-                            throw new NotSupportedException($"Sum() is not supported for field {field}!");
+                            throw new NotSupportedException($"Sum() is not supported for fieldName {field}!");
                         case DateTimeType.BigIntTicks:
                             result = Convert.ToDouble(value, CultureInfo.CurrentCulture) / TimeSpan.TicksPerSecond;
                             break;
@@ -355,7 +356,7 @@ namespace Cave.Data.Sql
 
             if (i < 1)
             {
-                throw new Exception("At least one identifier field needed!");
+                throw new InvalidDataException("At least one identifier fieldName needed!");
             }
 
             return Exist(search);
@@ -452,13 +453,14 @@ namespace Cave.Data.Sql
         #region QueryRow(SqlCmd cmd, ...)
 
         /// <summary>Queries for a dataset (selected fields, one row).</summary>
-        /// <param name="cmd">The database dependent sql statement.</param>
+        /// <param name="cmd">The databaseName dependent sql statement.</param>
         /// <param name="layout">The expected schema layout (if unset the layout is returned).</param>
         /// <returns>The result row.</returns>
+        [SuppressMessage("Design", "CA1045")]
         public Row QueryRow(SqlCmd cmd, ref RowLayout layout) => Query(cmd, ref layout).Single();
 
         /// <summary>Queries for a dataset (selected fields, one row).</summary>
-        /// <param name="cmd">The database dependent sql statement.</param>
+        /// <param name="cmd">The databaseName dependent sql statement.</param>
         /// <returns>The result row.</returns>
         public Row QueryRow(SqlCmd cmd)
         {
@@ -470,19 +472,20 @@ namespace Cave.Data.Sql
 
         #region QueryValue(SqlCmd cmd, ...
 
-        /// <summary>Querys a single value with a database dependent sql statement.</summary>
-        /// <param name="cmd">The database dependent sql statement.</param>
+        /// <summary>Querys a single value with a databaseName dependent sql statement.</summary>
+        /// <param name="cmd">The databaseName dependent sql statement.</param>
         /// <param name="value">The result.</param>
-        /// <param name="fieldName">Name of the field (optional, only needed if multiple columns are returned).</param>
+        /// <param name="fieldName">Name of the fieldName (optional, only needed if multiple columns are returned).</param>
         /// <returns>true if the value could be found and read, false otherwise.</returns>
         /// <typeparam name="TValue">Result value type.</typeparam>
+        [SuppressMessage("Design", "CA1021")]
         public bool QueryValue<TValue>(SqlCmd cmd, out TValue value, string fieldName = null)
             where TValue : struct
             => Storage.QueryValue(cmd, out value, Database.Name, Name, fieldName);
 
-        /// <summary>Querys a single value with a database dependent sql statement.</summary>
-        /// <param name="cmd">The database dependent sql statement.</param>
-        /// <param name="fieldName">Name of the field (optional, only needed if multiple columns are returned).</param>
+        /// <summary>Querys a single value with a databaseName dependent sql statement.</summary>
+        /// <param name="cmd">The databaseName dependent sql statement.</param>
+        /// <param name="fieldName">Name of the fieldName (optional, only needed if multiple columns are returned).</param>
         /// <returns>The result value or null.</returns>
         public object QueryValue(SqlCmd cmd, string fieldName = null)
             => Storage.QueryValue(cmd, Database.Name, Name, fieldName);
@@ -491,9 +494,9 @@ namespace Cave.Data.Sql
 
         #region Execute(SqlCmd cmd, ...)
 
-        /// <summary>Executes a database dependent sql statement silently.</summary>
-        /// <param name="cmd">the database dependent sql statement.</param>
-        /// <returns>Number of affected rows (if supported by the database).</returns>
+        /// <summary>Executes a databaseName dependent sql statement silently.</summary>
+        /// <param name="cmd">the databaseName dependent sql statement.</param>
+        /// <returns>Number of affected rows (if supported by the databaseName).</returns>
         public int Execute(SqlCmd cmd) => Storage.Execute(cmd, Database.Name, Name);
 
         #endregion
@@ -501,13 +504,14 @@ namespace Cave.Data.Sql
         #region Query(SqlCmd, ...)
 
         /// <summary>Queries for all matching datasets.</summary>
-        /// <param name="cmd">The database dependent sql statement.</param>
+        /// <param name="cmd">The databaseName dependent sql statement.</param>
         /// <param name="layout">The expected schema layout (if unset the layout is returned).</param>
         /// <returns>The result rows.</returns>
+        [SuppressMessage("Design", "CA1045")]
         public IList<Row> Query(SqlCmd cmd, ref RowLayout layout) => Storage.Query(cmd, ref layout, Database.Name, Name);
 
         /// <summary>Queries for all matching datasets.</summary>
-        /// <param name="cmd">The database dependent sql statement.</param>
+        /// <param name="cmd">The databaseName dependent sql statement.</param>
         /// <returns>The result rows.</returns>
         public IList<Row> Query(SqlCmd cmd)
         {
@@ -520,16 +524,21 @@ namespace Cave.Data.Sql
         #region Commit
 
         /// <inheritdoc />
-        public override int Commit(IEnumerable<Transaction> transactions, TransactionFlags flags = TransactionFlags.Default)
+        public override int Commit(IEnumerable<Transaction> transactions, TransactionFlags flags = default)
         {
-            if (transactions == null) throw new ArgumentNullException(nameof(transactions));
+            if (transactions == null)
+            {
+                if (flags.HasFlag(TransactionFlags.NoExceptions)) { return -1; }
+                throw new ArgumentNullException(nameof(transactions));
+            }
+
             try
             {
                 return InternalCommit(transactions, true);
             }
             catch
             {
-                if ((flags & TransactionFlags.ThrowExceptions) != 0)
+                if (!flags.HasFlag(TransactionFlags.NoExceptions))
                 {
                     throw;
                 }
@@ -712,7 +721,7 @@ namespace Cave.Data.Sql
             return Convert.ToInt64(value, null);
         }
 
-        /// <summary>Searches the table for rows with given field value combinations.</summary>
+        /// <summary>Searches the table for rows with given fieldName value combinations.</summary>
         /// <param name="search">The search to run.</param>
         /// <param name="opt">Options for the search and the result set.</param>
         /// <returns>Returns number of rows found.</returns>
@@ -760,7 +769,7 @@ namespace Cave.Data.Sql
             return Convert.ToInt64(value, Storage.Culture);
         }
 
-        /// <summary>Searches the table for rows with given field value combinations.</summary>
+        /// <summary>Searches the table for rows with given fieldName value combinations.</summary>
         /// <param name="search">The search to run.</param>
         /// <param name="opt">Options for the search and the result set.</param>
         /// <returns>Returns the ID of the row found or -1.</returns>
@@ -839,7 +848,7 @@ namespace Cave.Data.Sql
         /// <summary>Creates the insert command.</summary>
         /// <param name="commandBuilder">The command builder.</param>
         /// <param name="row">The row.</param>
-        /// <param name="useParameters">Use database parameters instead of escaped command string.</param>
+        /// <param name="useParameters">Use databaseName parameters instead of escaped command string.</param>
         protected virtual void CreateInsert(SqlCommandBuilder commandBuilder, Row row, bool useParameters)
         {
             if (row == null) throw new ArgumentNullException(nameof(row));
@@ -898,7 +907,7 @@ namespace Cave.Data.Sql
         /// <summary>Creates an update command.</summary>
         /// <param name="commandBuilder">The command builder.</param>
         /// <param name="row">The row.</param>
-        /// <param name="useParameters">Use database parameters instead of escaped command string.</param>
+        /// <param name="useParameters">Use databaseName parameters instead of escaped command string.</param>
         protected virtual void CreateUpdate(SqlCommandBuilder commandBuilder, Row row, bool useParameters)
         {
             if (commandBuilder == null) throw new ArgumentNullException(nameof(commandBuilder));
@@ -947,7 +956,7 @@ namespace Cave.Data.Sql
         /// <summary>Creates a replace command.</summary>
         /// <param name="commandBuilder">The command builder.</param>
         /// <param name="row">The row.</param>
-        /// <param name="useParameters">Use database parameters instead of escaped command string.</param>
+        /// <param name="useParameters">Use databaseName parameters instead of escaped command string.</param>
         protected virtual void CreateReplace(SqlCommandBuilder commandBuilder, Row row, bool useParameters)
         {
             if (row == null) throw new ArgumentNullException(nameof(row));

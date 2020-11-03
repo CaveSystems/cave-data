@@ -33,7 +33,7 @@ namespace Cave.Data
         /// <summary>Gets a value indicating whether the storage was already closed or not.</summary>
         bool Closed { get; }
 
-        /// <summary>Gets all available database names.</summary>
+        /// <summary>Gets all available databaseName names.</summary>
         IList<string> DatabaseNames { get; }
 
         /// <summary>Gets the maximum <see cref="float" /> precision at the value of 1.0f of this storage engine.</summary>
@@ -48,37 +48,37 @@ namespace Cave.Data
         /// <summary>Gets the maximum <see cref="TimeSpan" /> value precision (absolute) of this storage engine.</summary>
         TimeSpan TimeSpanPrecision { get; }
 
-        /// <summary>Gets the database with the specified name.</summary>
-        /// <param name="database">The name of the database.</param>
-        /// <returns>A new <see cref="IDatabase" /> instance for the requested database.</returns>
+        /// <summary>Gets the databaseName with the specified name.</summary>
+        /// <param name="database">The name of the databaseName.</param>
+        /// <returns>A new <see cref="IDatabase" /> instance for the requested databaseName.</returns>
         IDatabase this[string database] { get; }
 
         /// <summary>closes the connection to the storage engine.</summary>
         void Close();
 
-        /// <summary>Checks whether the database with the specified name exists at the database or not.</summary>
-        /// <param name="database">The name of the database.</param>
-        /// <returns>True if the database exists, false otherwise.</returns>
-        bool HasDatabase(string database);
+        /// <summary>Checks whether the databaseName with the specified name exists at the databaseName or not.</summary>
+        /// <param name="databaseName">The name of the databaseName.</param>
+        /// <returns>True if the databaseName exists, false otherwise.</returns>
+        bool HasDatabase(string databaseName);
 
-        /// <summary>Gets the database with the specified name.</summary>
-        /// <param name="database">The name of the database.</param>
-        /// <returns>A new <see cref="IDatabase" /> instance for the requested database.</returns>
-        IDatabase GetDatabase(string database);
+        /// <summary>Gets the databaseName with the specified name.</summary>
+        /// <param name="databaseName">The name of the databaseName.</param>
+        /// <returns>A new <see cref="IDatabase" /> instance for the requested databaseName.</returns>
+        IDatabase GetDatabase(string databaseName);
 
-        /// <summary>Gets the database with the specified name.</summary>
-        /// <param name="database">The name of the database.</param>
-        /// <param name="createIfNotExists">Create the database if its not already present.</param>
-        /// <returns>A new <see cref="IDatabase" /> instance for the requested database.</returns>
-        IDatabase GetDatabase(string database, bool createIfNotExists);
+        /// <summary>Gets the databaseName with the specified name.</summary>
+        /// <param name="databaseName">The name of the databaseName.</param>
+        /// <param name="createIfNotExists">Create the databaseName if its not already present.</param>
+        /// <returns>A new <see cref="IDatabase" /> instance for the requested databaseName.</returns>
+        IDatabase GetDatabase(string databaseName, bool createIfNotExists);
 
-        /// <summary>Adds a new database with the specified name.</summary>
-        /// <param name="database">The name of the database.</param>
-        /// <returns>A new <see cref="IDatabase" /> instance for the created database.</returns>
-        IDatabase CreateDatabase(string database);
+        /// <summary>Adds a new databaseName with the specified name.</summary>
+        /// <param name="databaseName">The name of the databaseName.</param>
+        /// <returns>A new <see cref="IDatabase" /> instance for the created databaseName.</returns>
+        IDatabase CreateDatabase(string databaseName);
 
-        /// <summary>Removes the specified database.</summary>
-        /// <param name="database">The name of the database.</param>
+        /// <summary>Removes the specified databaseName.</summary>
+        /// <param name="database">The name of the databaseName.</param>
         void DeleteDatabase(string database);
 
         /// <summary>Gets converted field properties for this storage instance based on requested field properties.</summary>
@@ -88,11 +88,11 @@ namespace Cave.Data
 
         /// <summary>Gets the maximum <see cref="decimal" /> value precision (absolute) for the specified field length.</summary>
         /// <param name="count">The length (0 = default).</param>
-        /// <returns>The precision at the database.</returns>
+        /// <returns>The precision at the databaseName.</returns>
         decimal GetDecimalPrecision(float count);
 
         /// <summary>
-        ///     Checks two layouts for equality using the database field type conversion and throws an error if the layouts do
+        ///     Checks two layouts for equality using the databaseName field type conversion and throws an error if the layouts do
         ///     not match.
         /// </summary>
         /// <param name="expected">The expected layout.</param>

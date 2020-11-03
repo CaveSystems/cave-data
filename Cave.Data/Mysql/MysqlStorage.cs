@@ -231,15 +231,15 @@ namespace Cave.Data.Mysql
         }
 
         /// <inheritdoc />
-        public override bool HasDatabase(string database)
+        public override bool HasDatabase(string databaseName)
         {
-            if (database.HasInvalidChars(ASCII.Strings.SafeName))
+            if (databaseName.HasInvalidChars(ASCII.Strings.SafeName))
             {
                 throw new ArgumentException("Database name contains invalid chars!");
             }
 
             var value = QueryValue(database: "information_schema", table: "SCHEMATA",
-                cmd: "SELECT COUNT(*) FROM information_schema.SCHEMATA WHERE SCHEMA_NAME LIKE " + EscapeString(database) + ";");
+                cmd: "SELECT COUNT(*) FROM information_schema.SCHEMATA WHERE SCHEMA_NAME LIKE " + EscapeString(databaseName) + ";");
             if (value == null)
             {
                 throw new InvalidDataException("Could not read information_schema.tables!");
@@ -249,27 +249,27 @@ namespace Cave.Data.Mysql
         }
 
         /// <inheritdoc />
-        public override IDatabase GetDatabase(string database)
+        public override IDatabase GetDatabase(string databaseName)
         {
-            if (!HasDatabase(database))
+            if (!HasDatabase(databaseName))
             {
                 throw new ArgumentException("Database does not exist!");
             }
 
-            return new MySqlDatabase(this, database);
+            return new MySqlDatabase(this, databaseName);
         }
 
         /// <inheritdoc />
-        public override IDatabase CreateDatabase(string database)
+        public override IDatabase CreateDatabase(string databaseName)
         {
-            if (database.HasInvalidChars(ASCII.Strings.SafeName))
+            if (databaseName.HasInvalidChars(ASCII.Strings.SafeName))
             {
                 throw new ArgumentException("Database name contains invalid chars!");
             }
 
             Execute(database: "information_schema", table: "SCHEMATA",
-                cmd: $"CREATE DATABASE `{database}` CHARACTER SET {CharacterSet} COLLATE {CharacterSet}_general_ci;");
-            return GetDatabase(database);
+                cmd: $"CREATE DATABASE `{databaseName}` CHARACTER SET {CharacterSet} COLLATE {CharacterSet}_general_ci;");
+            return GetDatabase(databaseName);
         }
 
         /// <inheritdoc />

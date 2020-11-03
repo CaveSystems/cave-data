@@ -1,9 +1,11 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Cave.Data
 {
     /// <summary>Provides available field flags.</summary>
     [Flags]
+    [SuppressMessage("Naming", "CA1711")]
     public enum FieldFlags
     {
         /// <summary>Default field type = no flags</summary>

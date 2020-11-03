@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -331,11 +332,13 @@ namespace Cave.Data
             }
         }
 
+
         /// <summary>Sets all field values of a struct/class object.</summary>
         /// <param name="obj">structure object.</param>
         /// <param name="fields">fields to be set.</param>
         /// <param name="values">values to set.</param>
         /// <param name="cultureInfo">The culture to use during formatting.</param>
+        [SuppressMessage("Design", "CA1045")]
         public static void SetValues(ref object obj, IList<FieldInfo> fields, IList<object> values, CultureInfo cultureInfo)
         {
             if (obj == null)

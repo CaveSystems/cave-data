@@ -6,7 +6,7 @@ using System.IO;
 
 namespace Cave.Data
 {
-    /// <summary>Provides access to database storage engines.</summary>
+    /// <summary>Provides access to databaseName storage engines.</summary>
     public abstract class Storage : IStorage
     {
         /// <summary>Epoch DateTime in Ticks.</summary>
@@ -90,19 +90,19 @@ namespace Cave.Data
         public virtual void Close() => closed = true;
 
         /// <inheritdoc />
-        public virtual IDatabase GetDatabase(string database, bool createIfNotExists)
+        public virtual IDatabase GetDatabase(string databaseName, bool createIfNotExists)
         {
-            if (HasDatabase(database))
+            if (HasDatabase(databaseName))
             {
-                return GetDatabase(database);
+                return GetDatabase(databaseName);
             }
 
             if (createIfNotExists)
             {
-                return CreateDatabase(database);
+                return CreateDatabase(databaseName);
             }
 
-            throw new ArgumentException($"The requested database '{database}' was not found!");
+            throw new ArgumentException($"The requested databaseName '{databaseName}' was not found!");
         }
 
         /// <inheritdoc />
@@ -130,7 +130,7 @@ namespace Cave.Data
                 var currentField = GetDatabaseFieldProperties(current[i]);
                 if (!expectedField.Equals(currentField))
                 {
-                    throw new Exception($"FieldProperties of table {current.Name} != {expected.Name} differ! (found {currentField} expected {expectedField})!");
+                    throw new InvalidDataException($"FieldProperties of table {current.Name} != {expected.Name} differ! (found {currentField} expected {expectedField})!");
                 }
 
                 if (currentField.Flags != expectedField.Flags)
@@ -141,13 +141,13 @@ namespace Cave.Data
         }
 
         /// <inheritdoc />
-        public abstract bool HasDatabase(string database);
+        public abstract bool HasDatabase(string databaseName);
 
         /// <inheritdoc />
-        public abstract IDatabase GetDatabase(string database);
+        public abstract IDatabase GetDatabase(string databaseName);
 
         /// <inheritdoc />
-        public abstract IDatabase CreateDatabase(string database);
+        public abstract IDatabase CreateDatabase(string databaseName);
 
         /// <inheritdoc />
         public abstract void DeleteDatabase(string database);

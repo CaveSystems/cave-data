@@ -35,7 +35,7 @@ namespace Cave.Data
         /// <param name="layout">Layout of the table.</param>
         void Connect(IDatabase database, TableFlags flags, RowLayout layout);
 
-        /// <summary>Updates the layout of the table (applies local field mappings and type conversion).</summary>
+        /// <summary>Updates the layout of the table (applies local fieldName mappings and type conversion).</summary>
         /// <param name="layout">The new layout.</param>
         void UseLayout(RowLayout layout);
 
@@ -56,10 +56,10 @@ namespace Cave.Data
         /// <returns>The row.</returns>
         Row GetRowAt(int index);
 
-        /// <summary>Sets the specified value to the specified fieldname on all rows.</summary>
-        /// <param name="fieldName">The fieldname.</param>
-        /// <param name="databaseValue">The databaseValue to set (no conversions are done).</param>
-        void SetValue(string fieldName, object databaseValue);
+        /// <summary>Sets the specified value to the specified fieldName on all rows.</summary>
+        /// <param name="fieldName">The fieldName.</param>
+        /// <param name="value">The value to set.</param>
+        void SetValue(string fieldName, object value);
 
         /// <summary>Searches the table using the specified search.</summary>
         /// <param name="search">The search to perform.</param>
@@ -128,13 +128,13 @@ namespace Cave.Data
         /// <returns>The rows found.</returns>
         IList<Row> GetRows(Search search = default, ResultOption resultOption = default);
 
-        /// <summary>Calculates the sum of the specified field name for all matching rows.</summary>
-        /// <param name="fieldName">Name of the field.</param>
+        /// <summary>Calculates the sum of the specified fieldName name for all matching rows.</summary>
+        /// <param name="fieldName">Name of the fieldName.</param>
         /// <param name="search">The search.</param>
-        /// <returns>The sum of all values at the specified field.</returns>
+        /// <returns>The sum of all values at the specified fieldName.</returns>
         double Sum(string fieldName, Search search = null);
 
-        /// <summary>Gets the maximum value for the specified fieldname.</summary>
+        /// <summary>Gets the maximum value for the specified fieldName.</summary>
         /// <typeparam name="TValue">Value type.</typeparam>
         /// <param name="fieldName">Field name.</param>
         /// <param name="search">Search to apply.</param>
@@ -142,7 +142,7 @@ namespace Cave.Data
         TValue? Maximum<TValue>(string fieldName, Search search = null)
             where TValue : struct, IComparable;
 
-        /// <summary>Gets the minimum value for the specified fieldname.</summary>
+        /// <summary>Gets the minimum value for the specified fieldName.</summary>
         /// <typeparam name="TValue">Value type.</typeparam>
         /// <param name="fieldName">Field name.</param>
         /// <param name="search">Search to apply.</param>
@@ -150,26 +150,26 @@ namespace Cave.Data
         TValue? Minimum<TValue>(string fieldName, Search search = null)
             where TValue : struct, IComparable;
 
-        /// <summary>Obtains all different field values of a given field.</summary>
+        /// <summary>Obtains all different fieldName values of a given fieldName.</summary>
         /// <typeparam name="TValue">The returned value type.</typeparam>
-        /// <param name="field">The field.</param>
+        /// <param name="fieldName">The fieldName.</param>
         /// <param name="search">The search.</param>
         /// <returns>A new <see cref="List{TValue}" />.</returns>
-        IList<TValue> GetValues<TValue>(string field, Search search = null)
+        IList<TValue> GetValues<TValue>(string fieldName, Search search = null)
             where TValue : struct, IComparable;
 
-        /// <summary>Obtains all different field values of a given field.</summary>
+        /// <summary>Obtains all different fieldName values of a given fieldName.</summary>
         /// <typeparam name="TValue">The returned value type.</typeparam>
-        /// <param name="field">The field.</param>
+        /// <param name="fieldName">The fieldName.</param>
         /// <param name="search">The search.</param>
         /// <returns>A new <see cref="List{TValue}" />.</returns>
-        IList<TValue> Distinct<TValue>(string field, Search search = null)
+        IList<TValue> Distinct<TValue>(string fieldName, Search search = null)
             where TValue : struct, IComparable;
 
         /// <summary>Commits a whole TransactionLog to the table.</summary>
         /// <param name="transactions">The transaction log to read.</param>
         /// <param name="flags">The flags to use.</param>
         /// <returns>The number of transactions done or -1 if unknown.</returns>
-        int Commit(IEnumerable<Transaction> transactions, TransactionFlags flags = TransactionFlags.Default);
+        int Commit(IEnumerable<Transaction> transactions, TransactionFlags flags = default);
     }
 }

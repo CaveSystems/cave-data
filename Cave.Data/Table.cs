@@ -174,7 +174,7 @@ namespace Cave.Data
                 case DataType.String:
                 case DataType.User:
                 case DataType.Unknown:
-                    throw new NotSupportedException($"Sum() is not supported for field {field}!");
+                    throw new NotSupportedException($"Sum() is not supported for fieldName {field}!");
                 default:
                     foreach (var row in GetRows(search))
                     {
@@ -240,10 +240,10 @@ namespace Cave.Data
         }
 
         /// <inheritdoc />
-        public virtual IList<TValue> Distinct<TValue>(string field, Search search = null)
+        public virtual IList<TValue> Distinct<TValue>(string fieldName, Search search = null)
             where TValue : struct, IComparable
         {
-            var index = Layout.GetFieldIndex(field, true);
+            var index = Layout.GetFieldIndex(fieldName, true);
             var rows = GetRows(search);
             var result = new Set<TValue>();
             foreach (var row in rows)
@@ -256,10 +256,10 @@ namespace Cave.Data
         }
 
         /// <inheritdoc />
-        public virtual IList<TValue> GetValues<TValue>(string field, Search search = null)
+        public virtual IList<TValue> GetValues<TValue>(string fieldName, Search search = null)
             where TValue : struct, IComparable
         {
-            var index = Layout.GetFieldIndex(field, true);
+            var index = Layout.GetFieldIndex(fieldName, true);
             var rows = GetRows(search);
             var result = new List<TValue>();
             foreach (var row in rows)
@@ -272,10 +272,11 @@ namespace Cave.Data
         }
 
         /// <inheritdoc />
-        public virtual int Commit(IEnumerable<Transaction> transactions, TransactionFlags flags = TransactionFlags.Default)
+        public virtual int Commit(IEnumerable<Transaction> transactions, TransactionFlags flags = default)
         {
             if (transactions == null)
             {
+                if (flags.HasFlag(TransactionFlags.NoExceptions)) { return -1; }
                 throw new ArgumentNullException(nameof(transactions));
             }
 
@@ -298,7 +299,9 @@ namespace Cave.Data
                         case TransactionType.Deleted:
                             Delete(transaction.Row);
                             break;
-                        default: throw new NotImplementedException();
+                        default:
+                            if (flags.HasFlag(TransactionFlags.NoExceptions)) { return -1; }
+                            throw new NotImplementedException();
                     }
 
                     i++;
@@ -306,7 +309,7 @@ namespace Cave.Data
                 catch (Exception ex)
                 {
                     Trace.TraceWarning("Error committing transaction to table <red>{0}.{1}\n{2}", Database.Name, Name, ex);
-                    if ((flags & TransactionFlags.ThrowExceptions) != 0)
+                    if (!flags.HasFlag(TransactionFlags.NoExceptions))
                     {
                         throw;
                     }

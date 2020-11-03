@@ -76,9 +76,9 @@ namespace Cave.Data.Postgres
 
         #region functions
 
-        /// <summary>Gets the postgresql name of the database/table/field.</summary>
+        /// <summary>Gets the postgresql name of the databaseName/table/field.</summary>
         /// <param name="name">Name of the object.</param>
-        /// <returns>The name of the database object.</returns>
+        /// <returns>The name of the databaseName object.</returns>
         public static string GetObjectName(string name) => name.ReplaceInvalidChars(ASCII.Strings.Letters + ASCII.Strings.Digits, "_");
 
         /// <inheritdoc />
@@ -145,31 +145,31 @@ namespace Cave.Data.Postgres
         }
 
         /// <inheritdoc />
-        public override bool HasDatabase(string database)
+        public override bool HasDatabase(string databaseName)
         {
             var value = QueryValue(database: "SCHEMATA",
-                cmd: "SELECT COUNT(*) FROM pg_database WHERE datname LIKE " + EscapeString(GetObjectName(database)) + ";");
+                cmd: "SELECT COUNT(*) FROM pg_database WHERE datname LIKE " + EscapeString(GetObjectName(databaseName)) + ";");
             return Convert.ToInt32(value, Culture) > 0;
         }
 
         /// <inheritdoc />
-        public override IDatabase GetDatabase(string database)
+        public override IDatabase GetDatabase(string databaseName)
         {
-            return HasDatabase(database) ? new PgSqlDatabase(this, database) : throw new ArgumentException("Database does not exist!");
+            return HasDatabase(databaseName) ? new PgSqlDatabase(this, databaseName) : throw new ArgumentException("Database does not exist!");
         }
 
         /// <inheritdoc />
-        public override IDatabase CreateDatabase(string database)
+        public override IDatabase CreateDatabase(string databaseName)
         {
-            if (database.HasInvalidChars(ASCII.Strings.SafeName))
+            if (databaseName.HasInvalidChars(ASCII.Strings.SafeName))
             {
                 throw new ArgumentException("Database name contains invalid chars!");
             }
 
             var cmd =
-                $"CREATE DATABASE {GetObjectName(database)} WITH OWNER = {EscapeString(ConnectionString.UserName)} ENCODING 'UTF8' CONNECTION LIMIT = -1;";
+                $"CREATE DATABASE {GetObjectName(databaseName)} WITH OWNER = {EscapeString(ConnectionString.UserName)} ENCODING 'UTF8' CONNECTION LIMIT = -1;";
             Execute(cmd);
-            return GetDatabase(database);
+            return GetDatabase(databaseName);
         }
 
         /// <inheritdoc />

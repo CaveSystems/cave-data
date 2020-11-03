@@ -5,12 +5,12 @@ using Cave.Data.Sql;
 
 namespace Cave.Data.SQLite
 {
-    /// <summary>Provides a sqlite database implementation.</summary>
+    /// <summary>Provides a sqlite databaseName implementation.</summary>
     public sealed class SQLiteDatabase : SqlDatabase
     {
         /// <summary>Initializes a new instance of the <see cref="SQLiteDatabase" /> class.</summary>
         /// <param name="storage">The storage engine.</param>
-        /// <param name="name">The name of the database.</param>
+        /// <param name="name">The name of the databaseName.</param>
         public SQLiteDatabase(SQLiteStorage storage, string name)
             : base(storage, name)
         {
@@ -38,7 +38,7 @@ namespace Cave.Data.SQLite
         public override bool IsSecure => true;
 
         /// <inheritdoc />
-        public override ITable GetTable(string table, TableFlags flags) => SQLiteTable.Connect(this, flags, table);
+        public override ITable GetTable(string tableName, TableFlags flags) => SQLiteTable.Connect(this, flags, tableName);
 
         /// <inheritdoc />
         public override ITable CreateTable(RowLayout layout, TableFlags flags)
@@ -129,7 +129,7 @@ namespace Cave.Data.SQLite
         {
             var result = new List<string>();
             var rows = SqlStorage.Query(database: Name, table: "sqlite_master",
-                cmd: "SELECT name, type FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'");
+                cmd: "SELECT name, type FROM sqlite_master WHERE type='tableName' AND name NOT LIKE 'sqlite_%'");
             foreach (var row in rows)
             {
                 result.Add((string) row[0]);

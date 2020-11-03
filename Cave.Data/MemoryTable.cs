@@ -203,7 +203,7 @@ namespace Cave.Data
                 {
                     if (rowCount != RowCount)
                     {
-                        throw new Exception();
+                        throw new InvalidDataException("Could not load all rows.");
                     }
 
                     break;
@@ -376,7 +376,7 @@ namespace Cave.Data
 #if DEBUG
                     if (index.Count != RowCount)
                     {
-                        throw new Exception($"BFDE: Operation: {"Delete"}, index.Count {index.Count}, RowCount {RowCount}");
+                        throw new InvalidDataException($"BFDE: Operation: {nameof(Delete)}, index.Count {index.Count}, RowCount {RowCount}");
                     }
 #endif
                 }
@@ -660,10 +660,10 @@ namespace Cave.Data
                 Trace.TraceInformation("Insert {0} at {1}", row, this);
             }
 
-            var autoinc = Layout.Identifier.Where(f => f.Flags.HasFlag(FieldFlags.AutoIncrement));
-            if (autoinc.Any())
+            var autoIncrement = Layout.Identifier.Where(f => f.Flags.HasFlag(FieldFlags.AutoIncrement));
+            if (autoIncrement.Any())
             {
-                GetAutoIncrement(ref row, ref id, autoinc);
+                GetAutoIncrement(ref row, ref id, autoIncrement);
             }
 
             var values = row.CopyValues();
@@ -682,7 +682,7 @@ namespace Cave.Data
 #if DEBUG
                     if (index.Count != RowCount)
                     {
-                        throw new Exception($"BFDE: Operation: {"Add"}, index.Count {index.Count}, RowCount {RowCount}");
+                        throw new InvalidDataException($"BFDE: Operation: {nameof(Insert)}, index.Count {index.Count}, RowCount {RowCount}");
                     }
 #endif
                 }
@@ -828,7 +828,7 @@ namespace Cave.Data
 #if DEBUG
                     if (index.Count != RowCount)
                     {
-                        throw new Exception($"BFDE: Operation: {"Replace"}, index.Count {index.Count}, RowCount {RowCount}");
+                        throw new InvalidDataException($"BFDE: Operation: {nameof(Replace)}, index.Count {index.Count}, RowCount {RowCount}");
                     }
 #endif
                 }

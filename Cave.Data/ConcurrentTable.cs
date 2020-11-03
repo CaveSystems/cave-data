@@ -90,7 +90,7 @@ namespace Cave.Data
         public Row GetRowAt(int index) => ReadLocked(() => BaseTable.GetRowAt(index));
 
         /// <inheritdoc />
-        public void SetValue(string field, object value) => WriteLocked(() => BaseTable.SetValue(field, value));
+        public void SetValue(string fieldName, object value) => WriteLocked(() => BaseTable.SetValue(fieldName, value));
 
         /// <inheritdoc />
         public bool Exist(Search search) => ReadLocked(() => BaseTable.Exist(search));
@@ -135,27 +135,27 @@ namespace Cave.Data
         public IList<Row> GetRows() => ReadLocked(() => BaseTable.GetRows());
 
         /// <inheritdoc />
-        public IList<TValue> GetValues<TValue>(string field, Search search = null)
+        public IList<TValue> GetValues<TValue>(string fieldName, Search search = null)
             where TValue : struct, IComparable
-            => ReadLocked(() => BaseTable.GetValues<TValue>(field, search));
+            => ReadLocked(() => BaseTable.GetValues<TValue>(fieldName, search));
 
         /// <inheritdoc />
-        public IList<TValue> Distinct<TValue>(string field, Search search = null)
+        public IList<TValue> Distinct<TValue>(string fieldName, Search search = null)
             where TValue : struct, IComparable
-            => ReadLocked(() => BaseTable.Distinct<TValue>(field, search));
+            => ReadLocked(() => BaseTable.Distinct<TValue>(fieldName, search));
 
         /// <inheritdoc />
-        public TValue? Maximum<TValue>(string field, Search search = null)
+        public TValue? Maximum<TValue>(string fieldName, Search search = null)
             where TValue : struct, IComparable
-            => ReadLocked(() => BaseTable.Maximum<TValue>(field, search));
+            => ReadLocked(() => BaseTable.Maximum<TValue>(fieldName, search));
 
         /// <inheritdoc />
-        public TValue? Minimum<TValue>(string field, Search search = null)
+        public TValue? Minimum<TValue>(string fieldName, Search search = null)
             where TValue : struct, IComparable
-            => ReadLocked(() => BaseTable.Minimum<TValue>(field, search));
+            => ReadLocked(() => BaseTable.Minimum<TValue>(fieldName, search));
 
         /// <inheritdoc />
-        public int Commit(IEnumerable<Transaction> transactions, TransactionFlags flags = TransactionFlags.Default) =>
+        public int Commit(IEnumerable<Transaction> transactions, TransactionFlags flags = default) =>
             WriteLocked(() => BaseTable.Commit(transactions, flags));
 
         #endregion
@@ -213,7 +213,7 @@ namespace Cave.Data
                 Monitor.Enter(this);
                 if (readLock < 0)
                 {
-                    throw new Exception("Fatal readlock underflow, deadlock imminent!");
+                    throw new InvalidOperationException("Fatal readlock underflow, deadlock imminent!");
                 }
 
                 while (readLock > 0)

@@ -29,7 +29,7 @@ namespace Cave.Data.Sql
         #region IDatabase Member
 
         /// <inheritdoc />
-        public override void DeleteTable(string table) { SqlStorage.Execute(database: Name, table: table, cmd: "DROP TABLE " + SqlStorage.FQTN(Name, table)); }
+        public override void DeleteTable(string tableName) { SqlStorage.Execute(database: Name, table: tableName, cmd: "DROP TABLE " + SqlStorage.FQTN(Name, tableName)); }
 
         /// <inheritdoc />
         public override void Close()

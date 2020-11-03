@@ -41,12 +41,12 @@ namespace Cave.Data.Postgres
         }
 
         /// <inheritdoc />
-        public override ITable GetTable(string table, TableFlags flags = default) => PgSqlTable.Connect(this, flags, table);
+        public override ITable GetTable(string tableName, TableFlags flags = default) => PgSqlTable.Connect(this, flags, tableName);
 
-        /// <summary>Adds a new table with the specified name.</summary>
-        /// <param name="layout">Layout of the table.</param>
-        /// <param name="flags">The flags for table creation.</param>
-        /// <returns>Returns an <see cref="ITable" /> instance for the specified table.</returns>
+        /// <summary>Adds a new tableName with the specified name.</summary>
+        /// <param name="layout">Layout of the tableName.</param>
+        /// <param name="flags">The flags for tableName creation.</param>
+        /// <returns>Returns an <see cref="ITable" /> instance for the specified tableName.</returns>
         public override ITable CreateTable(RowLayout layout, TableFlags flags = default)
         {
             if (layout == null)
@@ -54,7 +54,7 @@ namespace Cave.Data.Postgres
                 throw new ArgumentNullException(nameof(layout));
             }
 
-            Trace.TraceInformation($"Creating table {layout}");
+            Trace.TraceInformation($"Creating tableName {layout}");
             if (layout.Name.HasInvalidChars(ASCII.Strings.SafeName))
             {
                 throw new ArgumentException($"Table name {layout.Name} contains invalid chars!");
@@ -285,11 +285,11 @@ namespace Cave.Data.Postgres
                             if (fieldProperties.MaximumLength <= 0)
                             {
                                 throw new NotSupportedException(
-                                    $"Unique string fields without length are not supported! Please define Field.MaxLength at table {layout.Name} field {fieldProperties.Name}");
+                                    $"Unique string fields without length are not supported! Please define Field.MaxLength at tableName {layout.Name} field {fieldProperties.Name}");
                             }
 
                             break;
-                        default: throw new NotSupportedException($"Uniqueness for table {layout.Name} field {fieldProperties.Name} is not supported!");
+                        default: throw new NotSupportedException($"Uniqueness for tableName {layout.Name} field {fieldProperties.Name} is not supported!");
                     }
                 }
 

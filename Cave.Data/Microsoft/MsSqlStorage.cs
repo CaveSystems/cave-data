@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Cave.Data.Sql;
 
@@ -133,17 +134,19 @@ namespace Cave.Data.Microsoft
         /// <inheritdoc />
         public override string FQTN(string database, string table) => "[" + database + "].[dbo].[" + table + "]";
 
+
         /// <inheritdoc />
-        public override bool HasDatabase(string database)
+        [SuppressMessage("Globalization", "CA1309")]
+        public override bool HasDatabase(string databaseName)
         {
-            if (database.HasInvalidChars(ASCII.Strings.SafeName))
+            if (databaseName.HasInvalidChars(ASCII.Strings.SafeName))
             {
                 throw new ArgumentException("Database name contains invalid chars!");
             }
 
             foreach (var name in DatabaseNames)
             {
-                if (string.Equals(database, name, StringComparison.CurrentCultureIgnoreCase))
+                if (string.Equals(databaseName, name, StringComparison.CurrentCultureIgnoreCase))
                 {
                     return true;
                 }
@@ -153,26 +156,26 @@ namespace Cave.Data.Microsoft
         }
 
         /// <inheritdoc />
-        public override IDatabase GetDatabase(string database)
+        public override IDatabase GetDatabase(string databaseName)
         {
-            if (!HasDatabase(database))
+            if (!HasDatabase(databaseName))
             {
                 throw new DataException("Database does not exist!");
             }
 
-            return new MsSqlDatabase(this, database);
+            return new MsSqlDatabase(this, databaseName);
         }
 
         /// <inheritdoc />
-        public override IDatabase CreateDatabase(string database)
+        public override IDatabase CreateDatabase(string databaseName)
         {
-            if (database.HasInvalidChars(ASCII.Strings.SafeName))
+            if (databaseName.HasInvalidChars(ASCII.Strings.SafeName))
             {
                 throw new ArgumentException("Database name contains invalid chars!");
             }
 
-            Execute(database: "information_schema", table: "SCHEMATA", cmd: "CREATE DATABASE " + database);
-            return GetDatabase(database);
+            Execute(database: "information_schema", table: "SCHEMATA", cmd: "CREATE DATABASE " + databaseName);
+            return GetDatabase(databaseName);
         }
 
         /// <inheritdoc />

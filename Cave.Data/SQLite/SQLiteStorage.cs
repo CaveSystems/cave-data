@@ -50,12 +50,12 @@ namespace Cave.Data.SQLite
         protected internal override bool DBConnectionCanChangeDataBase => false;
 
         /// <summary>
-        ///     Gets the database type for the specified field type. Sqlite does not implement all different sql92 types
+        ///     Gets the databaseName type for the specified field type. Sqlite does not implement all different sql92 types
         ///     directly instead they are reusing only 4 different types. So we have to check only the sqlite value types and
         ///     convert to the dotnet type.
         /// </summary>
         /// <param name="dataType">Local DataType.</param>
-        /// <returns>The database data type to use.</returns>
+        /// <returns>The databaseName data type to use.</returns>
         /// <exception cref="ArgumentNullException">FieldType.</exception>
         public static DataType GetDatabaseDataType(DataType dataType)
         {
@@ -130,9 +130,9 @@ namespace Cave.Data.SQLite
             return string.Format(null, StaticConnectionString, path);
         }
 
-        /// <summary>Gets the fileName for the specified database name.</summary>
-        /// <param name="database">Name of the database (file).</param>
-        /// <returns>Full path to the database file.</returns>
+        /// <summary>Gets the fileName for the specified databaseName name.</summary>
+        /// <param name="database">Name of the databaseName (file).</param>
+        /// <returns>Full path to the databaseName file.</returns>
         string GetFileName(string database) => Path.GetFullPath(Path.Combine(ConnectionString.Location, database + ".db"));
 
         #region IStorage functions
@@ -166,31 +166,31 @@ namespace Cave.Data.SQLite
         public override string FQTN(string database, string table) => table;
 
         /// <inheritdoc />
-        public override bool HasDatabase(string database) => File.Exists(GetFileName(database));
+        public override bool HasDatabase(string databaseName) => File.Exists(GetFileName(databaseName));
 
         /// <inheritdoc />
-        public override IDatabase GetDatabase(string database)
+        public override IDatabase GetDatabase(string databaseName)
         {
-            if (!HasDatabase(database))
+            if (!HasDatabase(databaseName))
             {
-                throw new InvalidOperationException($"Database '{database}' does not exist!");
+                throw new InvalidOperationException($"Database '{databaseName}' does not exist!");
             }
 
-            return new SQLiteDatabase(this, database);
+            return new SQLiteDatabase(this, databaseName);
         }
 
         /// <inheritdoc />
-        public override IDatabase CreateDatabase(string database)
+        public override IDatabase CreateDatabase(string databaseName)
         {
-            var file = GetFileName(database);
+            var file = GetFileName(databaseName);
             if (File.Exists(file))
             {
-                throw new InvalidOperationException($"Database '{database}' already exists!");
+                throw new InvalidOperationException($"Database '{databaseName}' already exists!");
             }
 
             Directory.CreateDirectory(Path.GetDirectoryName(file));
             File.WriteAllBytes(file, new byte[0]);
-            return new SQLiteDatabase(this, database);
+            return new SQLiteDatabase(this, databaseName);
         }
 
         /// <inheritdoc />

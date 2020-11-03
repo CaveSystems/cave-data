@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Cave.Data
 {
@@ -13,7 +14,9 @@ namespace Cave.Data
         /// <param name="name">Name for the table.</param>
         public TableAttribute(string name) => Name = name;
 
+
         /// <summary>Gets or sets the field name at the database.</summary>
+        [SuppressMessage("Design", "CA1019")]
         public string Name { get; set; }
 
         /// <summary>Gets or sets the <see cref="NamingStrategy" /> used for this table (name and fields).</summary>

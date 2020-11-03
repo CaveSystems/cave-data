@@ -90,11 +90,11 @@ namespace Cave.Data
         }
 
         /// <inheritdoc />
-        public void SetValue(string field, object value)
+        public void SetValue(string fieldName, object value)
         {
             lock (BaseTable)
             {
-                BaseTable.SetValue(field, value);
+                BaseTable.SetValue(fieldName, value);
             }
         }
 
@@ -254,27 +254,27 @@ namespace Cave.Data
         }
 
         /// <inheritdoc />
-        public IList<TValue> Distinct<TValue>(string field, Search search = null)
+        public IList<TValue> Distinct<TValue>(string fieldName, Search search = null)
             where TValue : struct, IComparable
         {
             lock (BaseTable)
             {
-                return BaseTable.Distinct<TValue>(field, search);
+                return BaseTable.Distinct<TValue>(fieldName, search);
             }
         }
 
         /// <inheritdoc />
-        public IList<TValue> GetValues<TValue>(string field, Search search = null)
+        public IList<TValue> GetValues<TValue>(string fieldName, Search search = null)
             where TValue : struct, IComparable
         {
             lock (BaseTable)
             {
-                return BaseTable.GetValues<TValue>(field, search);
+                return BaseTable.GetValues<TValue>(fieldName, search);
             }
         }
 
         /// <inheritdoc />
-        public int Commit(IEnumerable<Transaction> transactions, TransactionFlags flags = TransactionFlags.Default)
+        public int Commit(IEnumerable<Transaction> transactions, TransactionFlags flags = default)
         {
             lock (BaseTable)
             {

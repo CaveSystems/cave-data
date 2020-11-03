@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Cave.Data
 {
@@ -7,13 +8,14 @@ namespace Cave.Data
     {
         /// <summary>Settings used during de/serialization.</summary>
         [Flags]
+        [SuppressMessage("Naming", "CA1711")]
         public enum Flags
         {
             /// <summary>No flags</summary>
             None = 0,
 
             /// <summary>
-            ///     Serialize the layout first, then the data. This adds type safety to the stream but costs a lot of bandwith and
+            ///     Serialize the layout first, then the data. This adds type safety to the stream but costs a lot of bandwidth and
             ///     time.
             /// </summary>
             WithLayout = 1
