@@ -218,13 +218,13 @@ namespace Cave.Data.Sql
                 case decimal _:
                     return value.ToString();
                 case double d:
-                    return d.ToString("R", CultureInfo.InvariantCulture);
+                    return d.ToString("R", Culture);
                 case float f:
-                    return f.ToString("R", CultureInfo.InvariantCulture);
+                    return f.ToString("R", Culture);
                 case bool b:
                     return b ? "1" : "0";
                 case TimeSpan timeSpan:
-                    return timeSpan.TotalSeconds.ToString("R", CultureInfo.InvariantCulture);
+                    return timeSpan.TotalSeconds.ToString("R", Culture);
                 case DateTime dateTime:
                 {
                     DateTime dt;
@@ -238,8 +238,8 @@ namespace Cave.Data.Sql
                     switch (properties.DateTimeType)
                     {
                         case DateTimeType.Undefined:
-                        case DateTimeType.Native: return $"'{dt:NativeDateTimeFormat}'";
-                        case DateTimeType.BigIntHumanReadable: return $"{dt:BigIntDateTimeFormat}";
+                        case DateTimeType.Native: return dt.ToString(NativeDateTimeFormat, Culture);
+                        case DateTimeType.BigIntHumanReadable: return dt.ToString(BigIntDateTimeFormat, Culture);
                         case DateTimeType.BigIntTicks: return $"{dt.Ticks}";
                         case DateTimeType.DecimalSeconds: return $"{dt.Ticks / (decimal) TimeSpan.TicksPerSecond}";
                         case DateTimeType.DoubleSeconds: return $"{dt.Ticks / (double) TimeSpan.TicksPerSecond}";
@@ -248,7 +248,7 @@ namespace Cave.Data.Sql
                     }
                 }
                 default:
-                    return value.GetType().IsEnum ? $"{Convert.ToInt64(value, CultureInfo.InvariantCulture)}" : EscapeString(value.ToString());
+                    return value.GetType().IsEnum ? $"{Convert.ToInt64(value, Culture)}" : EscapeString(value.ToString());
             }
         }
 
@@ -279,7 +279,7 @@ namespace Cave.Data.Sql
                 switch (field.DataType)
                 {
                     case DataType.Enum:
-                        return Convert.ToInt64(localValue, CultureInfo.CurrentCulture);
+                        return Convert.ToInt64(localValue, Culture);
                     case DataType.User:
                         return localValue.ToString();
                     case DataType.TimeSpan:
@@ -289,7 +289,7 @@ namespace Cave.Data.Sql
                         {
                             case DateTimeType.Undefined:
                             case DateTimeType.Native: return value;
-                            case DateTimeType.BigIntHumanReadable: return long.Parse(new DateTime(value.Ticks).ToString(BigIntDateTimeFormat, CultureInfo.InvariantCulture), CultureInfo.InvariantCulture);
+                            case DateTimeType.BigIntHumanReadable: return long.Parse(new DateTime(value.Ticks).ToString(BigIntDateTimeFormat, Culture), Culture);
                             case DateTimeType.BigIntTicks: return value.Ticks;
                             case DateTimeType.DecimalSeconds: return (decimal) value.Ticks / TimeSpan.TicksPerSecond;
                             case DateTimeType.DoubleSeconds: return (double) value.Ticks / TimeSpan.TicksPerSecond;
@@ -337,7 +337,7 @@ namespace Cave.Data.Sql
                         {
                             case DateTimeType.Undefined:
                             case DateTimeType.Native: return value;
-                            case DateTimeType.BigIntHumanReadable: return long.Parse(value.ToString(BigIntDateTimeFormat, CultureInfo.InvariantCulture), CultureInfo.InvariantCulture);
+                            case DateTimeType.BigIntHumanReadable: return long.Parse(value.ToString(BigIntDateTimeFormat, Culture), Culture);
                             case DateTimeType.BigIntTicks: return value.Ticks;
                             case DateTimeType.DecimalSeconds: return value.Ticks / (decimal) TimeSpan.TicksPerSecond;
                             case DateTimeType.DoubleSeconds: return value.Ticks / (double) TimeSpan.TicksPerSecond;
@@ -381,7 +381,7 @@ namespace Cave.Data.Sql
                 case DataType.Single: return (float) databaseValue;
                 case DataType.User:
                 {
-                    return field.ParseValue((string) databaseValue, null, CultureInfo.InvariantCulture);
+                    return field.ParseValue((string) databaseValue, null, Culture);
                 }
                 case DataType.Enum:
                 {
@@ -395,8 +395,8 @@ namespace Cave.Data.Sql
                         default: throw new NotSupportedException($"DateTimeType {field.DateTimeType} is not supported");
                         case DateTimeType.BigIntHumanReadable:
                         {
-                            var text = ((long) databaseValue).ToString(CultureInfo.InvariantCulture);
-                            ticks = DateTime.ParseExact(text, BigIntDateTimeFormat, CultureInfo.InvariantCulture).Ticks;
+                            var text = ((long) databaseValue).ToString(Culture);
+                            ticks = DateTime.ParseExact(text, BigIntDateTimeFormat, Culture).Ticks;
                             break;
                         }
                         case DateTimeType.Undefined:
@@ -448,13 +448,13 @@ namespace Cave.Data.Sql
                         default: throw new NotSupportedException($"DateTimeType {field.DateTimeType} is not supported");
                         case DateTimeType.BigIntHumanReadable:
                         {
-                            var text = ((long) databaseValue).ToString(CultureInfo.InvariantCulture);
-                            ticks = DateTime.ParseExact(text, BigIntDateTimeFormat, CultureInfo.InvariantCulture).Ticks;
+                            var text = ((long) databaseValue).ToString(Culture);
+                            ticks = DateTime.ParseExact(text, BigIntDateTimeFormat, Culture).Ticks;
                             break;
                         }
                         case DateTimeType.Undefined:
                         case DateTimeType.Native:
-                            ticks = ((TimeSpan) Convert.ChangeType(databaseValue, typeof(TimeSpan), CultureInfo.InvariantCulture)).Ticks;
+                            ticks = ((TimeSpan) Convert.ChangeType(databaseValue, typeof(TimeSpan), Culture)).Ticks;
                             break;
                         case DateTimeType.BigIntTicks:
                             ticks = (long) databaseValue;
