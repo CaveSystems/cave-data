@@ -47,9 +47,9 @@ namespace Cave.Data.Sql
             if (option == null) throw new ArgumentNullException(nameof(option));
             foreach (var fieldName in option.FieldNames)
             {
-                if (!FieldNames.Contains(fieldName))
+                if (!fieldNames.Contains(fieldName))
                 {
-                    FieldNames.Add(fieldName);
+                    fieldNames.Add(fieldName);
                 }
             }
         }
