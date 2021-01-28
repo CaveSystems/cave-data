@@ -37,7 +37,7 @@ namespace Cave.Data
 
         /// <summary>Initializes a new instance of the <see cref="DatReader" /> class.</summary>
         /// <param name="stream">Stream to read from.</param>
-        public DatReader(Stream stream) { Load(stream); }
+        public DatReader(Stream stream) => Load(stream);
 
         #endregion
 
@@ -74,7 +74,6 @@ namespace Cave.Data
         /// <param name="row">The read row.</param>
         /// <typeparam name="TStruct">Structure type.</typeparam>
         /// <returns>Returns true is the row was read, false otherwise.</returns>
-        [SuppressMessage("Design", "CA1021")]
         public bool ReadRow<TStruct>(bool checkLayout, out TStruct row)
             where TStruct : struct
         {
@@ -168,7 +167,7 @@ namespace Cave.Data
         }
 
         /// <summary>Disposes the base stream.</summary>
-        public void Dispose() { Close(); }
+        public void Dispose() => Close();
 
         #region internal static functions
 

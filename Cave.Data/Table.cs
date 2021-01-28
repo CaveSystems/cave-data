@@ -121,19 +121,19 @@ namespace Cave.Data
         public abstract Row Insert(Row row);
 
         /// <inheritdoc />
-        public virtual void Insert(IEnumerable<Row> rows) { Commit(rows.Select(r => Transaction.Insert(r))); }
+        public virtual void Insert(IEnumerable<Row> rows) => Commit(rows.Select(r => Transaction.Insert(r)));
 
         /// <inheritdoc />
         public abstract void Update(Row row);
 
         /// <inheritdoc />
-        public virtual void Update(IEnumerable<Row> rows) { Commit(rows.Select(r => Transaction.Updated(r))); }
+        public virtual void Update(IEnumerable<Row> rows) => Commit(rows.Select(r => Transaction.Updated(r)));
 
         /// <inheritdoc />
         public abstract void Delete(Row row);
 
         /// <inheritdoc />
-        public virtual void Delete(IEnumerable<Row> rows) { Commit(rows.Select(r => Transaction.Delete(r))); }
+        public virtual void Delete(IEnumerable<Row> rows) => Commit(rows.Select(r => Transaction.Delete(r)));
 
         /// <inheritdoc />
         public abstract int TryDelete(Search search);
@@ -142,7 +142,7 @@ namespace Cave.Data
         public abstract void Replace(Row row);
 
         /// <inheritdoc />
-        public virtual void Replace(IEnumerable<Row> rows) { Commit(rows.Select(r => Transaction.Replace(r))); }
+        public virtual void Replace(IEnumerable<Row> rows) => Commit(rows.Select(r => Transaction.Replace(r)));
 
         /// <inheritdoc />
         public abstract Row GetRow(Search search = default, ResultOption resultOption = default);
@@ -193,7 +193,6 @@ namespace Cave.Data
         {
             search = search ?? Search.None;
             var fieldNumber = Layout.GetFieldIndex(fieldName, true);
-            var field = Layout[fieldNumber];
             var rows = GetRows(search);
             if (!rows.Any())
             {
@@ -219,7 +218,6 @@ namespace Cave.Data
         {
             search = search ?? Search.None;
             var fieldNumber = Layout.GetFieldIndex(fieldName, true);
-            var field = Layout[fieldNumber];
             var rows = GetRows(search);
             if (!rows.Any())
             {

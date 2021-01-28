@@ -21,8 +21,7 @@ namespace Test.Cave.Data
             var reader = new DatReader(stream);
             for (var i = 0; i < 100; i++)
             {
-                var t = new TestStructClean();
-                Assert.IsTrue(reader.ReadRow(true, out t));
+                Assert.IsTrue(reader.ReadRow<TestStructClean>(true, out var t));
                 Assert.AreEqual(t, TestStructClean.Create(i));
             }
         }

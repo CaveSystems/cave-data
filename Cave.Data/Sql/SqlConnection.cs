@@ -103,7 +103,7 @@ namespace Cave.Data.Sql
         }
 
         /// <summary>Closes the connection to the database.</summary>
-        public void Close() { Dispose(); }
+        public void Close() => Dispose();
 
         /// <summary>Creates a new IDbCommand for this connection.</summary>
         /// <returns>A new <see cref="IDbCommand" /> instance.</returns>
@@ -131,7 +131,6 @@ namespace Cave.Data.Sql
         }
 
         /// <summary>Disposes the connection.</summary>
-        [SuppressMessage("Design", "CA1031")]
         public void Dispose()
         {
             if (connection != null)

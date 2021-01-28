@@ -114,10 +114,7 @@ namespace Cave.Data
         /// <summary>Adds a table to the database interface code. This does not generate the table class!</summary>
         /// <param name="tableCodeResult">The table to add.</param>
         /// <param name="getterName">Name of the getter in the resulting class (optional).</param>
-        public void Add(GenerateTableCodeResult tableCodeResult, string getterName = null)
-        {
-            Add(className: tableCodeResult.ClassName, tableName: tableCodeResult.TableName, getterName: getterName);
-        }
+        public void Add(GenerateTableCodeResult tableCodeResult, string getterName = null) => Add(className: tableCodeResult.ClassName, tableName: tableCodeResult.TableName, getterName: getterName);
 
         /// <summary>Adds a table to the code.</summary>
         /// <param name="tableName">Name of the table at the database.</param>

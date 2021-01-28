@@ -443,7 +443,6 @@ namespace Cave.Data
         #region Count
 
         /// <inheritdoc />
-        [SuppressMessage("Design", "CA1062")]
         public override long Count(Search search = default, ResultOption resultOption = null) => GetRows(search, resultOption, false).Count;
 
         #endregion
@@ -458,7 +457,6 @@ namespace Cave.Data
         #region GetRows
 
         /// <inheritdoc />
-        [SuppressMessage("Design", "CA1062")]
         public override IList<Row> GetRows(Search search = default, ResultOption resultOption = null) => GetRows(search, resultOption, false);
 
         #endregion
@@ -466,7 +464,6 @@ namespace Cave.Data
         #region GetRow
 
         /// <inheritdoc />
-        [SuppressMessage("Design", "CA1062")]
         public override Row GetRow(Search search = default, ResultOption resultOption = null) => GetRows(search, resultOption, false).Single();
 
         #endregion

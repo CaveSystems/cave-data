@@ -38,11 +38,11 @@ namespace Cave.Data.Sql
 
         /// <summary>Appends a command text.</summary>
         /// <param name="text">Text to add.</param>
-        public void Append(string text) { this.text.Append(text); }
+        public void Append(string text) => this.text.Append(text);
 
         /// <summary>Appends a command text.</summary>
         /// <param name="text">Text to add.</param>
-        public void AppendLine(string text) { this.text.AppendLine(text); }
+        public void AppendLine(string text) => this.text.AppendLine(text);
 
         /// <summary>Appends a parameter to the parameter list.</summary>
         /// <param name="databaseValue">The value at the database.</param>
@@ -62,7 +62,7 @@ namespace Cave.Data.Sql
 
         /// <summary>Appends a parameter to the command text and parameter list.</summary>
         /// <param name="vdatabaseValuelue">The value at the database.</param>
-        public void CreateAndAddParameter(object vdatabaseValuelue) { text.Append(CreateParameter(vdatabaseValuelue).Name); }
+        public void CreateAndAddParameter(object vdatabaseValuelue) => text.Append(CreateParameter(vdatabaseValuelue).Name);
 
         /// <summary>Gets the full command text.</summary>
         /// <returns>Command text.</returns>

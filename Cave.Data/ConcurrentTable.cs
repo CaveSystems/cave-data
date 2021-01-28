@@ -65,7 +65,7 @@ namespace Cave.Data
         public RowLayout Layout => BaseTable.Layout;
 
         /// <inheritdoc />
-        public long RowCount => ReadLocked(() => BaseTable.RowCount);
+        public long RowCount => ReadLockedFunc(() => BaseTable.RowCount);
 
         #endregion
 
@@ -78,25 +78,25 @@ namespace Cave.Data
         public virtual void UseLayout(RowLayout layout) => BaseTable.UseLayout(layout);
 
         /// <inheritdoc />
-        public virtual long Count(Search search = default, ResultOption resultOption = default) => ReadLocked(() => BaseTable.Count(search, resultOption));
+        public virtual long Count(Search search = default, ResultOption resultOption = default) => ReadLockedFunc(() => BaseTable.Count(search, resultOption));
 
         /// <inheritdoc />
-        public double Sum(string fieldName, Search search = null) => ReadLocked(() => BaseTable.Sum(fieldName, search));
+        public double Sum(string fieldName, Search search = null) => ReadLockedFunc(() => BaseTable.Sum(fieldName, search));
 
         /// <inheritdoc />
         public virtual void Clear() => WriteLocked(BaseTable.Clear);
 
         /// <inheritdoc />
-        public Row GetRowAt(int index) => ReadLocked(() => BaseTable.GetRowAt(index));
+        public Row GetRowAt(int index) => ReadLockedFunc(() => BaseTable.GetRowAt(index));
 
         /// <inheritdoc />
         public void SetValue(string fieldName, object value) => WriteLocked(() => BaseTable.SetValue(fieldName, value));
 
         /// <inheritdoc />
-        public bool Exist(Search search) => ReadLocked(() => BaseTable.Exist(search));
+        public bool Exist(Search search) => ReadLockedFunc(() => BaseTable.Exist(search));
 
         /// <inheritdoc />
-        public bool Exist(Row row) => ReadLocked(() => BaseTable.Exist(row));
+        public bool Exist(Row row) => ReadLockedFunc(() => BaseTable.Exist(row));
 
         /// <inheritdoc />
         public Row Insert(Row row) => WriteLocked(() => BaseTable.Insert(row));
@@ -126,33 +126,33 @@ namespace Cave.Data
         public void Replace(IEnumerable<Row> rows) => WriteLocked(() => BaseTable.Replace(rows));
 
         /// <inheritdoc />
-        public Row GetRow(Search search = default, ResultOption resultOption = default) => ReadLocked(() => BaseTable.GetRow(search, resultOption));
+        public Row GetRow(Search search = default, ResultOption resultOption = default) => ReadLockedFunc(() => BaseTable.GetRow(search, resultOption));
 
         /// <inheritdoc />
-        public IList<Row> GetRows(Search search = default, ResultOption resultOption = default) => ReadLocked(() => BaseTable.GetRows(search, resultOption));
+        public IList<Row> GetRows(Search search = default, ResultOption resultOption = default) => ReadLockedFunc(() => BaseTable.GetRows(search, resultOption));
 
         /// <inheritdoc />
-        public IList<Row> GetRows() => ReadLocked(() => BaseTable.GetRows());
+        public IList<Row> GetRows() => ReadLockedFunc(() => BaseTable.GetRows());
 
         /// <inheritdoc />
         public IList<TValue> GetValues<TValue>(string fieldName, Search search = null)
             where TValue : struct, IComparable
-            => ReadLocked(() => BaseTable.GetValues<TValue>(fieldName, search));
+            => ReadLockedFunc(() => BaseTable.GetValues<TValue>(fieldName, search));
 
         /// <inheritdoc />
         public IList<TValue> Distinct<TValue>(string fieldName, Search search = null)
             where TValue : struct, IComparable
-            => ReadLocked(() => BaseTable.Distinct<TValue>(fieldName, search));
+            => ReadLockedFunc(() => BaseTable.Distinct<TValue>(fieldName, search));
 
         /// <inheritdoc />
         public TValue? Maximum<TValue>(string fieldName, Search search = null)
             where TValue : struct, IComparable
-            => ReadLocked(() => BaseTable.Maximum<TValue>(fieldName, search));
+            => ReadLockedFunc(() => BaseTable.Maximum<TValue>(fieldName, search));
 
         /// <inheritdoc />
         public TValue? Minimum<TValue>(string fieldName, Search search = null)
             where TValue : struct, IComparable
-            => ReadLocked(() => BaseTable.Minimum<TValue>(fieldName, search));
+            => ReadLockedFunc(() => BaseTable.Minimum<TValue>(fieldName, search));
 
         /// <inheritdoc />
         public int Commit(IEnumerable<Transaction> transactions, TransactionFlags flags = default) =>
@@ -189,10 +189,10 @@ namespace Cave.Data
             }
         }
 
-        TResult ReadLocked<TResult>(Func<TResult> func)
+        TResult ReadLockedFunc<TResult>(Func<TResult> func)
         {
             TResult result = default;
-            ReadLocked(() => { result = func(); });
+            ReadLocked(() => result = func());
             return result;
         }
 
@@ -277,7 +277,7 @@ namespace Cave.Data
         TResult WriteLocked<TResult>(Func<TResult> func)
         {
             TResult result = default;
-            WriteLocked(() => { result = func(); });
+            WriteLocked(() => result = func());
             return result;
         }
 

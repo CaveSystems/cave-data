@@ -20,7 +20,6 @@ namespace Cave.Data
         /// <param name="table">The table.</param>
         /// <param name="row">The row.</param>
         /// <returns>Returns true if the dataset was inserted, false otherwise.</returns>
-        [SuppressMessage("Design", "CA1031")]
         public static bool TryInsert(this ITable table, Row row)
         {
             if (table == null) throw new ArgumentNullException(nameof(table));
@@ -45,7 +44,6 @@ namespace Cave.Data
         /// <param name="table">The table.</param>
         /// <param name="row">The row.</param>
         /// <returns>Returns true if the dataset was inserted, false otherwise.</returns>
-        [SuppressMessage("Design", "CA1031")]
         public static bool TryUpdate(this ITable table, Row row)
         {
             if (table == null) throw new ArgumentNullException(nameof(table));
@@ -71,7 +69,6 @@ namespace Cave.Data
         /// <param name="id">The identifier.</param>
         /// <returns>Returns true if the data set was removed, false otherwise.</returns>
         /// <typeparam name="TIdentifier">Identifier type. This has to be convertible to the database <see cref="DataType" />.</typeparam>
-        [SuppressMessage("Design", "CA1031")]
         public static bool TryDelete<TIdentifier>(this ITable table, TIdentifier id)
         {
             if (table == null) throw new ArgumentNullException(nameof(table));
@@ -85,7 +82,6 @@ namespace Cave.Data
         /// <param name="ids">The identifiers.</param>
         /// <returns>The number of data sets removed, 0 if the database does not support deletion count or no data set was removed.</returns>
         /// <typeparam name="TIdentifier">Identifier type. This has to be convertible to the database <see cref="DataType" />.</typeparam>
-        [SuppressMessage("Design", "CA1031")]
         public static int TryDelete<TIdentifier>(this ITable table, IEnumerable<TIdentifier> ids)
         {
             if (table == null) throw new ArgumentNullException(nameof(table));

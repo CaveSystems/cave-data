@@ -33,17 +33,14 @@ namespace Test.Cave
         [Field]
         public int Integer;
 
-        public override string ToString()
-        {
-            return $"{ID} {Content} {DateTime} {Name} {Source} {Level} {Integer}";
-        }
+        public override string ToString() => $"{ID} {Content} {DateTime} {Name} {Source} {Level} {Integer}";
     }
 
 
     [Table("TestStructBug")]
     struct TestStructBug
     {
-        static Environment.SpecialFolder[] enumValues = Enum.GetValues(typeof(Environment.SpecialFolder)).Cast<Environment.SpecialFolder>().ToArray();
+        static readonly Environment.SpecialFolder[] EnumValues = Enum.GetValues(typeof(Environment.SpecialFolder)).Cast<Environment.SpecialFolder>().ToArray();
 
         public static TestStructBug Create(int i)
         {
@@ -55,7 +52,7 @@ namespace Test.Cave
                 BuggyField = i.ToString(),
                 IndexedField = (uint)i,
                 NoField = i.ToString(),
-                SomeEnum = enumValues[i % enumValues.Length],
+                SomeEnum = EnumValues[i % EnumValues.Length],
                 UniqueIndexedField = (sbyte)(-i / 10),
                 UniqueField = (short)i,
                 AutoIncField = (ushort)i,
@@ -182,7 +179,11 @@ namespace Test.Cave
 
         public override bool Equals(object obj)
         {
-            if (!(obj is TestStructClean)) return false;
+            if (!(obj is TestStructClean))
+            {
+                return false;
+            }
+
             var other = (TestStructClean)obj;
             return
                 DefaultComparer.Equals(Arr, other.Arr) &&
@@ -203,9 +204,6 @@ namespace Test.Cave
                 Equals(US, other.US);
         }
 
-        public override int GetHashCode()
-        {
-            return ID.GetHashCode();
-        }
+        public override int GetHashCode() => ID.GetHashCode();
     }
 }

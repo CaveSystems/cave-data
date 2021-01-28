@@ -140,7 +140,7 @@ namespace Cave.Data
         ///     <c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only
         ///     unmanaged resources.
         /// </param>
-        protected virtual void Dispose(bool disposing) { Close(); }
+        protected virtual void Dispose(bool disposing) => Close();
 
         #endregion
     }

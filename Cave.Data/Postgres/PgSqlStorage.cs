@@ -153,10 +153,7 @@ namespace Cave.Data.Postgres
         }
 
         /// <inheritdoc />
-        public override IDatabase GetDatabase(string databaseName)
-        {
-            return HasDatabase(databaseName) ? new PgSqlDatabase(this, databaseName) : throw new ArgumentException("Database does not exist!");
-        }
+        public override IDatabase GetDatabase(string databaseName) => HasDatabase(databaseName) ? new PgSqlDatabase(this, databaseName) : throw new ArgumentException("Database does not exist!");
 
         /// <inheritdoc />
         public override IDatabase CreateDatabase(string databaseName)
@@ -166,8 +163,7 @@ namespace Cave.Data.Postgres
                 throw new ArgumentException("Database name contains invalid chars!");
             }
 
-            var cmd =
-                $"CREATE DATABASE {GetObjectName(databaseName)} WITH OWNER = {EscapeString(ConnectionString.UserName)} ENCODING 'UTF8' CONNECTION LIMIT = -1;";
+            var cmd = $"CREATE DATABASE {GetObjectName(databaseName)} WITH OWNER = {EscapeString(ConnectionString.UserName)} ENCODING 'UTF8' CONNECTION LIMIT = -1;";
             Execute(cmd);
             return GetDatabase(databaseName);
         }

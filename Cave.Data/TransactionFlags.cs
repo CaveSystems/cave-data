@@ -6,7 +6,6 @@ namespace Cave.Data
     /// <summary>Transaction flags.</summary>
     [Flags]
     [SuppressMessage("Naming", "CA1711")]
-    [SuppressMessage("Usage", "CA2217")]
     public enum TransactionFlags
     {
         /// <summary>No settings</summary>

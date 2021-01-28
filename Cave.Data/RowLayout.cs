@@ -14,7 +14,6 @@ namespace Cave.Data
 {
     /// <summary>Provides a row layout implementation.</summary>
     [DebuggerDisplay("{" + nameof(Name) + "} [{" + nameof(FieldCount) + "}]")]
-    [SuppressMessage("Design", "CA1051")]
     public sealed class RowLayout : IEquatable<RowLayout>, IEnumerable<IFieldProperties>
     {
         /// <inheritdoc />
@@ -483,7 +482,6 @@ namespace Cave.Data
         /// <param name="item">The struct to set the value at.</param>
         /// <param name="value">The value to set.</param>
         /// <param name="culture">Culture to use to convert values.</param>
-        [SuppressMessage("Design", "CA1045")]
         public void SetValue(int index, ref object item, object value, CultureInfo culture = null)
         {
             if (!IsTyped)
@@ -542,7 +540,6 @@ namespace Cave.Data
         /// <param name="item">The struct to set the values at.</param>
         /// <param name="values">The values to set.</param>
         /// <param name="culture">Culture to use when converting values.</param>
-        [SuppressMessage("Design", "CA1045")]
         public void SetValues(ref object item, object[] values, CultureInfo culture = null)
         {
             if (values == null)

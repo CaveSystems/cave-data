@@ -37,7 +37,7 @@ namespace Cave.Data
             }
         }
 
-        public IList<TValue> Values { get { return SortedKeys.Select(k => unsorted[k]).ToList(); } }
+        public IList<TValue> Values => SortedKeys.Select(k => unsorted[k]).ToList();
 
         public int Count => unsorted.Count;
 
@@ -79,7 +79,7 @@ namespace Cave.Data
 
         public bool ContainsKey(TKey key) => unsorted.ContainsKey(key);
 
-        public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex) { unsorted.CopyTo(array, arrayIndex); }
+        public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex) => unsorted.CopyTo(array, arrayIndex);
 
         public bool Remove(TKey key)
         {

@@ -22,8 +22,6 @@ namespace Cave.Data.Sql
 
         #region constructors
 
-#pragma warning disable CA2214 // Constructor calls virtual method to retrieve required database connection class
-
         /// <summary>Initializes a new instance of the <see cref="SqlStorage" /> class.</summary>
         /// <param name="connectionString">the connection details.</param>
         /// <param name="flags">The connection flags.</param>
@@ -40,8 +38,6 @@ namespace Cave.Data.Sql
             pool = new SqlConnectionPool(this);
             WarnUnsafe();
         }
-
-#pragma warning restore CA2214
 
         #endregion
 
@@ -107,11 +103,9 @@ namespace Cave.Data.Sql
         ///     Gets a value indicating whether the db connections can change the database with the Sql92 "USE Database"
         ///     command.
         /// </summary>
-        [SuppressMessage("Microsoft.Naming", "CA1721")]
         protected internal abstract bool DBConnectionCanChangeDataBase { get; }
 
         /// <summary>Gets the <see cref="IDbConnection" /> type.</summary>
-        [SuppressMessage("Microsoft.Naming", "CA1721")]
         protected internal Type DbConnectionType { get; }
 
         #endregion
@@ -523,7 +517,6 @@ namespace Cave.Data.Sql
         /// <summary>Returns a connection to the connection pool for reuse.</summary>
         /// <param name="connection">The connection to return to the queue.</param>
         /// <param name="close">Force close of the connection.</param>
-        [SuppressMessage("Design", "CA1045")]
         public void ReturnConnection(ref SqlConnection connection, bool close)
         {
             if (connection == null)
@@ -753,7 +746,6 @@ namespace Cave.Data.Sql
         /// <param name="fieldName">Name of the field (optional, only needed if multiple columns are returned).</param>
         /// <returns>The result value or null.</returns>
         /// <typeparam name="TValue">Result type.</typeparam>
-        [SuppressMessage("Design", "CA1021")]
         public bool QueryValue<TValue>(SqlCmd cmd, out TValue value, string database = null, string table = null, string fieldName = null)
             where TValue : struct
         {
@@ -861,7 +853,6 @@ namespace Cave.Data.Sql
         /// <param name="database">The affected database (dependent on the storage engine this may be null).</param>
         /// <param name="table">The affected table (dependent on the storage engine this may be null).</param>
         /// <returns>The result row.</returns>
-        [SuppressMessage("Design", "CA1045")]
         public Row QueryRow(SqlCmd cmd, ref RowLayout layout, string database = null, string table = null) => Query(cmd, ref layout, database, table).Single();
 
         #endregion
@@ -922,7 +913,6 @@ namespace Cave.Data.Sql
         /// <param name="database">The databasename (optional, used with cached connections).</param>
         /// <param name="table">The tablename (optional, used with cached connections).</param>
         /// <returns>The result rows.</returns>
-        [SuppressMessage("Design", "CA1045")]
         public virtual IList<Row> Query(SqlCmd cmd, ref RowLayout layout, string database = null, string table = null)
         {
             if (Closed)
@@ -1043,7 +1033,6 @@ namespace Cave.Data.Sql
         /// <summary>Gets a connection string for the <see cref="DbConnectionType" />.</summary>
         /// <param name="database">The database to connect to.</param>
         /// <returns>The connection string for the specified database.</returns>
-        [SuppressMessage("Microsoft.Naming", "CA1721")]
         protected abstract string GetConnectionString(string database);
 
         /// <summary>Generates an command for the database connection.</summary>

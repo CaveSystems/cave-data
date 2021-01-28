@@ -351,7 +351,6 @@ namespace Cave.Data
         /// <summary>Reads a row from the file.</summary>
         /// <param name="row">The read row.</param>
         /// <returns>Returns true on success, false if no further row can be read.</returns>
-        [SuppressMessage("Design", "CA1021")]
         public bool ReadRow(out Row row)
         {
             if (reader == null)
@@ -367,7 +366,6 @@ namespace Cave.Data
         /// <param name="row">The read row.</param>
         /// <returns>Returns true on success, false if no further row can be read.</returns>
         /// <typeparam name="TStruct">Structure type.</typeparam>
-        [SuppressMessage("Design", "CA1021")]
         public bool ReadRow<TStruct>(out TStruct row)
             where TStruct : struct
         {
@@ -478,7 +476,7 @@ namespace Cave.Data
         #endregion
 
         /// <summary>Releases unmanaged and managed resources.</summary>
-        public void Dispose() { Dispose(true); }
+        public void Dispose() => Dispose(true);
 
         #region private ReadRowData()
 

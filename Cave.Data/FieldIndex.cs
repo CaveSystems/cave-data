@@ -17,21 +17,17 @@ namespace Cave.Data
 #else
         /// <summary>resolves value to IDs.</summary>
         readonly FakeSortedDictionary<object, List<object[]>> index;
-
-#pragma warning disable SA1214 // Readonly fields should appear before non-readonly fields
         readonly object nullValue = new BoxedValue(null);
-#pragma warning restore SA1214 // Readonly fields should appear before non-readonly fields
 #endif
 
         /// <summary>Initializes a new instance of the <see cref="FieldIndex" /> class.</summary>
         public FieldIndex()
-        {
+        =>
 #if USE_BOXING
             index = new FakeSortedDictionary<BoxedValue, List<object[]>>();
 #else
             index = new FakeSortedDictionary<object, List<object[]>>();
 #endif
-        }
 
         /// <summary>Gets the id count.</summary>
         /// <value>The id count.</value>

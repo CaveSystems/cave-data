@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 
@@ -43,9 +44,13 @@ namespace Cave.Data
 
             Layout = layout;
             var keyField = layout.Identifier.Single();
-            if (keyField.ValueType != typeof(TKey))
+
+            var dbValue = (IConvertible) Activator.CreateInstance(keyField.ValueType);
+            var converted = (IConvertible) dbValue.ToType(typeof(TKey), CultureInfo.InvariantCulture);
+            var test = (IConvertible) converted.ToType(keyField.ValueType, CultureInfo.InvariantCulture);
+            if (!Equals(test, dbValue))
             {
-                throw new ArgumentException($"{nameof(TKey)} needs to be of type {keyField.ValueType}!");
+                throw new ArgumentException($"Type (local) {nameof(TKey)} can not be converted from and to (database) {keyField.ValueType}!");
             }
 
             KeyField = keyField;

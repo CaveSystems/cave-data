@@ -157,10 +157,7 @@ namespace Cave.Data.SQLite
         }
 
         /// <inheritdoc />
-        public override string EscapeFieldName(IFieldProperties field)
-        {
-            return field == null ? throw new ArgumentNullException(nameof(field)) : "[" + field.NameAtDatabase + "]";
-        }
+        public override string EscapeFieldName(IFieldProperties field) => field == null ? throw new ArgumentNullException(nameof(field)) : "[" + field.NameAtDatabase + "]";
 
         /// <inheritdoc />
         public override string FQTN(string database, string table) => table;

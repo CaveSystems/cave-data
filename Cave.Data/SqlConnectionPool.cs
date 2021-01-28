@@ -110,7 +110,7 @@ namespace Cave.Data
         }
 
         /// <summary>Closes this instance.</summary>
-        public void Close() { Clear(); }
+        public void Close() => Clear();
 
         SqlConnection GetQueuedConnection(string database)
         {

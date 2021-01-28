@@ -12,12 +12,7 @@ namespace Cave.Data
         protected FileDatabase(FileStorage storage, string directory)
             : base(storage, Path.GetFileName(directory))
         {
-            if (directory == null)
-            {
-                throw new ArgumentNullException(nameof(directory));
-            }
-
-            Folder = directory;
+            Folder = directory ?? throw new ArgumentNullException(nameof(directory));
             Directory.CreateDirectory(Folder);
         }
 
@@ -30,7 +25,7 @@ namespace Cave.Data
         #region IDatabase Member
 
         /// <summary>Closes the instance and flushes all cached data.</summary>
-        public override void Close() { Folder = null; }
+        public override void Close() => Folder = null;
 
         #endregion
 
@@ -52,7 +47,7 @@ namespace Cave.Data
         ///     <c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only
         ///     unmanaged resources.
         /// </param>
-        protected virtual void Dispose(bool disposing) { Close(); }
+        protected virtual void Dispose(bool disposing) => Close();
 
         #endregion
     }

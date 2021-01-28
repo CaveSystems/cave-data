@@ -97,10 +97,8 @@ namespace Cave.Data
         /// <param name="value">Row to write.</param>
         /// <typeparam name="TStruct">Structure type.</typeparam>
         public void Write<TStruct>(TStruct value)
-            where TStruct : struct
-        {
-            Write(new Row(layout, layout.GetValues(value), false));
-        }
+            where TStruct : struct 
+            => Write(new Row(layout, layout.GetValues(value), false));
 
         /// <summary>Writes a number of rows to the file.</summary>
         /// <param name="table">Table to write.</param>

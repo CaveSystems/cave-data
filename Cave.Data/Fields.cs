@@ -338,7 +338,6 @@ namespace Cave.Data
         /// <param name="fields">fields to be set.</param>
         /// <param name="values">values to set.</param>
         /// <param name="cultureInfo">The culture to use during formatting.</param>
-        [SuppressMessage("Design", "CA1045")]
         public static void SetValues(ref object obj, IList<FieldInfo> fields, IList<object> values, CultureInfo cultureInfo)
         {
             if (obj == null)

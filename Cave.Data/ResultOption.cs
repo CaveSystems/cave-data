@@ -61,10 +61,10 @@ namespace Cave.Data
         }
 
         /// <inheritdoc />
-        public IEnumerator<ResultOption> GetEnumerator() { return (list ?? new[] { this }).Where(i => i.Mode != ResultOptionMode.None).GetEnumerator(); }
+        public IEnumerator<ResultOption> GetEnumerator() => (list ?? new[] { this }).Where(i => i.Mode != ResultOptionMode.None).GetEnumerator();
 
         /// <inheritdoc />
-        IEnumerator IEnumerable.GetEnumerator() { return (list ?? new[] { this }).Where(i => i.Mode != ResultOptionMode.None).GetEnumerator(); }
+        IEnumerator IEnumerable.GetEnumerator() => (list ?? new[] { this }).Where(i => i.Mode != ResultOptionMode.None).GetEnumerator();
 
         /// <summary>Implements the operator ==.</summary>
         /// <param name="left">The first item.</param>
@@ -108,11 +108,13 @@ namespace Cave.Data
         public static ResultOption SortAscending(params string[] fields)
         {
             var result = None;
-            foreach (var field in fields)
+            if (fields != null)
             {
-                result += SortAscending(field);
+                foreach (var field in fields)
+                {
+                    result += SortAscending(field);
+                }
             }
-
             return result;
         }
 
@@ -122,11 +124,13 @@ namespace Cave.Data
         public static ResultOption SortDescending(params string[] fields)
         {
             var result = None;
-            foreach (var field in fields)
+            if (fields != null)
             {
-                result += SortDescending(field);
+                foreach (var field in fields)
+                {
+                    result += SortDescending(field);
+                }
             }
-
             return result;
         }
 

@@ -6,7 +6,6 @@ using Cave.IO;
 namespace Cave.Data
 {
     /// <summary>Provides properties for CSV files.</summary>
-    [SuppressMessage("Design", "CA1051")]
     public struct CsvProperties : IEquatable<CsvProperties>
     {
         #region public fields
@@ -108,7 +107,7 @@ namespace Cave.Data
         /// <summary>Determines whether the specified <see cref="object" />, is equal to this instance.</summary>
         /// <param name="obj">The <see cref="object" /> to compare with this instance.</param>
         /// <returns><c>true</c> if the specified <see cref="object" /> is equal to this instance; otherwise, <c>false</c>.</returns>
-        public override bool Equals(object obj) => !(obj is CsvProperties) ? false : base.Equals((CsvProperties) obj);
+        public override bool Equals(object obj) => obj is CsvProperties other && Equals(other);
 
         /// <summary>Determines whether the specified <see cref="CsvProperties" />, are equal to this instance.</summary>
         /// <param name="other">The <see cref="CsvProperties" /> to compare with this instance.</param>

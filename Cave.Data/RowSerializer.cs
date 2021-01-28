@@ -179,11 +179,7 @@ namespace Cave.Data
         /// <typeparam name="TStruct">Structure type.</typeparam>
         /// <param name="writer">The writer.</param>
         /// <param name="items">The items.</param>
-        public static void Serialize<TStruct>(this DataWriter writer, params TStruct[] items)
-            where TStruct : struct
-        {
-            Serialize(writer, 0, items);
-        }
+        public static void Serialize<TStruct>(this DataWriter writer, params TStruct[] items) where TStruct : struct => Serialize(writer, 0, items);
 
         /// <summary>Serializes the specified items.</summary>
         /// <typeparam name="TStruct">Structure type.</typeparam>

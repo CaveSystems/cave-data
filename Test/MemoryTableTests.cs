@@ -27,7 +27,11 @@ namespace Test.Cave.Data
                     content = DefaultRNG.GetPassword(DefaultRNG.UInt8 % 16, ASCII.Strings.Letters);
                 }
                 var integer = content.GetHashCode();
-                while (collisionCheck.Contains(integer)) integer++;
+                while (collisionCheck.Contains(integer))
+                {
+                    integer++;
+                }
+
                 collisionCheck.Add(integer);
                 typed.Insert(new SmallTestStruct()
                 {
@@ -76,7 +80,11 @@ namespace Test.Cave.Data
                     content = DefaultRNG.GetPassword(DefaultRNG.UInt8 % 16, ASCII.Strings.Letters);
                 }
                 var integer = content.GetHashCode();
-                while (collisionCheck.Contains(integer)) integer++;
+                while (collisionCheck.Contains(integer))
+                {
+                    integer++;
+                }
+
                 collisionCheck.Add(integer);
                 typed.Replace(new TestStructClean()
                 {
@@ -130,7 +138,10 @@ namespace Test.Cave.Data
 
             var rows = typed.GetStructs(Search.None, ResultOption.Group(nameof(SmallTestStruct.Name)) + ResultOption.SortDescending(nameof(SmallTestStruct.Name)));
             Assert.AreEqual(10, rows.Count);
-            for (var i = 0; i < 10; i++) Assert.AreEqual("host" + (9 - i), rows[i].Name);
+            for (var i = 0; i < 10; i++)
+            {
+                Assert.AreEqual("host" + (9 - i), rows[i].Name);
+            }
 
             rows = typed.GetStructs(
                 Search.FieldGreater(nameof(SmallTestStruct.DateTime), new DateTime(1970, 1, 1, 5, 0, 0, DateTimeKind.Local)) &

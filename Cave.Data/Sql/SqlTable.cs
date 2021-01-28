@@ -456,7 +456,6 @@ namespace Cave.Data.Sql
         /// <param name="cmd">The databaseName dependent sql statement.</param>
         /// <param name="layout">The expected schema layout (if unset the layout is returned).</param>
         /// <returns>The result row.</returns>
-        [SuppressMessage("Design", "CA1045")]
         public Row QueryRow(SqlCmd cmd, ref RowLayout layout) => Query(cmd, ref layout).Single();
 
         /// <summary>Queries for a dataset (selected fields, one row).</summary>
@@ -478,7 +477,6 @@ namespace Cave.Data.Sql
         /// <param name="fieldName">Name of the fieldName (optional, only needed if multiple columns are returned).</param>
         /// <returns>true if the value could be found and read, false otherwise.</returns>
         /// <typeparam name="TValue">Result value type.</typeparam>
-        [SuppressMessage("Design", "CA1021")]
         public bool QueryValue<TValue>(SqlCmd cmd, out TValue value, string fieldName = null)
             where TValue : struct
             => Storage.QueryValue(cmd, out value, Database.Name, Name, fieldName);
@@ -507,7 +505,6 @@ namespace Cave.Data.Sql
         /// <param name="cmd">The databaseName dependent sql statement.</param>
         /// <param name="layout">The expected schema layout (if unset the layout is returned).</param>
         /// <returns>The result rows.</returns>
-        [SuppressMessage("Design", "CA1045")]
         public IList<Row> Query(SqlCmd cmd, ref RowLayout layout) => Storage.Query(cmd, ref layout, Database.Name, Name);
 
         /// <summary>Queries for all matching datasets.</summary>

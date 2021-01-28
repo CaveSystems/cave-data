@@ -854,7 +854,6 @@ namespace Cave.Data
             return Expression.IsMatch(text);
         }
 
-        [SuppressMessage("Design", "CA1031")]
         object ConvertValue(object value)
         {
             try

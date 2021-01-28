@@ -710,7 +710,7 @@ namespace Cave
         /// <summary>Checks another FieldProperties instance for equality.</summary>
         /// <param name="obj">The FieldProperties to check for equality.</param>
         /// <returns>Returns true if the other instance equals this one, false otherwise.</returns>
-        public override bool Equals(object obj) => obj is FieldProperties other ? Equals(other) : false;
+        public override bool Equals(object obj) => obj is FieldProperties other && Equals(other);
 
         /// <summary>Gets the hashcode for the instance.</summary>
         /// <returns>Hashcode for the field.</returns>

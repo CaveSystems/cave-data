@@ -14,7 +14,7 @@ if "%VisualStudioVersion%"=="" call "%ProgramFiles(x86)%\Microsoft Visual Studio
 msbuild /t:Clean
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-dotnet restore
+msbuild /t:restore
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 msbuild /p:Configuration=Release /p:Platform="Any CPU"
