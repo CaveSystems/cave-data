@@ -1,17 +1,18 @@
 using System;
 using System.Data;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Cave.Data.Sql
 {
     /// <summary>
-    ///     Wraps an <see cref="IDbConnection" /> and allows always to obtain the database name of the connection. This is
-    ///     needed for connection reusing at <see cref="SqlStorage" />.
+    /// Wraps an <see cref="IDbConnection" /> and allows always to obtain the database name of the connection. This is needed for
+    /// connection reusing at <see cref="SqlStorage" />.
     /// </summary>
     public sealed class SqlConnection : IDbConnection
     {
         IDbConnection connection;
+
+        #region Constructors
 
         /// <summary>Initializes a new instance of the <see cref="SqlConnection" /> class.</summary>
         /// <param name="databaseName">Name of the database.</param>
@@ -23,43 +24,16 @@ namespace Cave.Data.Sql
             LastUsed = DateTime.UtcNow;
         }
 
+        #endregion
+
+        #region Properties
+
         /// <summary>Gets or sets the last use datetime (local).</summary>
         public DateTime LastUsed { get; set; }
 
-        /// <summary>Gets the name of the database this instance is connected to.</summary>
-        public string Database { get; private set; }
+        #endregion
 
-        /// <inheritdoc />
-        public string ConnectionString
-        {
-            get
-            {
-                if (connection == null)
-                {
-                    throw new ObjectDisposedException("SqlConnection");
-                }
-
-                return connection.ConnectionString;
-            }
-            set => throw new NotSupportedException();
-        }
-
-        /// <summary>Gets the connection timeout in milliseconds.</summary>
-        public int ConnectionTimeout
-        {
-            get
-            {
-                if (connection == null)
-                {
-                    throw new ObjectDisposedException("SqlConnection");
-                }
-
-                return connection.ConnectionTimeout;
-            }
-        }
-
-        /// <summary>Gets the current <see cref="ConnectionState" />.</summary>
-        public ConnectionState State => connection == null ? ConnectionState.Closed : connection.State;
+        #region IDbConnection Members
 
         /// <summary>Begins a database transaction with the specified IsolationLevel value.</summary>
         /// <param name="il">One of the IsolationLevel values. </param>
@@ -105,6 +79,35 @@ namespace Cave.Data.Sql
         /// <summary>Closes the connection to the database.</summary>
         public void Close() => Dispose();
 
+        /// <inheritdoc />
+        public string ConnectionString
+        {
+            get
+            {
+                if (connection == null)
+                {
+                    throw new ObjectDisposedException("SqlConnection");
+                }
+
+                return connection.ConnectionString;
+            }
+            set => throw new NotSupportedException();
+        }
+
+        /// <summary>Gets the connection timeout in milliseconds.</summary>
+        public int ConnectionTimeout
+        {
+            get
+            {
+                if (connection == null)
+                {
+                    throw new ObjectDisposedException("SqlConnection");
+                }
+
+                return connection.ConnectionTimeout;
+            }
+        }
+
         /// <summary>Creates a new IDbCommand for this connection.</summary>
         /// <returns>A new <see cref="IDbCommand" /> instance.</returns>
         public IDbCommand CreateCommand()
@@ -118,6 +121,9 @@ namespace Cave.Data.Sql
             return connection.CreateCommand();
         }
 
+        /// <summary>Gets the name of the database this instance is connected to.</summary>
+        public string Database { get; private set; }
+
         /// <summary>Opens the connection to the database.</summary>
         public void Open()
         {
@@ -129,6 +135,9 @@ namespace Cave.Data.Sql
             connection.Open();
             LastUsed = DateTime.UtcNow;
         }
+
+        /// <summary>Gets the current <see cref="ConnectionState" />.</summary>
+        public ConnectionState State => connection == null ? ConnectionState.Closed : connection.State;
 
         /// <summary>Disposes the connection.</summary>
         public void Dispose()
@@ -148,11 +157,17 @@ namespace Cave.Data.Sql
             }
         }
 
+        #endregion
+
+        #region Overrides
+
         /// <summary>Returns a <see cref="string" /> that represents this instance.</summary>
         /// <returns>A <see cref="string" /> that represents this instance.</returns>
         public override string ToString() =>
             connection == null
                 ? "SqlConnection Disposed"
                 : $"SqlConnection Database:'{Database}' State:{State}";
+
+        #endregion
     }
 }

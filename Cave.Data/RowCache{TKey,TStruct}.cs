@@ -3,43 +3,49 @@ using System.Collections.Generic;
 
 namespace Cave.Data
 {
-    /// <summary>
-    /// Provides a row cache class working with row structures.
-    /// </summary>
+    /// <summary>Provides a row cache class working with row structures.</summary>
     /// <typeparam name="TKey">Key identifier type.</typeparam>
     /// <typeparam name="TStruct">Row structure type.</typeparam>
     public class RowCache<TKey, TStruct> : IRowCache where TKey : IComparable<TKey> where TStruct : struct
     {
-        Dictionary<TKey, TStruct?> cache = new Dictionary<TKey, TStruct?>();
-        ITable<TKey, TStruct> table;
+        readonly Dictionary<TKey, TStruct?> cache = new Dictionary<TKey, TStruct?>();
+        readonly ITable<TKey, TStruct> table;
 
-        /// <inheritdoc/>
-        public long HitCount { get; set; }
+        #region Constructors
 
-        /// <inheritdoc/>
-        public long MissCount { get; set; }
-
-        /// <inheritdoc/>
-        public long NotFoundCount { get; set; }
-
-        /// <summary>
-        /// Creates a new row cache using the specified table.
-        /// </summary>
+        /// <summary>Creates a new row cache using the specified table.</summary>
         /// <param name="table">Table to read rows from.</param>
         public RowCache(ITable table) => this.table = new Table<TKey, TStruct>(table);
 
-        /// <inheritdoc/>
+        #endregion
+
+        #region IRowCache Members
+
+        /// <inheritdoc />
         public void Clear()
         {
             lock (this)
             {
                 cache.Clear();
-            };
+            }
+
+            ;
         }
 
-        /// <summary>
-        /// Gets the row with the specified identifier.
-        /// </summary>
+        /// <inheritdoc />
+        public long HitCount { get; set; }
+
+        /// <inheritdoc />
+        public long MissCount { get; set; }
+
+        /// <inheritdoc />
+        public long NotFoundCount { get; set; }
+
+        #endregion
+
+        #region Members
+
+        /// <summary>Gets the row with the specified identifier.</summary>
         /// <param name="id">Row identifier.</param>
         /// <returns>Returns the row structure or null.</returns>
         public TStruct? Get(TKey id)
@@ -51,12 +57,14 @@ namespace Cave.Data
                     HitCount++;
                     return result;
                 }
+
                 MissCount++;
                 if (table.TryGetStruct(id, out var value))
                 {
                     return cache[id] = value;
                 }
             }
+
             NotFoundCount++;
             return cache[id] = null;
         }
@@ -71,5 +79,7 @@ namespace Cave.Data
             row = result ?? default;
             return result.HasValue;
         }
+
+        #endregion
     }
 }

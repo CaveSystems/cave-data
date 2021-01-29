@@ -6,6 +6,8 @@ namespace Cave.Data
     [AttributeUsage(AttributeTargets.Field)]
     public sealed class DateTimeFormatAttribute : Attribute
     {
+        #region Constructors
+
         /// <summary>Initializes a new instance of the <see cref="DateTimeFormatAttribute" /> class.</summary>
         /// <param name="kind"><see cref="DateTimeKind" />.</param>
         /// <param name="type"><see cref="DateTimeType" />.</param>
@@ -15,10 +17,16 @@ namespace Cave.Data
             Type = type;
         }
 
+        #endregion
+
+        #region Properties
+
         /// <summary>Gets the <see cref="DateTimeKind" />.</summary>
         public DateTimeKind Kind { get; }
 
         /// <summary>Gets the <see cref="DateTimeType" />.</summary>
         public DateTimeType Type { get; }
+
+        #endregion
     }
 }

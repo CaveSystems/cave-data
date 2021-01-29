@@ -13,6 +13,8 @@ namespace Cave.Data
         where TKey : IComparable<TKey>
         where TStruct : struct
     {
+        #region Constructors
+
         /// <summary>Initializes a new instance of the <see cref="Table{TKey, TStruct}" /> class.</summary>
         /// <param name="table">The table instance to wrap.</param>
         public Table(ITable table)
@@ -44,7 +46,6 @@ namespace Cave.Data
 
             Layout = layout;
             var keyField = layout.Identifier.Single();
-
             var dbValue = (IConvertible) Activator.CreateInstance(keyField.ValueType);
             var converted = (IConvertible) dbValue.ToType(typeof(TKey), CultureInfo.InvariantCulture);
             var test = (IConvertible) converted.ToType(keyField.ValueType, CultureInfo.InvariantCulture);
@@ -57,20 +58,30 @@ namespace Cave.Data
             table.UseLayout(layout);
         }
 
-        /// <inheritdoc />
-        public override RowLayout Layout { get; }
+        #endregion
+
+        #region Overrides
 
         /// <inheritdoc />
         protected override ITable BaseTable { get; }
 
         /// <inheritdoc />
-        protected override IFieldProperties KeyField { get; }
+        public override void Connect(IDatabase database, TableFlags flags, RowLayout layout) => BaseTable.Connect(database, flags, layout);
 
         /// <inheritdoc />
-        public override void Connect(IDatabase database, TableFlags flags, RowLayout layout) => BaseTable.Connect(database, flags, layout);
+        public override RowLayout Layout { get; }
 
         /// <summary>Not supported.</summary>
         /// <param name="layout">Unused parameter.</param>
         public override void UseLayout(RowLayout layout) => throw new NotSupportedException();
+
+        #endregion
+
+        #region Overrides
+
+        /// <inheritdoc />
+        protected override IFieldProperties KeyField { get; }
+
+        #endregion
     }
 }

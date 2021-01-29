@@ -7,6 +7,8 @@ namespace Cave.Data
     [Serializable]
     public class TableLayoutFixedException : Exception
     {
+        #region Constructors
+
         /// <summary>Initializes a new instance of the <see cref="TableLayoutFixedException" /> class.</summary>
         public TableLayoutFixedException()
             : base("The table layout is already fixed and can no longer be changed!")
@@ -35,5 +37,7 @@ namespace Cave.Data
             : base(info, context)
         {
         }
+
+        #endregion
     }
 }

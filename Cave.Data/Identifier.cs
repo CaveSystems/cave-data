@@ -7,15 +7,40 @@ namespace Cave.Data
     /// <summary>Provides a database identifier (alias primary key).</summary>
     public class Identifier : IEquatable<Identifier>
     {
+        #region Static
+
+        static object[] GetData(Row row, IEnumerable<int> fields)
+        {
+            var result = fields.Select(fieldsIndex => row[fieldsIndex]).ToArray();
+            if (result.Length == 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(fields));
+            }
+
+            return result;
+        }
+
+        #endregion
+
         readonly object[] data;
+
+        #region Constructors
 
         /// <summary>Initializes a new instance of the <see cref="Identifier" /> class.</summary>
         /// <param name="row">Row to create to create identifier for.</param>
         /// <param name="layout">Table layout.</param>
         public Identifier(Row row, RowLayout layout)
         {
-            if (layout == null) throw new ArgumentNullException(nameof(layout));
-            if (row == null) throw new ArgumentNullException(nameof(row));
+            if (layout == null)
+            {
+                throw new ArgumentNullException(nameof(layout));
+            }
+
+            if (row == null)
+            {
+                throw new ArgumentNullException(nameof(row));
+            }
+
             if (!layout.Identifier.Any())
             {
                 data = row.Values;
@@ -36,11 +61,16 @@ namespace Cave.Data
         /// <param name="fields">The fields to use for the identifier.</param>
         public Identifier(Row row, IEnumerable<int> fields) => data = GetData(row, fields);
 
-        /// <inheritdoc />
-        public bool Equals(Identifier other) => other != null && data.SequenceEqual(other.data);
+        #endregion
+
+        #region IEquatable<Identifier> Members
 
         /// <inheritdoc />
-        public override string ToString() => data.Select(d => $"{d}").Join('|');
+        public bool Equals(Identifier other) => (other != null) && data.SequenceEqual(other.data);
+
+        #endregion
+
+        #region Overrides
 
         /// <inheritdoc />
         public override bool Equals(object obj) => obj is Identifier other && Equals(other);
@@ -58,15 +88,9 @@ namespace Cave.Data
             return hash;
         }
 
-        static object[] GetData(Row row, IEnumerable<int> fields)
-        {
-            var result = fields.Select(fieldsIndex => row[fieldsIndex]).ToArray();
-            if (result.Length == 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(fields));
-            }
+        /// <inheritdoc />
+        public override string ToString() => data.Select(d => $"{d}").Join('|');
 
-            return result;
-        }
+        #endregion
     }
 }

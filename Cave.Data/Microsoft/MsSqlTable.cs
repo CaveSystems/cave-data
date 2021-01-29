@@ -7,8 +7,7 @@ namespace Cave.Data.Microsoft
     /// <summary>Provides a MsSql table implementation.</summary>
     public class MsSqlTable : SqlTable
     {
-        /// <summary>Initializes a new instance of the <see cref="MsSqlTable" /> class.</summary>
-        protected MsSqlTable() { }
+        #region Static
 
         /// <summary>Connects to the specified database and tablename.</summary>
         /// <param name="database">Database to connect to.</param>
@@ -22,6 +21,34 @@ namespace Cave.Data.Microsoft
             return table;
         }
 
+        #endregion
+
+        #region Constructors
+
+        /// <summary>Initializes a new instance of the <see cref="MsSqlTable" /> class.</summary>
+        protected MsSqlTable() { }
+
+        #endregion
+
+        #region Overrides
+
+        /// <inheritdoc />
+        protected override void CreateLastInsertedRowCommand(SqlCommandBuilder commandBuilder, Row row)
+        {
+            if (commandBuilder == null)
+            {
+                throw new ArgumentNullException(nameof(commandBuilder));
+            }
+
+            if (row == null)
+            {
+                throw new ArgumentNullException(nameof(row));
+            }
+
+            var idField = Layout.Identifier.Single();
+            commandBuilder.AppendLine($"SELECT * FROM {FQTN} WHERE {Storage.EscapeFieldName(idField)} = (SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]);");
+        }
+
         /// <inheritdoc />
         public override Row GetRowAt(int index)
         {
@@ -29,13 +56,6 @@ namespace Cave.Data.Microsoft
             return QueryRow(cmd);
         }
 
-        /// <inheritdoc />
-        protected override void CreateLastInsertedRowCommand(SqlCommandBuilder commandBuilder, Row row)
-        {
-            if (commandBuilder == null) throw new ArgumentNullException(nameof(commandBuilder));
-            if (row == null) throw new ArgumentNullException(nameof(row));
-            var idField = Layout.Identifier.Single();
-            commandBuilder.AppendLine($"SELECT * FROM {FQTN} WHERE {Storage.EscapeFieldName(idField)} = (SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]);");
-        }
+        #endregion
     }
 }

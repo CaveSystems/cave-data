@@ -10,11 +10,17 @@ namespace Cave.Data
     /// <summary>Provides writing of csv files using a struct or class.</summary>
     public sealed class DatWriter : IDisposable
     {
+        #region Static
+
         /// <summary>The current version.</summary>
         public const int CurrentVersion = 4;
 
+        #endregion
+
         readonly RowLayout layout;
         DataWriter writer;
+
+        #region Members
 
         void WriteData(byte[] data)
         {
@@ -32,6 +38,8 @@ namespace Cave.Data
                 throw new IOException("Container too small!");
             }
         }
+
+        #endregion
 
         #region constructor
 
@@ -88,7 +96,11 @@ namespace Cave.Data
         /// <param name="row">Row to write.</param>
         public void Write(Row row)
         {
-            if (row == null) throw new ArgumentNullException(nameof(row));
+            if (row == null)
+            {
+                throw new ArgumentNullException(nameof(row));
+            }
+
             var data = GetData(row, CurrentVersion);
             WriteData(data);
         }
@@ -97,8 +109,8 @@ namespace Cave.Data
         /// <param name="value">Row to write.</param>
         /// <typeparam name="TStruct">Structure type.</typeparam>
         public void Write<TStruct>(TStruct value)
-            where TStruct : struct 
-            => Write(new Row(layout, layout.GetValues(value), false));
+            where TStruct : struct =>
+            Write(new Row(layout, layout.GetValues(value), false));
 
         /// <summary>Writes a number of rows to the file.</summary>
         /// <param name="table">Table to write.</param>

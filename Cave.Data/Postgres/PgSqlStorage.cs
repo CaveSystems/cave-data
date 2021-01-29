@@ -7,8 +7,8 @@ using Cave.Data.Sql;
 namespace Cave.Data.Postgres
 {
     /// <summary>
-    ///     Provides a postgre sql storage implementation. Attention: <see cref="float" /> variables stored at the
-    ///     mysqldatabase loose their last precision digit (a value of 1 may differ by &lt;= 0.000001f).
+    /// Provides a postgre sql storage implementation. Attention: <see cref="float" /> variables stored at the mysqldatabase loose their
+    /// last precision digit (a value of 1 may differ by &lt;= 0.000001f).
     /// </summary>
     public sealed class PgSqlStorage : SqlStorage
     {
@@ -17,6 +17,8 @@ namespace Cave.Data.Postgres
 
         /// <summary>Gets the mysql storage version.</summary>
         public readonly string VersionString;
+
+        #region Constructors
 
         /// <summary>Initializes a new instance of the <see cref="PgSqlStorage" /> class.</summary>
         /// <param name="connectionString">the connection details.</param>
@@ -29,6 +31,8 @@ namespace Cave.Data.Postgres
             Version = new Version(parts[1]);
             Trace.TraceInformation($"pgsql version {Version}");
         }
+
+        #endregion
 
         #region properties
 
@@ -153,7 +157,8 @@ namespace Cave.Data.Postgres
         }
 
         /// <inheritdoc />
-        public override IDatabase GetDatabase(string databaseName) => HasDatabase(databaseName) ? new PgSqlDatabase(this, databaseName) : throw new ArgumentException("Database does not exist!");
+        public override IDatabase GetDatabase(string databaseName) =>
+            HasDatabase(databaseName) ? new PgSqlDatabase(this, databaseName) : throw new ArgumentException("Database does not exist!");
 
         /// <inheritdoc />
         public override IDatabase CreateDatabase(string databaseName)
@@ -163,7 +168,8 @@ namespace Cave.Data.Postgres
                 throw new ArgumentException("Database name contains invalid chars!");
             }
 
-            var cmd = $"CREATE DATABASE {GetObjectName(databaseName)} WITH OWNER = {EscapeString(ConnectionString.UserName)} ENCODING 'UTF8' CONNECTION LIMIT = -1;";
+            var cmd =
+                $"CREATE DATABASE {GetObjectName(databaseName)} WITH OWNER = {EscapeString(ConnectionString.UserName)} ENCODING 'UTF8' CONNECTION LIMIT = -1;";
             Execute(cmd);
             return GetDatabase(databaseName);
         }

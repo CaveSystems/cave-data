@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -14,9 +13,15 @@ namespace Cave.Data.Sql
     /// <summary>Provides a table implementation for generic sql92 databases.</summary>
     public abstract class SqlTable : Table
     {
+        #region Overrides
+
         /// <summary>Gets the name of the table.</summary>
         /// <returns>Database.Tablename.</returns>
         public override string ToString() => Storage.FQTN(Database.Name, Name);
+
+        #endregion
+
+        #region Members
 
         /// <summary>Gets the command to retrieve the last inserted row.</summary>
         /// <param name="commandBuilder">The command builder to append to.</param>
@@ -33,6 +38,8 @@ namespace Cave.Data.Sql
             Storage.Query($"SELECT * FROM {Storage.FQTN(database, table)} WHERE 1 = 0", ref layout, database, table);
             return layout;
         }
+
+        #endregion
 
         #region constructor
 
@@ -71,8 +78,16 @@ namespace Cave.Data.Sql
         /// <inheritdoc />
         public override void Connect(IDatabase database, TableFlags flags, RowLayout layout)
         {
-            if (database == null) throw new ArgumentNullException(nameof(database));
-            if (layout == null) throw new ArgumentNullException(nameof(layout));
+            if (database == null)
+            {
+                throw new ArgumentNullException(nameof(database));
+            }
+
+            if (layout == null)
+            {
+                throw new ArgumentNullException(nameof(layout));
+            }
+
             Storage = database.Storage as SqlStorage;
             if (Storage == null)
             {
@@ -205,6 +220,7 @@ namespace Cave.Data.Sql
         {
             var field = Layout[fieldName];
             if (search == null) { search = Search.None; }
+
             var s = ToSqlSearch(search);
             var command = new StringBuilder();
             command.Append("SELECT SUM(");
@@ -345,7 +361,11 @@ namespace Cave.Data.Sql
         /// <inheritdoc />
         public override bool Exist(Row row)
         {
-            if (row == null) throw new ArgumentNullException(nameof(row));
+            if (row == null)
+            {
+                throw new ArgumentNullException(nameof(row));
+            }
+
             var search = Search.None;
             var i = 0;
             foreach (var field in Layout.Identifier)
@@ -412,7 +432,11 @@ namespace Cave.Data.Sql
         /// <inheritdoc />
         public override void Delete(Row row)
         {
-            if (row == null) throw new ArgumentNullException(nameof(row));
+            if (row == null)
+            {
+                throw new ArgumentNullException(nameof(row));
+            }
+
             var commandBuilder = new SqlCommandBuilder(Storage);
             commandBuilder.Append("DELETE FROM ");
             commandBuilder.Append(FQTN);
@@ -478,15 +502,14 @@ namespace Cave.Data.Sql
         /// <returns>true if the value could be found and read, false otherwise.</returns>
         /// <typeparam name="TValue">Result value type.</typeparam>
         public bool QueryValue<TValue>(SqlCmd cmd, out TValue value, string fieldName = null)
-            where TValue : struct
-            => Storage.QueryValue(cmd, out value, Database.Name, Name, fieldName);
+            where TValue : struct =>
+            Storage.QueryValue(cmd, out value, Database.Name, Name, fieldName);
 
         /// <summary>Querys a single value with a databaseName dependent sql statement.</summary>
         /// <param name="cmd">The databaseName dependent sql statement.</param>
         /// <param name="fieldName">Name of the fieldName (optional, only needed if multiple columns are returned).</param>
         /// <returns>The result value or null.</returns>
-        public object QueryValue(SqlCmd cmd, string fieldName = null)
-            => Storage.QueryValue(cmd, Database.Name, Name, fieldName);
+        public object QueryValue(SqlCmd cmd, string fieldName = null) => Storage.QueryValue(cmd, Database.Name, Name, fieldName);
 
         #endregion
 
@@ -526,6 +549,7 @@ namespace Cave.Data.Sql
             if (transactions == null)
             {
                 if (flags.HasFlag(TransactionFlags.NoExceptions)) { return -1; }
+
                 throw new ArgumentNullException(nameof(transactions));
             }
 
@@ -602,8 +626,16 @@ namespace Cave.Data.Sql
         /// <returns>Returns a list of rows matching the specified criteria.</returns>
         protected internal virtual IList<Row> SqlGetGroupRows(SqlSearch search, ResultOption opt)
         {
-            if (search == null) throw new ArgumentNullException(nameof(search));
-            if (opt == null) throw new ArgumentNullException(nameof(opt));
+            if (search == null)
+            {
+                throw new ArgumentNullException(nameof(search));
+            }
+
+            if (opt == null)
+            {
+                throw new ArgumentNullException(nameof(opt));
+            }
+
             RowLayout layout;
             var command = new StringBuilder();
             command.Append("SELECT ");
@@ -772,8 +804,16 @@ namespace Cave.Data.Sql
         /// <returns>Returns the ID of the row found or -1.</returns>
         protected internal virtual IList<Row> SqlGetRows(SqlSearch search, ResultOption opt)
         {
-            if (search == null) throw new ArgumentNullException(nameof(search));
-            if (opt == null) throw new ArgumentNullException(nameof(opt));
+            if (search == null)
+            {
+                throw new ArgumentNullException(nameof(search));
+            }
+
+            if (opt == null)
+            {
+                throw new ArgumentNullException(nameof(opt));
+            }
+
             if (opt.Contains(ResultOptionMode.Group))
             {
                 return SqlGetGroupRows(search, opt);
@@ -848,8 +888,16 @@ namespace Cave.Data.Sql
         /// <param name="useParameters">Use databaseName parameters instead of escaped command string.</param>
         protected virtual void CreateInsert(SqlCommandBuilder commandBuilder, Row row, bool useParameters)
         {
-            if (row == null) throw new ArgumentNullException(nameof(row));
-            if (commandBuilder == null) throw new ArgumentNullException(nameof(commandBuilder));
+            if (row == null)
+            {
+                throw new ArgumentNullException(nameof(row));
+            }
+
+            if (commandBuilder == null)
+            {
+                throw new ArgumentNullException(nameof(commandBuilder));
+            }
+
             commandBuilder.Append("INSERT INTO ");
             commandBuilder.Append(FQTN);
             commandBuilder.Append(" (");
@@ -907,8 +955,16 @@ namespace Cave.Data.Sql
         /// <param name="useParameters">Use databaseName parameters instead of escaped command string.</param>
         protected virtual void CreateUpdate(SqlCommandBuilder commandBuilder, Row row, bool useParameters)
         {
-            if (commandBuilder == null) throw new ArgumentNullException(nameof(commandBuilder));
-            if (row == null) throw new ArgumentNullException(nameof(row));
+            if (commandBuilder == null)
+            {
+                throw new ArgumentNullException(nameof(commandBuilder));
+            }
+
+            if (row == null)
+            {
+                throw new ArgumentNullException(nameof(row));
+            }
+
             commandBuilder.Append("UPDATE ");
             commandBuilder.Append(FQTN);
             commandBuilder.Append(" SET ");
@@ -956,8 +1012,16 @@ namespace Cave.Data.Sql
         /// <param name="useParameters">Use databaseName parameters instead of escaped command string.</param>
         protected virtual void CreateReplace(SqlCommandBuilder commandBuilder, Row row, bool useParameters)
         {
-            if (row == null) throw new ArgumentNullException(nameof(row));
-            if (commandBuilder == null) throw new ArgumentNullException(nameof(commandBuilder));
+            if (row == null)
+            {
+                throw new ArgumentNullException(nameof(row));
+            }
+
+            if (commandBuilder == null)
+            {
+                throw new ArgumentNullException(nameof(commandBuilder));
+            }
+
             commandBuilder.Append("REPLACE INTO ");
             commandBuilder.Append(FQTN);
             commandBuilder.Append(" VALUES (");
@@ -1086,7 +1150,7 @@ namespace Cave.Data.Sql
                         Trace.TraceInformation("{0} transactions committed to {1}.", n, FQTN);
                     }
 
-                    execute = Task.Factory.StartNew(cmd => Execute((SqlCommandBuilder)cmd), commandBuilder);
+                    execute = Task.Factory.StartNew(cmd => Execute((SqlCmd)cmd), commandBuilder);
                     n += i;
                 }
                 catch (Exception ex)

@@ -12,6 +12,8 @@ namespace Cave.Data
         readonly object writeLock = new object();
         int readLock;
 
+        #region Constructors
+
         #region constructors
 
         /// <summary>Initializes a new instance of the <see cref="ConcurrentTable" /> class.</summary>
@@ -19,6 +21,10 @@ namespace Cave.Data
         public ConcurrentTable(ITable table) => BaseTable = !(table is ConcurrentTable) ? table : throw new ArgumentException("Table is already synchronized!");
 
         #endregion
+
+        #endregion
+
+        #region Overrides
 
         #region ToString and eXtended Text
 
@@ -28,13 +34,15 @@ namespace Cave.Data
 
         #endregion
 
+        #endregion
+
         #region properties
 
         /// <summary>Gets or sets the maximum wait time (milliseconds) while waiting for a write lock.</summary>
         /// <value>The maximum wait time (milliseconds) while waiting for a write lock.</value>
         /// <remarks>
-        ///     By default the maximum wait time is set to 100 milliseconds in release builds. Disabling the maximum wait time
-        ///     results in writing operations blocked forever if there are no gaps between reading operations.
+        /// By default the maximum wait time is set to 100 milliseconds in release builds. Disabling the maximum wait time results in writing
+        /// operations blocked forever if there are no gaps between reading operations.
         /// </remarks>
         public int MaxWaitTime { get; set; } = 100;
 
@@ -129,34 +137,34 @@ namespace Cave.Data
         public Row GetRow(Search search = default, ResultOption resultOption = default) => ReadLockedFunc(() => BaseTable.GetRow(search, resultOption));
 
         /// <inheritdoc />
-        public IList<Row> GetRows(Search search = default, ResultOption resultOption = default) => ReadLockedFunc(() => BaseTable.GetRows(search, resultOption));
+        public IList<Row> GetRows(Search search = default, ResultOption resultOption = default) =>
+            ReadLockedFunc(() => BaseTable.GetRows(search, resultOption));
 
         /// <inheritdoc />
         public IList<Row> GetRows() => ReadLockedFunc(() => BaseTable.GetRows());
 
         /// <inheritdoc />
         public IList<TValue> GetValues<TValue>(string fieldName, Search search = null)
-            where TValue : struct, IComparable
-            => ReadLockedFunc(() => BaseTable.GetValues<TValue>(fieldName, search));
+            where TValue : struct, IComparable =>
+            ReadLockedFunc(() => BaseTable.GetValues<TValue>(fieldName, search));
 
         /// <inheritdoc />
         public IList<TValue> Distinct<TValue>(string fieldName, Search search = null)
-            where TValue : struct, IComparable
-            => ReadLockedFunc(() => BaseTable.Distinct<TValue>(fieldName, search));
+            where TValue : struct, IComparable =>
+            ReadLockedFunc(() => BaseTable.Distinct<TValue>(fieldName, search));
 
         /// <inheritdoc />
         public TValue? Maximum<TValue>(string fieldName, Search search = null)
-            where TValue : struct, IComparable
-            => ReadLockedFunc(() => BaseTable.Maximum<TValue>(fieldName, search));
+            where TValue : struct, IComparable =>
+            ReadLockedFunc(() => BaseTable.Maximum<TValue>(fieldName, search));
 
         /// <inheritdoc />
         public TValue? Minimum<TValue>(string fieldName, Search search = null)
-            where TValue : struct, IComparable
-            => ReadLockedFunc(() => BaseTable.Minimum<TValue>(fieldName, search));
+            where TValue : struct, IComparable =>
+            ReadLockedFunc(() => BaseTable.Minimum<TValue>(fieldName, search));
 
         /// <inheritdoc />
-        public int Commit(IEnumerable<Transaction> transactions, TransactionFlags flags = default) =>
-            WriteLocked(() => BaseTable.Commit(transactions, flags));
+        public int Commit(IEnumerable<Transaction> transactions, TransactionFlags flags = default) => WriteLocked(() => BaseTable.Commit(transactions, flags));
 
         #endregion
 

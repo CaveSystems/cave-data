@@ -10,6 +10,8 @@ namespace Cave.Data
         readonly bool descending;
         readonly IFieldProperties field;
 
+        #region Constructors
+
         public TableSorter(IFieldProperties field, ResultOptionMode mode)
         {
             this.field = field ?? throw new ArgumentNullException(nameof(field));
@@ -85,11 +87,17 @@ namespace Cave.Data
             }
         }
 
+        #endregion
+
+        #region IComparer<Row> Members
+
         public int Compare(Row row1, Row row2)
         {
             var val1 = row1[field.Index];
             var val2 = row2[field.Index];
             return descending ? comparer.Compare(val2, val1) : comparer.Compare(val1, val2);
         }
+
+        #endregion
     }
 }

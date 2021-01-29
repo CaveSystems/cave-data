@@ -51,10 +51,7 @@ namespace Cave
         /// <summary>Datetime data<br /> 8 byte (64 bit) ticks (1 tick = 100 ns) since 01.01.0000 00:00:00</summary>
         DateTime = 0x24,
 
-        /// <summary>
-        ///     Timespan data<br /> 8 byte (64 bit) ticks (1 tick = 100 ns)<br /> most database implementations will save this
-        ///     as seconds (double)
-        /// </summary>
+        /// <summary>Timespan data<br /> 8 byte (64 bit) ticks (1 tick = 100 ns)<br /> most database implementations will save this as seconds (double)</summary>
         TimeSpan = 0x25,
 
         /// <summary>String data<br /> Utf-8 encoded string</summary>

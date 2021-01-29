@@ -10,6 +10,8 @@ namespace Cave.Data
     public class Table<TStruct> : AbstractTable<TStruct>
         where TStruct : struct
     {
+        #region Constructors
+
         #region constructor
 
         /// <summary>Initializes a new instance of the <see cref="Table{TStruct}" /> class.</summary>
@@ -47,8 +49,9 @@ namespace Cave.Data
 
         #endregion
 
-        /// <inheritdoc />
-        public override RowLayout Layout { get; }
+        #endregion
+
+        #region Overrides
 
         /// <inheritdoc />
         protected override ITable BaseTable { get; }
@@ -56,8 +59,13 @@ namespace Cave.Data
         /// <inheritdoc />
         public override void Connect(IDatabase database, TableFlags flags, RowLayout layout) => BaseTable.Connect(database, flags, layout);
 
+        /// <inheritdoc />
+        public override RowLayout Layout { get; }
+
         /// <summary>Not supported.</summary>
         /// <param name="layout">Unused parameter.</param>
         public override void UseLayout(RowLayout layout) => RowLayout.CheckLayout(Layout, layout);
+
+        #endregion
     }
 }

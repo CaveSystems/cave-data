@@ -17,12 +17,12 @@ namespace Cave.Data
 #else
         /// <summary>resolves value to IDs.</summary>
         readonly FakeSortedDictionary<object, List<object[]>> index;
+
         readonly object nullValue = new BoxedValue(null);
 #endif
 
         /// <summary>Initializes a new instance of the <see cref="FieldIndex" /> class.</summary>
-        public FieldIndex()
-        =>
+        public FieldIndex() =>
 #if USE_BOXING
             index = new FakeSortedDictionary<BoxedValue, List<object[]>>();
 #else
@@ -80,8 +80,8 @@ namespace Cave.Data
         /// <param name="newRow">Row to add.</param>
         /// <param name="fieldNumber">Fieldnumber.</param>
         /// <exception cref="ArgumentException">
-        ///     Value {value} is not present at index (equals check {index})! or Row {row} is not
-        ///     present at index! (Present: {value} => {rows})! or Could not remove row {row} value {value}!.
+        /// Value {value} is not present at index (equals check {index})! or Row {row} is not present at index!
+        /// (Present: {value} => {rows})! or Could not remove row {row} value {value}!.
         /// </exception>
         internal void Replace(object[] oldRow, object[] newRow, int fieldNumber)
         {
@@ -98,8 +98,8 @@ namespace Cave.Data
         /// <param name="row">The row.</param>
         /// <param name="fieldNumber">The fieldnumber.</param>
         /// <exception cref="ArgumentException">
-        ///     Value {value} is not present at index (equals check {index})! or Row {row} is not
-        ///     present at index! (Present: {value} => {rows})! or Could not remove row {row} value {value}!.
+        /// Value {value} is not present at index (equals check {index})! or Row {row} is not present at index!
+        /// (Present: {value} => {rows})! or Could not remove row {row} value {value}!.
         /// </exception>
         internal void Delete(object[] row, int fieldNumber)
         {
@@ -154,19 +154,39 @@ namespace Cave.Data
         {
             readonly object val;
 
+            #region Constructors
+
             public BoxedValue(object value) => val = value;
+
+            #endregion
+
+            #region IComparable Members
 
             public int CompareTo(object obj) => obj is BoxedValue box ? CompareTo(box) : Comparer.Default.Compare(val, obj);
 
+            #endregion
+
+            #region IComparable<BoxedValue> Members
+
             public int CompareTo(BoxedValue other) => Comparer.Default.Compare(val, other.val);
+
+            #endregion
+
+            #region IEquatable<BoxedValue> Members
 
             public bool Equals(BoxedValue other) => Equals(other.val, val);
 
-            public override int GetHashCode() => val == null ? 0 : val.GetHashCode();
+            #endregion
+
+            #region Overrides
 
             public override bool Equals(object obj) => obj is BoxedValue box ? Equals(box) : Equals(obj, val);
 
+            public override int GetHashCode() => val == null ? 0 : val.GetHashCode();
+
             public override string ToString() => val == null ? "<null>" : val.ToString();
+
+            #endregion
         }
     }
 }

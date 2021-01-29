@@ -6,6 +6,8 @@ namespace Cave.Data
     /// <summary>Provides Row based serialization.</summary>
     public static partial class RowSerializer
     {
+        #region Flags enum
+
         /// <summary>Settings used during de/serialization.</summary>
         [Flags]
         [SuppressMessage("Naming", "CA1711")]
@@ -14,11 +16,10 @@ namespace Cave.Data
             /// <summary>No flags</summary>
             None = 0,
 
-            /// <summary>
-            ///     Serialize the layout first, then the data. This adds type safety to the stream but costs a lot of bandwidth and
-            ///     time.
-            /// </summary>
+            /// <summary>Serialize the layout first, then the data. This adds type safety to the stream but costs a lot of bandwidth and time.</summary>
             WithLayout = 1
         }
+
+        #endregion
     }
 }

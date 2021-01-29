@@ -8,9 +8,19 @@ namespace Cave.Data.Sql
     /// <summary>Provides a sql command builder.</summary>
     public sealed class SqlCommandBuilder
     {
+        #region Static
+
+        /// <summary>Converts to a <see cref="SqlCmd" /> instance.</summary>
+        /// <param name="builder">The builder to convert.</param>
+        public static implicit operator SqlCmd(SqlCommandBuilder builder) => builder == null ? null : new SqlCmd(builder.ToString(), builder.Parameters);
+
+        #endregion
+
         readonly List<SqlParam> parameters = new List<SqlParam>();
         readonly SqlStorage storage;
         readonly StringBuilder text = new StringBuilder();
+
+        #region Constructors
 
         /// <summary>Initializes a new instance of the <see cref="SqlCommandBuilder" /> class.</summary>
         /// <param name="storage">The storage engine.</param>
@@ -20,21 +30,33 @@ namespace Cave.Data.Sql
             Parameters = new ReadOnlyCollection<SqlParam>(parameters);
         }
 
-        /// <summary>Gets the full command text.</summary>
-        public string Text => text.ToString();
+        #endregion
 
-        /// <summary>Gets all parameters present.</summary>
-        public IList<SqlParam> Parameters { get; }
-
-        /// <summary>Gets the parameter count.</summary>
-        public int ParameterCount => parameters.Count;
+        #region Properties
 
         /// <summary>Gets the length of the command text.</summary>
         public int Length => text.Length;
 
-        /// <summary>Converts to a <see cref="SqlCmd" /> instance.</summary>
-        /// <param name="builder">The builder to convert.</param>
-        public static implicit operator SqlCmd(SqlCommandBuilder builder) => builder == null ? null : new SqlCmd(builder.ToString(), builder.Parameters);
+        /// <summary>Gets the parameter count.</summary>
+        public int ParameterCount => parameters.Count;
+
+        /// <summary>Gets all parameters present.</summary>
+        public IList<SqlParam> Parameters { get; }
+
+        /// <summary>Gets the full command text.</summary>
+        public string Text => text.ToString();
+
+        #endregion
+
+        #region Overrides
+
+        /// <summary>Gets the full command text.</summary>
+        /// <returns>Command text.</returns>
+        public override string ToString() => text.ToString();
+
+        #endregion
+
+        #region Members
 
         /// <summary>Appends a command text.</summary>
         /// <param name="text">Text to add.</param>
@@ -43,6 +65,10 @@ namespace Cave.Data.Sql
         /// <summary>Appends a command text.</summary>
         /// <param name="text">Text to add.</param>
         public void AppendLine(string text) => this.text.AppendLine(text);
+
+        /// <summary>Appends a parameter to the command text and parameter list.</summary>
+        /// <param name="vdatabaseValuelue">The value at the database.</param>
+        public void CreateAndAddParameter(object vdatabaseValuelue) => text.Append(CreateParameter(vdatabaseValuelue).Name);
 
         /// <summary>Appends a parameter to the parameter list.</summary>
         /// <param name="databaseValue">The value at the database.</param>
@@ -60,12 +86,6 @@ namespace Cave.Data.Sql
             return parameter;
         }
 
-        /// <summary>Appends a parameter to the command text and parameter list.</summary>
-        /// <param name="vdatabaseValuelue">The value at the database.</param>
-        public void CreateAndAddParameter(object vdatabaseValuelue) => text.Append(CreateParameter(vdatabaseValuelue).Name);
-
-        /// <summary>Gets the full command text.</summary>
-        /// <returns>Command text.</returns>
-        public override string ToString() => text.ToString();
+        #endregion
     }
 }

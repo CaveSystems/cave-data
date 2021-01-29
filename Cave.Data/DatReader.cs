@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using Cave.IO;
 
@@ -11,11 +10,15 @@ namespace Cave.Data
     {
         DataReader reader;
 
+        #region Properties
+
         /// <summary>Gets the layout of the table.</summary>
         public RowLayout Layout { get; private set; }
 
         /// <summary>Gets the version the database was created with.</summary>
         public int Version { get; private set; }
+
+        #endregion
 
         #region constructor
 
@@ -103,8 +106,8 @@ namespace Cave.Data
         }
 
         /// <summary>
-        ///     Reads the whole file to the specified table. This does not write transactions and does not clear the table. If
-        ///     you want to start with a clean table clear it prior using this function.
+        /// Reads the whole file to the specified table. This does not write transactions and does not clear the table. If you want to start
+        /// with a clean table clear it prior using this function.
         /// </summary>
         /// <param name="table">Table to read to.</param>
         public void ReadTable(ITable table)

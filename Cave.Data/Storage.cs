@@ -9,15 +9,19 @@ namespace Cave.Data
     /// <summary>Provides access to databaseName storage engines.</summary>
     public abstract class Storage : IStorage
     {
+        #region Static
+
         /// <summary>Epoch DateTime in Ticks.</summary>
         public const long EpochTicks = 621355968000000000;
 
+        /// <summary>Gets or sets the date time format for big int date time values.</summary>
+        public static string BigIntDateTimeFormat { get; set; } = "yyyyMMddHHmmssfff";
+
+        #endregion
+
         bool closed;
 
-        /// <summary>
-        /// Gets or sets the storage culture.
-        /// </summary>
-        public CultureInfo Culture { get; set; }
+        #region Constructors
 
         /// <summary>Initializes a new instance of the <see cref="Storage" /> class.</summary>
         /// <param name="connectionString">ConnectionString of the storage.</param>
@@ -33,8 +37,14 @@ namespace Cave.Data
             }
         }
 
-        /// <summary>Gets or sets the date time format for big int date time values.</summary>
-        public static string BigIntDateTimeFormat { get; set; } = "yyyyMMddHHmmssfff";
+        #endregion
+
+        #region Properties
+
+        /// <summary>Gets or sets the storage culture.</summary>
+        public CultureInfo Culture { get; set; }
+
+        #endregion
 
         #region IStorage Member
 
@@ -130,7 +140,8 @@ namespace Cave.Data
                 var currentField = GetDatabaseFieldProperties(current[i]);
                 if (!expectedField.Equals(currentField))
                 {
-                    throw new InvalidDataException($"FieldProperties of table {current.Name} != {expected.Name} differ! (found {currentField} expected {expectedField})!");
+                    throw new InvalidDataException(
+                        $"FieldProperties of table {current.Name} != {expected.Name} differ! (found {currentField} expected {expectedField})!");
                 }
 
                 if (currentField.Flags != expectedField.Flags)

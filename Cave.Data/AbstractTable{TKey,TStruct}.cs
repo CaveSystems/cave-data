@@ -11,13 +11,21 @@ namespace Cave.Data
         where TKey : IComparable<TKey>
         where TStruct : struct
     {
+        #region Properties
+
         /// <summary>Gets the identifier field.</summary>
         protected abstract IFieldProperties KeyField { get; }
+
+        #endregion
+
+        #region ITable<TKey,TStruct> Members
 
         #region ITable{TKey, TStruct} properties
 
         /// <inheritdoc />
         public TStruct this[TKey id] => GetStruct(id);
+
+        #endregion
 
         #endregion
 
@@ -51,12 +59,12 @@ namespace Cave.Data
         public TStruct GetStruct(TKey id) => GetRow(id).GetStruct<TStruct>(Layout);
 
         /// <inheritdoc />
-        public IList<TStruct> GetStructs(IEnumerable<TKey> ids)
-            => GetRows(Search.FieldIn(KeyField.Name, ids)).Select(r => r.GetStruct<TStruct>(Layout)).ToList();
+        public IList<TStruct> GetStructs(IEnumerable<TKey> ids) =>
+            GetRows(Search.FieldIn(KeyField.Name, ids)).Select(r => r.GetStruct<TStruct>(Layout)).ToList();
 
         /// <inheritdoc />
-        public IDictionary<TKey, TStruct> GetDictionary(Search search = null, ResultOption resultOption = null)
-            => GetRows(search, resultOption).ToDictionary(r => (TKey) r[KeyField.Index], r => r.GetStruct<TStruct>(Layout));
+        public IDictionary<TKey, TStruct> GetDictionary(Search search = null, ResultOption resultOption = null) =>
+            GetRows(search, resultOption).ToDictionary(r => (TKey) r[KeyField.Index], r => r.GetStruct<TStruct>(Layout));
 
         #endregion
     }

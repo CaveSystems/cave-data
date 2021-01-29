@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using Cave.Collections.Generic;
@@ -14,10 +12,14 @@ namespace Cave.Data
     [DebuggerDisplay("{Name}")]
     public class MemoryTable : Table
     {
+        #region Constructors
+
         #region constructors
 
         /// <summary>Initializes a new instance of the <see cref="MemoryTable" /> class.</summary>
         protected MemoryTable() { }
+
+        #endregion
 
         #endregion
 
@@ -45,9 +47,9 @@ namespace Cave.Data
         /// <value><c>true</c> if this instance is readonly; otherwise, <c>false</c>.</value>
         /// <exception cref="ReadOnlyException">Table {0} is readonly!.</exception>
         /// <remarks>
-        ///     If the table is not readonly this can be set to readonly. Once set to readonly a reset is not possible. But
-        ///     you can recreate a writeable table by using a new <see cref="MemoryTable" /> and the
-        ///     <see cref="LoadTable(ITable, Search, ProgressCallback, object)" /> function.
+        /// If the table is not readonly this can be set to readonly. Once set to readonly a reset is not possible. But you can recreate a
+        /// writeable table by using a new <see cref="MemoryTable" /> and the <see cref="LoadTable(ITable, Search, ProgressCallback, object)" />
+        /// function.
         /// </remarks>
         public bool IsReadonly
         {
@@ -110,7 +112,11 @@ namespace Cave.Data
         /// <returns>Returns a field index array or null.</returns>
         public static FieldIndex[] CreateIndex(RowLayout layout, MemoryTableOptions options = 0)
         {
-            if (layout == null) throw new ArgumentNullException(nameof(layout));
+            if (layout == null)
+            {
+                throw new ArgumentNullException(nameof(layout));
+            }
+
             if ((options & MemoryTableOptions.DisableIndex) == 0)
             {
                 var indexCount = 0;
@@ -243,8 +249,8 @@ namespace Cave.Data
         #region GetRowAt
 
         /// <summary>
-        ///     This function does a lookup on the ids of the table and returns the row with the n-th ID where n is the given
-        ///     index. Note that indices may change on each update, insert, delete and sorting is not garanteed!.
+        /// This function does a lookup on the ids of the table and returns the row with the n-th ID where n is the given index. Note that
+        /// indices may change on each update, insert, delete and sorting is not garanteed!.
         /// </summary>
         /// <param name="index">The index of the row to be fetched.</param>
         /// <returns>The row.</returns>
@@ -257,7 +263,11 @@ namespace Cave.Data
         /// <inheritdoc />
         public override bool Exist(Search search)
         {
-            if (search == null) throw new ArgumentNullException(nameof(search));
+            if (search == null)
+            {
+                throw new ArgumentNullException(nameof(search));
+            }
+
             search.LoadLayout(Layout);
             return rows.Values.Any(row => search.Check(row));
         }
@@ -272,7 +282,11 @@ namespace Cave.Data
         /// <inheritdoc />
         public override void Replace(Row row)
         {
-            if (row == null) throw new ArgumentNullException(nameof(row));
+            if (row == null)
+            {
+                throw new ArgumentNullException(nameof(row));
+            }
+
             var id = new Identifier(row, Layout);
             if (Exist(id))
             {
@@ -287,7 +301,11 @@ namespace Cave.Data
         /// <inheritdoc />
         public override void Replace(IEnumerable<Row> rows)
         {
-            if (rows == null) throw new ArgumentNullException(nameof(rows));
+            if (rows == null)
+            {
+                throw new ArgumentNullException(nameof(rows));
+            }
+
             foreach (var row in rows)
             {
                 Replace(row);
@@ -301,7 +319,11 @@ namespace Cave.Data
         /// <inheritdoc />
         public override Row Insert(Row row)
         {
-            if (row == null) throw new ArgumentNullException(nameof(row));
+            if (row == null)
+            {
+                throw new ArgumentNullException(nameof(row));
+            }
+
             var id = new Identifier(row, Layout);
             return Insert(row, id);
         }
@@ -309,7 +331,11 @@ namespace Cave.Data
         /// <inheritdoc />
         public override void Insert(IEnumerable<Row> rows)
         {
-            if (rows == null) throw new ArgumentNullException(nameof(rows));
+            if (rows == null)
+            {
+                throw new ArgumentNullException(nameof(rows));
+            }
+
             foreach (var row in rows)
             {
                 Insert(row);
@@ -323,7 +349,11 @@ namespace Cave.Data
         /// <inheritdoc />
         public override void Update(Row row)
         {
-            if (row == null) throw new ArgumentNullException(nameof(row));
+            if (row == null)
+            {
+                throw new ArgumentNullException(nameof(row));
+            }
+
             var id = new Identifier(row, Layout);
             Update(row, id);
         }
@@ -331,7 +361,11 @@ namespace Cave.Data
         /// <inheritdoc />
         public override void Update(IEnumerable<Row> rows)
         {
-            if (rows == null) throw new ArgumentNullException(nameof(rows));
+            if (rows == null)
+            {
+                throw new ArgumentNullException(nameof(rows));
+            }
+
             foreach (var row in rows)
             {
                 Update(row);
@@ -345,7 +379,11 @@ namespace Cave.Data
         /// <inheritdoc />
         public override void Delete(Row row)
         {
-            if (row == null) throw new ArgumentNullException(nameof(row));
+            if (row == null)
+            {
+                throw new ArgumentNullException(nameof(row));
+            }
+
             if (isReadonly)
             {
                 throw new ReadOnlyException($"Table {this} is readonly!");
@@ -388,7 +426,11 @@ namespace Cave.Data
         /// <inheritdoc />
         public override void Delete(IEnumerable<Row> rows)
         {
-            if (rows == null) throw new ArgumentNullException(nameof(rows));
+            if (rows == null)
+            {
+                throw new ArgumentNullException(nameof(rows));
+            }
+
             foreach (var row in rows)
             {
                 Delete(row);
@@ -443,7 +485,7 @@ namespace Cave.Data
         #region Count
 
         /// <inheritdoc />
-        public override long Count(Search search = default, ResultOption resultOption = null) => GetRows(search, resultOption, false).Count;
+        public override long Count(Search search = default, ResultOption resultOption = null) => GetRows(search, resultOption).Count;
 
         #endregion
 
@@ -457,14 +499,14 @@ namespace Cave.Data
         #region GetRows
 
         /// <inheritdoc />
-        public override IList<Row> GetRows(Search search = default, ResultOption resultOption = null) => GetRows(search, resultOption, false);
+        public override IList<Row> GetRows(Search search = default, ResultOption resultOption = null) => GetRows(search, resultOption);
 
         #endregion
 
         #region GetRow
 
         /// <inheritdoc />
-        public override Row GetRow(Search search = default, ResultOption resultOption = null) => GetRows(search, resultOption, false).Single();
+        public override Row GetRow(Search search = default, ResultOption resultOption = null) => GetRows(search, resultOption).Single();
 
         #endregion
 
@@ -485,7 +527,11 @@ namespace Cave.Data
         /// <returns>The rows.</returns>
         public IList<Row> GetRows(IEnumerable<Identifier> ids)
         {
-            if (ids == null) throw new ArgumentNullException(nameof(ids));
+            if (ids == null)
+            {
+                throw new ArgumentNullException(nameof(ids));
+            }
+
             var result = new List<Row>();
             foreach (var id in ids)
             {

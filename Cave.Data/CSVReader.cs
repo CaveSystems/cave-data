@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using Cave.IO;
 
@@ -9,9 +8,7 @@ namespace Cave.Data
     /// <summary>Provides reading of csv files to a struct / class.</summary>
     public sealed class CsvReader : IDisposable
     {
-        readonly int[] fieldNumberMatching;
-        int currentRowNumber;
-        DataReader reader;
+        #region Static
 
         /// <summary>Parses a single row of data from the specified string.</summary>
         /// <typeparam name="TStruct">The structure type.</typeparam>
@@ -39,9 +36,21 @@ namespace Cave.Data
         /// <returns>Returns a new <see cref="Row" /> instance.</returns>
         public static Row ParseRow(CsvProperties properties, RowLayout layout, string data)
         {
-            if (properties == null) throw new ArgumentNullException(nameof(properties));
-            if (layout == null) throw new ArgumentNullException(nameof(layout));
-            if (data == null) throw new ArgumentNullException(nameof(data));
+            if (properties == null)
+            {
+                throw new ArgumentNullException(nameof(properties));
+            }
+
+            if (layout == null)
+            {
+                throw new ArgumentNullException(nameof(layout));
+            }
+
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data));
+            }
+
             try
             {
                 var fieldCount = layout.FieldCount;
@@ -150,11 +159,13 @@ namespace Cave.Data
 
                 return null;
             }
-            catch (Exception ex)
-            {
-                throw new InvalidDataException("Error while reading row data!", ex);
-            }
         }
+
+        #endregion
+
+        readonly int[] fieldNumberMatching;
+        int currentRowNumber;
+        DataReader reader;
 
         #region constructors
 
@@ -326,7 +337,11 @@ namespace Cave.Data
         public static IList<TStruct> ReadList<TStruct>(string[] lines)
             where TStruct : struct
         {
-            if (lines == null) throw new ArgumentNullException(nameof(lines));
+            if (lines == null)
+            {
+                throw new ArgumentNullException(nameof(lines));
+            }
+
             using (var ms = new MemoryStream())
             {
                 var w = new DataWriter(ms);
@@ -604,10 +619,6 @@ namespace Cave.Data
 
                 return null;
             }
-            catch (Exception ex)
-            {
-                throw new InvalidDataException($"Error while reading row data at row #{currentRowNumber}", ex);
-            }
         }
 
         #endregion
@@ -615,10 +626,7 @@ namespace Cave.Data
         #region IDisposable Support
 
         /// <summary>Releases unmanaged and - optionally - managed resources.</summary>
-        /// <param name="disposing">
-        ///     <c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only
-        ///     unmanaged resources.
-        /// </param>
+        /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
         void Dispose(bool disposing)
         {
             if (disposing)

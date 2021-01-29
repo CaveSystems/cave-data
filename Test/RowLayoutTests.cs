@@ -1,23 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using NUnit.Framework;
 using Cave;
 using Cave.Data;
+using NUnit.Framework;
 
 namespace Test.Cave.Data
 {
     [TestFixture]
     public class RowLayoutTests
     {
-        static void CreateField(ref List<IFieldProperties> fields, FieldFlags flags, DataType dataType, string name, Type valueType=null)
+        static void CreateField(ref List<IFieldProperties> fields, FieldFlags flags, DataType dataType, string name, Type valueType = null)
         {
-            var field = new FieldProperties()
+            var field = new FieldProperties
             {
                 Index = fields.Count,
                 Name = name,
                 Flags = flags,
                 DataType = dataType,
-                ValueType = valueType,
+                ValueType = valueType
             }.Validate();
             fields.Add(field);
         }
@@ -36,7 +36,6 @@ namespace Test.Cave.Data
             CreateField(ref fields, FieldFlags.Index | FieldFlags.AutoIncrement | FieldFlags.Unique, DataType.Int64, "AutoIncUniqueIndexedField");
             CreateField(ref fields, FieldFlags.None, DataType.Enum, "SomeEnum", typeof(Environment.SpecialFolder));
             CreateField(ref fields, FieldFlags.None, DataType.String, "BuggyField");
-
             var layoutB = RowLayout.CreateUntyped("TestStruct", fields.ToArray());
             RowLayout.CheckLayout(layoutB, layoutA);
         }

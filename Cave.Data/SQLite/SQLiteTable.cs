@@ -7,8 +7,7 @@ namespace Cave.Data.SQLite
     /// <summary>Provides a sqlite table implementation.</summary>
     public class SQLiteTable : SqlTable
     {
-        /// <summary>Initializes a new instance of the <see cref="SQLiteTable" /> class.</summary>
-        protected SQLiteTable() { }
+        #region Static
 
         /// <summary>Connects to the specified database and tablename.</summary>
         /// <param name="database">Database to connect to.</param>
@@ -22,16 +21,37 @@ namespace Cave.Data.SQLite
             return table;
         }
 
-        /// <inheritdoc />
-        public override Row GetRowAt(int index) => QueryRow($"SELECT * FROM {FQTN} LIMIT {index},1");
+        #endregion
+
+        #region Constructors
+
+        /// <summary>Initializes a new instance of the <see cref="SQLiteTable" /> class.</summary>
+        protected SQLiteTable() { }
+
+        #endregion
+
+        #region Overrides
 
         /// <inheritdoc />
         protected override void CreateLastInsertedRowCommand(SqlCommandBuilder commandBuilder, Row row)
         {
-            if (commandBuilder == null) throw new ArgumentNullException(nameof(commandBuilder));
-            if (row == null) throw new ArgumentNullException(nameof(row));
+            if (commandBuilder == null)
+            {
+                throw new ArgumentNullException(nameof(commandBuilder));
+            }
+
+            if (row == null)
+            {
+                throw new ArgumentNullException(nameof(row));
+            }
+
             var idField = Layout.Identifier.Single();
             commandBuilder.AppendLine($"SELECT * FROM {FQTN} WHERE {Storage.EscapeFieldName(idField)} = last_insert_rowid();");
         }
+
+        /// <inheritdoc />
+        public override Row GetRowAt(int index) => QueryRow($"SELECT * FROM {FQTN} LIMIT {index},1");
+
+        #endregion
     }
 }

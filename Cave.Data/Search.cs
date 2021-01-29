@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -15,6 +14,416 @@ namespace Cave.Data
     /// <summary>Provides database independent search functions.</summary>
     public sealed class Search
     {
+        #region Static
+
+        /// <summary>Prepares a search using like to find a full match of all of the specified parts.</summary>
+        /// <param name="fieldName">Name of the field.</param>
+        /// <param name="parts">The parts.</param>
+        /// <returns>Rows containing all specified parts.</returns>
+        public static Search FieldContainsAllOf(string fieldName, string[] parts)
+        {
+            if (parts == null)
+            {
+                throw new ArgumentNullException(nameof(parts));
+            }
+
+            var result = None;
+            foreach (var part in parts)
+            {
+                result &= FieldLike(fieldName, TextLike("%" + part + "%"));
+            }
+
+            return result;
+        }
+
+        /// <summary>Prepares a search using like to find a single match of one of the specified parts.</summary>
+        /// <param name="fieldName">Name of the field.</param>
+        /// <param name="parts">The parts.</param>
+        /// <returns>A new search instance.</returns>
+        public static Search FieldContainsOneOf(string fieldName, string[] parts)
+        {
+            if (parts == null)
+            {
+                throw new ArgumentNullException(nameof(parts));
+            }
+
+            var result = None;
+            foreach (var part in parts)
+            {
+                result |= FieldLike(fieldName, TextLike("%" + part + "%"));
+            }
+
+            return result;
+        }
+
+        /// <summary>Creates a field equals value search.</summary>
+        /// <param name="name">The field name.</param>
+        /// <param name="value">The value to check against.</param>
+        /// <returns>A new search instance.</returns>
+        public static Search FieldEquals(string name, object value) => new Search(SearchMode.Equals, false, name, value);
+
+        /// <summary>Creates a field greater value search.</summary>
+        /// <param name="name">The field name.</param>
+        /// <param name="value">The value to check against.</param>
+        /// <returns>A new search instance.</returns>
+        public static Search FieldGreater(string name, object value) => new Search(SearchMode.Greater, false, name, value);
+
+        /// <summary>Creates a field greater or equal value search.</summary>
+        /// <param name="name">The field name.</param>
+        /// <param name="value">The value to check against.</param>
+        /// <returns>A new search instance.</returns>
+        public static Search FieldGreaterOrEqual(string name, object value) => new Search(SearchMode.GreaterOrEqual, false, name, value);
+
+        /// <summary>Creates a field in value search.</summary>
+        /// <param name="name">The name.</param>
+        /// <param name="values">The values.</param>
+        /// <returns>A new search instance.</returns>
+        public static Search FieldIn(string name, params object[] values)
+        {
+            if (values == null)
+            {
+                throw new ArgumentNullException(nameof(values));
+            }
+
+            var s = new Set<object>();
+            foreach (var val in values)
+            {
+                s.Include(val);
+            }
+
+            return s.Count == 0 ? None : new Search(SearchMode.In, false, name, s);
+        }
+
+        /// <summary>Creates a field in value search.</summary>
+        /// <param name="name">The name.</param>
+        /// <param name="values">The values.</param>
+        /// <returns>A new search instance.</returns>
+        public static Search FieldIn(string name, IEnumerable values)
+        {
+            if (values == null)
+            {
+                throw new ArgumentNullException(nameof(values));
+            }
+
+            var s = new Set<object>();
+            foreach (var val in values)
+            {
+                s.Include(val);
+            }
+
+            return s.Count == 0 ? None : new Search(SearchMode.In, false, name, s);
+        }
+
+        /// <summary>Creates a field like value search.</summary>
+        /// <param name="name">The field name.</param>
+        /// <param name="value">The value to check against.</param>
+        /// <returns>A new search instance.</returns>
+        public static Search FieldLike(string name, object value) => new Search(SearchMode.Like, false, name, value);
+
+        /// <summary>Creates a field not equals value search.</summary>
+        /// <param name="name">The field name.</param>
+        /// <param name="value">The value to check against.</param>
+        /// <returns>A new search instance.</returns>
+        public static Search FieldNotEquals(string name, object value) => new Search(SearchMode.Equals, true, name, value);
+
+        /// <summary>Creates a field not like value search.</summary>
+        /// <param name="name">The field name.</param>
+        /// <param name="value">The value to check against.</param>
+        /// <returns>A new search instance.</returns>
+        public static Search FieldNotLike(string name, object value) => new Search(SearchMode.Like, true, name, value);
+
+        /// <summary>Creates a field smaller value search.</summary>
+        /// <param name="name">The field name.</param>
+        /// <param name="value">The value to check against.</param>
+        /// <returns>A new search instance.</returns>
+        public static Search FieldSmaller(string name, object value) => new Search(SearchMode.Smaller, false, name, value);
+
+        /// <summary>Creates a field smaller or equal value search.</summary>
+        /// <param name="name">The field name.</param>
+        /// <param name="value">The value to check against.</param>
+        /// <returns>A new search instance.</returns>
+        public static Search FieldSmallerOrEqual(string name, object value) => new Search(SearchMode.SmallerOrEqual, false, name, value);
+
+        /// <summary>Creates a search for matching specified fields of a row.</summary>
+        /// <param name="table">The table.</param>
+        /// <param name="row">The row.</param>
+        /// <param name="fieldNames">The field names.</param>
+        /// <returns>A new search instance.</returns>
+        public static Search FullMatch(ITable table, Row row, params string[] fieldNames)
+        {
+            if (row == null)
+            {
+                throw new ArgumentNullException(nameof(row));
+            }
+
+            if (table == null)
+            {
+                throw new ArgumentNullException(nameof(table));
+            }
+
+            if (fieldNames == null)
+            {
+                throw new ArgumentNullException(nameof(fieldNames));
+            }
+
+            var search = None;
+            foreach (var field in fieldNames)
+            {
+                var index = table.Layout.GetFieldIndex(field, true);
+                var value = row[index];
+                search &= FieldEquals(field, value);
+            }
+
+            return search;
+        }
+
+        /// <summary>Creates a search for matching a given row excluding the ID field.</summary>
+        /// <typeparam name="TStruct">Structure type.</typeparam>
+        /// <param name="table">The table.</param>
+        /// <param name="row">The row data to search for.</param>
+        /// <param name="checkDefaultValues">if set to <c>true</c> [check default values].</param>
+        /// <returns>Returns a new search instance.</returns>
+        public static Search FullMatch<TStruct>(ITable table, TStruct row, bool checkDefaultValues = false)
+            where TStruct : struct
+        {
+            if (table == null)
+            {
+                throw new ArgumentNullException(nameof(table));
+            }
+
+            return FullMatch(table, table.Layout.GetRow(row), checkDefaultValues);
+        }
+
+        /// <summary>Creates a search for matching a given row excluding the ID field.</summary>
+        /// <param name="table">The table.</param>
+        /// <param name="row">The row data to search for.</param>
+        /// <param name="checkDefaultValues">if set to <c>true</c> [check default values].</param>
+        /// <returns>Returns a new search instance.</returns>
+        public static Search FullMatch(ITable table, Row row, bool checkDefaultValues = false)
+        {
+            if (table == null)
+            {
+                throw new ArgumentNullException(nameof(table));
+            }
+
+            if (row == null)
+            {
+                throw new ArgumentNullException(nameof(row));
+            }
+
+            return FullMatch(table, row.Values, checkDefaultValues);
+        }
+
+        /// <summary>Creates a search for matching a given row excluding the identifier fields.</summary>
+        /// <param name="table">The table.</param>
+        /// <param name="fields">The row data to search for.</param>
+        /// <param name="checkDefaultValues">if set to <c>true</c> [check default values].</param>
+        /// <returns>Returns a new search instance.</returns>
+        public static Search FullMatch(ITable table, object[] fields, bool checkDefaultValues = false)
+        {
+            if (table == null)
+            {
+                throw new ArgumentNullException(nameof(table));
+            }
+
+            if (fields == null)
+            {
+                throw new ArgumentNullException(nameof(fields));
+            }
+
+            var search = None;
+            for (var i = 0; i < table.Layout.FieldCount; i++)
+            {
+                var field = table.Layout[i];
+                if (field.Flags.HasFlag(FieldFlags.ID))
+                {
+                    continue;
+                }
+
+                var value = fields.GetValue(i);
+                if (checkDefaultValues)
+                {
+                    if (value == null)
+                    {
+                        continue;
+                    }
+
+                    switch (field.DataType)
+                    {
+                        case DataType.String:
+                            if (Equals(string.Empty, value))
+                            {
+                                continue;
+                            }
+
+                            break;
+                        default:
+                        {
+                            if (field.ValueType != null)
+                            {
+                                var defaultValue = Activator.CreateInstance(field.ValueType);
+                                if (Equals(value, defaultValue))
+                                {
+                                    continue;
+                                }
+                            }
+
+                            break;
+                        }
+                    }
+                }
+
+                search &= FieldEquals(table.Layout.GetName(i), fields.GetValue(i));
+            }
+
+            return search;
+        }
+
+        /// <summary>Creates a search for matching specified fields of a row.</summary>
+        /// <param name="table">The table.</param>
+        /// <param name="row">The row.</param>
+        /// <returns>A new search instance.</returns>
+        public static Search IdentifierMatch(ITable table, Row row)
+        {
+            if (row == null)
+            {
+                throw new ArgumentNullException(nameof(row));
+            }
+
+            if (table == null)
+            {
+                throw new ArgumentNullException(nameof(table));
+            }
+
+            var search = None;
+            foreach (var field in table.Layout.Identifier)
+            {
+                var value = row[field.Index];
+                search &= FieldEquals(field.Name, value);
+            }
+
+            return search;
+        }
+
+        /// <summary>Builds a search text from the specified text.</summary>
+        /// <param name="text">The text.</param>
+        /// <returns>The search text.</returns>
+        /// <remarks>Space, Point, Star, Percent, Underscore and Questionmark are used as wildcard.</remarks>
+        public static string TextLike(string text)
+        {
+            if (text == null)
+            {
+                throw new ArgumentNullException(nameof(text));
+            }
+
+            var result = text.ReplaceChars(" .*%_?", "%");
+            while (result.Contains("%%"))
+            {
+                result = result.Replace("%%", "%");
+            }
+
+            return result;
+        }
+
+        /// <summary>Combines to searches with AND.</summary>
+        /// <param name="left">The first search.</param>
+        /// <param name="right">The second search.</param>
+        /// <returns>A new search instance.</returns>
+        public static Search operator &(Search left, Search right)
+        {
+            if (left == null)
+            {
+                throw new ArgumentNullException(nameof(left));
+            }
+
+            if (right == null)
+            {
+                throw new ArgumentNullException(nameof(right));
+            }
+
+            if (right.Mode == SearchMode.None)
+            {
+                return left;
+            }
+
+            return left.Mode == SearchMode.None ? right : new Search(SearchMode.And, false, left, right);
+        }
+
+        /// <summary>Combines to searches with OR.</summary>
+        /// <param name="left">The first search.</param>
+        /// <param name="right">The second search.</param>
+        /// <returns>A new search instance.</returns>
+        public static Search operator |(Search left, Search right)
+        {
+            if (left == null)
+            {
+                throw new ArgumentNullException(nameof(left));
+            }
+
+            if (right == null)
+            {
+                throw new ArgumentNullException(nameof(right));
+            }
+
+            return right.Mode == SearchMode.None ? left : left.Mode == SearchMode.None ? right : new Search(SearchMode.Or, false, left, right);
+        }
+
+        /// <summary>Inverts a search.</summary>
+        /// <param name="search">Search to invert.</param>
+        /// <returns>A new search instance.</returns>
+        public static Search operator !(Search search)
+        {
+            if (search == null)
+            {
+                throw new ArgumentNullException(nameof(search));
+            }
+
+            switch (search.Mode)
+            {
+                case SearchMode.And:
+                case SearchMode.Or:
+                    return new Search(search.Mode, !search.Inverted, search.SearchA, search.SearchB);
+                case SearchMode.Equals:
+                case SearchMode.Like:
+                case SearchMode.Greater:
+                case SearchMode.Smaller:
+                case SearchMode.GreaterOrEqual:
+                case SearchMode.SmallerOrEqual:
+                case SearchMode.In:
+                    return new Search(search.Mode, !search.Inverted, search.FieldName, search.FieldValue);
+                default:
+                    throw new ArgumentException($"Invalid mode {search.Mode}!");
+            }
+        }
+
+        /// <summary>Gets no search.</summary>
+        public static Search None { get; } = new Search();
+
+        static int Compare(DateTime tableValue, DateTime checkValue)
+        {
+            if (checkValue.Kind == DateTimeKind.Local)
+            {
+                checkValue = checkValue.ToUniversalTime();
+            }
+
+            if (tableValue.Kind == DateTimeKind.Local)
+            {
+                tableValue = tableValue.ToUniversalTime();
+            }
+
+            return tableValue.Ticks.CompareTo(checkValue.Ticks);
+        }
+
+        /// <summary>Inverts the selection of the specified 'items' using the sorting present at specified 'all'.</summary>
+        /// <param name="all">All ids (sorting will be kept).</param>
+        /// <param name="items">The items to be inverted.</param>
+        /// <returns>The inverted selection.</returns>
+        static IEnumerable<Row> Invert(IEnumerable<Row> all, IEnumerable<Row> items) => all.Except(items);
+
+        #endregion
+
+        #region Constructors
+
         /// <summary>Initializes a new instance of the <see cref="Search" /> class.</summary>
         Search() => Mode = SearchMode.None;
 
@@ -73,15 +482,16 @@ namespace Cave.Data
             Mode = mode;
         }
 
-        /// <summary>Gets no search.</summary>
-        public static Search None { get; } = new Search();
+        #endregion
+
+        #region Properties
+
+        /// <summary>Gets a value indicating whether invert the search.</summary>
+        public bool Inverted { get; }
 
         /// <summary>Gets the mode.</summary>
         /// <value>The mode.</value>
         public SearchMode Mode { get; }
-
-        /// <summary>Gets the field number (unknown == -1).</summary>
-        public int FieldNumber { get; private set; } = -1;
 
         /// <summary>Gets sub search A (only used with Mode = AND / OR).</summary>
         public Search SearchA { get; }
@@ -89,343 +499,30 @@ namespace Cave.Data
         /// <summary>Gets sub search B (only used with Mode = AND / OR).</summary>
         public Search SearchB { get; }
 
+        /// <summary>Gets the RegEx for LIKE comparison.</summary>
+        public Regex Expression { get; private set; }
+
         /// <summary>Gets the fieldname to search for.</summary>
         public string FieldName { get; private set; }
 
-        /// <summary>Gets the value to search for.</summary>
-        public object FieldValue { get; private set; }
-
-        /// <summary>Gets a value indicating whether invert the search.</summary>
-        public bool Inverted { get; }
-
-        /// <summary>Gets the RegEx for LIKE comparison.</summary>
-        public Regex Expression { get; private set; }
+        /// <summary>Gets the field number (unknown == -1).</summary>
+        public int FieldNumber { get; private set; } = -1;
 
         /// <summary>Gets fieldProperties for database value conversion.</summary>
         public IFieldProperties FieldProperties { get; private set; }
 
+        /// <summary>Gets the value to search for.</summary>
+        public object FieldValue { get; private set; }
+
         /// <summary>Gets the layout.</summary>
         public RowLayout Layout { get; private set; }
 
-        /// <summary>Inverts a search.</summary>
-        /// <param name="search">Search to invert.</param>
-        /// <returns>A new search instance.</returns>
-        public static Search operator !(Search search)
-        {
-            if (search == null)
-            {
-                throw new ArgumentNullException(nameof(search));
-            }
+        #endregion
 
-            switch (search.Mode)
-            {
-                case SearchMode.And:
-                case SearchMode.Or:
-                    return new Search(search.Mode, !search.Inverted, search.SearchA, search.SearchB);
-                case SearchMode.Equals:
-                case SearchMode.Like:
-                case SearchMode.Greater:
-                case SearchMode.Smaller:
-                case SearchMode.GreaterOrEqual:
-                case SearchMode.SmallerOrEqual:
-                case SearchMode.In:
-                    return new Search(search.Mode, !search.Inverted, search.FieldName, search.FieldValue);
-                default:
-                    throw new ArgumentException($"Invalid mode {search.Mode}!");
-            }
-        }
+        #region Overrides
 
-        /// <summary>Combines to searches with AND.</summary>
-        /// <param name="left">The first search.</param>
-        /// <param name="right">The second search.</param>
-        /// <returns>A new search instance.</returns>
-        public static Search operator &(Search left, Search right)
-        {
-            if (left == null)
-            {
-                throw new ArgumentNullException(nameof(left));
-            }
-
-            if (right == null)
-            {
-                throw new ArgumentNullException(nameof(right));
-            }
-
-            if (right.Mode == SearchMode.None)
-            {
-                return left;
-            }
-
-            return left.Mode == SearchMode.None ? right : new Search(SearchMode.And, false, left, right);
-        }
-
-        /// <summary>Combines to searches with OR.</summary>
-        /// <param name="left">The first search.</param>
-        /// <param name="right">The second search.</param>
-        /// <returns>A new search instance.</returns>
-        public static Search operator |(Search left, Search right)
-        {
-            if (left == null)
-            {
-                throw new ArgumentNullException(nameof(left));
-            }
-
-            if (right == null)
-            {
-                throw new ArgumentNullException(nameof(right));
-            }
-
-            return right.Mode == SearchMode.None ? left : left.Mode == SearchMode.None ? right : new Search(SearchMode.Or, false, left, right);
-        }
-
-        /// <summary>Prepares a search using like to find a full match of all of the specified parts.</summary>
-        /// <param name="fieldName">Name of the field.</param>
-        /// <param name="parts">The parts.</param>
-        /// <returns>Rows containing all specified parts.</returns>
-        public static Search FieldContainsAllOf(string fieldName, string[] parts)
-        {
-            if (parts == null) throw new ArgumentNullException(nameof(parts));
-            var result = None;
-            foreach (var part in parts)
-            {
-                result &= FieldLike(fieldName, TextLike("%" + part + "%"));
-            }
-
-            return result;
-        }
-
-        /// <summary>Prepares a search using like to find a single match of one of the specified parts.</summary>
-        /// <param name="fieldName">Name of the field.</param>
-        /// <param name="parts">The parts.</param>
-        /// <returns>A new search instance.</returns>
-        public static Search FieldContainsOneOf(string fieldName, string[] parts)
-        {
-            if (parts == null) throw new ArgumentNullException(nameof(parts));
-            var result = None;
-            foreach (var part in parts)
-            {
-                result |= FieldLike(fieldName, TextLike("%" + part + "%"));
-            }
-
-            return result;
-        }
-
-        /// <summary>Builds a search text from the specified text.</summary>
-        /// <param name="text">The text.</param>
-        /// <returns>The search text.</returns>
-        /// <remarks>Space, Point, Star, Percent, Underscore and Questionmark are used as wildcard.</remarks>
-        public static string TextLike(string text)
-        {
-            if (text == null) throw new ArgumentNullException(nameof(text));
-            var result = text.ReplaceChars(" .*%_?", "%");
-            while (result.Contains("%%"))
-            {
-                result = result.Replace("%%", "%");
-            }
-
-            return result;
-        }
-
-        /// <summary>Creates a search for matching specified fields of a row.</summary>
-        /// <param name="table">The table.</param>
-        /// <param name="row">The row.</param>
-        /// <param name="fieldNames">The field names.</param>
-        /// <returns>A new search instance.</returns>
-        public static Search FullMatch(ITable table, Row row, params string[] fieldNames)
-        {
-            if (row == null) throw new ArgumentNullException(nameof(row));
-            if (table == null) throw new ArgumentNullException(nameof(table));
-            if (fieldNames == null) throw new ArgumentNullException(nameof(fieldNames));
-            var search = None;
-            foreach (var field in fieldNames)
-            {
-                var index = table.Layout.GetFieldIndex(field, true);
-                var value = row[index];
-                search &= FieldEquals(field, value);
-            }
-
-            return search;
-        }
-
-        /// <summary>Creates a search for matching specified fields of a row.</summary>
-        /// <param name="table">The table.</param>
-        /// <param name="row">The row.</param>
-        /// <returns>A new search instance.</returns>
-        public static Search IdentifierMatch(ITable table, Row row)
-        {
-            if (row == null) throw new ArgumentNullException(nameof(row));
-            if (table == null) throw new ArgumentNullException(nameof(table));
-            var search = None;
-            foreach (var field in table.Layout.Identifier)
-            {
-                var value = row[field.Index];
-                search &= FieldEquals(field.Name, value);
-            }
-
-            return search;
-        }
-
-        /// <summary>Creates a search for matching a given row excluding the ID field.</summary>
-        /// <typeparam name="TStruct">Structure type.</typeparam>
-        /// <param name="table">The table.</param>
-        /// <param name="row">The row data to search for.</param>
-        /// <param name="checkDefaultValues">if set to <c>true</c> [check default values].</param>
-        /// <returns>Returns a new search instance.</returns>
-        public static Search FullMatch<TStruct>(ITable table, TStruct row, bool checkDefaultValues = false)
-            where TStruct : struct
-        {
-            if (table == null) throw new ArgumentNullException(nameof(table));
-            return FullMatch(table, table.Layout.GetRow(row), checkDefaultValues);
-        }
-
-        /// <summary>Creates a search for matching a given row excluding the ID field.</summary>
-        /// <param name="table">The table.</param>
-        /// <param name="row">The row data to search for.</param>
-        /// <param name="checkDefaultValues">if set to <c>true</c> [check default values].</param>
-        /// <returns>Returns a new search instance.</returns>
-        public static Search FullMatch(ITable table, Row row, bool checkDefaultValues = false)
-        {
-            if (table == null) throw new ArgumentNullException(nameof(table));
-            if (row == null) throw new ArgumentNullException(nameof(row));
-            return FullMatch(table, row.Values, checkDefaultValues);
-        }
-
-        /// <summary>Creates a search for matching a given row excluding the identifier fields.</summary>
-        /// <param name="table">The table.</param>
-        /// <param name="fields">The row data to search for.</param>
-        /// <param name="checkDefaultValues">if set to <c>true</c> [check default values].</param>
-        /// <returns>Returns a new search instance.</returns>
-        public static Search FullMatch(ITable table, object[] fields, bool checkDefaultValues = false)
-        {
-            if (table == null) throw new ArgumentNullException(nameof(table));
-            if (fields == null) throw new ArgumentNullException(nameof(fields));
-            var search = None;
-            for (var i = 0; i < table.Layout.FieldCount; i++)
-            {
-                var field = table.Layout[i];
-                if (field.Flags.HasFlag(FieldFlags.ID))
-                {
-                    continue;
-                }
-
-                var value = fields.GetValue(i);
-                if (checkDefaultValues)
-                {
-                    if (value == null)
-                    {
-                        continue;
-                    }
-
-                    switch (field.DataType)
-                    {
-                        case DataType.String:
-                            if (Equals(string.Empty, value))
-                            {
-                                continue;
-                            }
-
-                            break;
-                        default:
-                        {
-                            if (field.ValueType != null)
-                            {
-                                var defaultValue = Activator.CreateInstance(field.ValueType);
-                                if (Equals(value, defaultValue))
-                                {
-                                    continue;
-                                }
-                            }
-
-                            break;
-                        }
-                    }
-                }
-
-                search &= FieldEquals(table.Layout.GetName(i), fields.GetValue(i));
-            }
-
-            return search;
-        }
-
-        /// <summary>Creates a field in value search.</summary>
-        /// <param name="name">The name.</param>
-        /// <param name="values">The values.</param>
-        /// <returns>A new search instance.</returns>
-        public static Search FieldIn(string name, params object[] values)
-        {
-            if (values == null) throw new ArgumentNullException(nameof(values));
-            var s = new Set<object>();
-            foreach (var val in values)
-            {
-                s.Include(val);
-            }
-
-            return s.Count == 0 ? None : new Search(SearchMode.In, false, name, s);
-        }
-
-        /// <summary>Creates a field in value search.</summary>
-        /// <param name="name">The name.</param>
-        /// <param name="values">The values.</param>
-        /// <returns>A new search instance.</returns>
-        public static Search FieldIn(string name, IEnumerable values)
-        {
-            if (values == null) throw new ArgumentNullException(nameof(values));
-            var s = new Set<object>();
-            foreach (var val in values)
-            {
-                s.Include(val);
-            }
-
-            return s.Count == 0 ? None : new Search(SearchMode.In, false, name, s);
-        }
-
-        /// <summary>Creates a field equals value search.</summary>
-        /// <param name="name">The field name.</param>
-        /// <param name="value">The value to check against.</param>
-        /// <returns>A new search instance.</returns>
-        public static Search FieldEquals(string name, object value) => new Search(SearchMode.Equals, false, name, value);
-
-        /// <summary>Creates a field not equals value search.</summary>
-        /// <param name="name">The field name.</param>
-        /// <param name="value">The value to check against.</param>
-        /// <returns>A new search instance.</returns>
-        public static Search FieldNotEquals(string name, object value) => new Search(SearchMode.Equals, true, name, value);
-
-        /// <summary>Creates a field like value search.</summary>
-        /// <param name="name">The field name.</param>
-        /// <param name="value">The value to check against.</param>
-        /// <returns>A new search instance.</returns>
-        public static Search FieldLike(string name, object value) => new Search(SearchMode.Like, false, name, value);
-
-        /// <summary>Creates a field not like value search.</summary>
-        /// <param name="name">The field name.</param>
-        /// <param name="value">The value to check against.</param>
-        /// <returns>A new search instance.</returns>
-        public static Search FieldNotLike(string name, object value) => new Search(SearchMode.Like, true, name, value);
-
-        /// <summary>Creates a field greater value search.</summary>
-        /// <param name="name">The field name.</param>
-        /// <param name="value">The value to check against.</param>
-        /// <returns>A new search instance.</returns>
-        public static Search FieldGreater(string name, object value) => new Search(SearchMode.Greater, false, name, value);
-
-        /// <summary>Creates a field greater or equal value search.</summary>
-        /// <param name="name">The field name.</param>
-        /// <param name="value">The value to check against.</param>
-        /// <returns>A new search instance.</returns>
-        public static Search FieldGreaterOrEqual(string name, object value) => new Search(SearchMode.GreaterOrEqual, false, name, value);
-
-        /// <summary>Creates a field smaller value search.</summary>
-        /// <param name="name">The field name.</param>
-        /// <param name="value">The value to check against.</param>
-        /// <returns>A new search instance.</returns>
-        public static Search FieldSmaller(string name, object value) => new Search(SearchMode.Smaller, false, name, value);
-
-        /// <summary>Creates a field smaller or equal value search.</summary>
-        /// <param name="name">The field name.</param>
-        /// <param name="value">The value to check against.</param>
-        /// <returns>A new search instance.</returns>
-        public static Search FieldSmallerOrEqual(string name, object value) => new Search(SearchMode.SmallerOrEqual, false, name, value);
+        /// <inheritdoc />
+        public override int GetHashCode() => ToString().GetHashCode();
 
         /// <inheritdoc />
         public override string ToString()
@@ -465,8 +562,9 @@ namespace Cave.Data
                 : "[{0}] {1} '{2}'".Format(FieldName, operation, StringExtensions.ToString(FieldValue, null));
         }
 
-        /// <inheritdoc />
-        public override int GetHashCode() => ToString().GetHashCode();
+        #endregion
+
+        #region Members
 
         /// <summary>Scans a Table for matches with the current search.</summary>
         /// <param name="preselected">The preselected ids.</param>
@@ -477,6 +575,7 @@ namespace Cave.Data
         public IEnumerable<Row> Scan(IEnumerable<Row> preselected, RowLayout layout, IFieldIndex[] indices, ITable table)
         {
             if (table == null) { throw new ArgumentNullException(nameof(table)); }
+
             if (layout == null) { throw new ArgumentNullException(nameof(layout)); }
 
             LoadLayout(layout);
@@ -573,52 +672,6 @@ namespace Cave.Data
                     }
                 }
                 default: throw new NotImplementedException($"Mode {Mode} not implemented!");
-            }
-        }
-
-        internal void LoadLayout(RowLayout layout)
-        {
-            if (Mode == SearchMode.And || Mode == SearchMode.Or || Mode == SearchMode.None)
-            {
-                return;
-            }
-
-            if (Layout != null)
-            {
-                if (ReferenceEquals(layout, Layout))
-                {
-                    return;
-                }
-            }
-
-            Layout = layout ?? throw new ArgumentNullException(nameof(layout));
-            if (FieldName == null)
-            {
-                throw new InvalidOperationException($"Property {nameof(FieldName)} has to be set!");
-            }
-            FieldNumber = layout.GetFieldIndex(FieldName, true);
-            FieldProperties = layout[FieldNumber];
-
-            if (Mode == SearchMode.In)
-            {
-                var result = new Set<object>();
-                foreach (var value in (Set<object>) FieldValue)
-                {
-                    result.Add(ConvertValue(value));
-                }
-
-                FieldValue = result;
-            }
-            else if (Mode == SearchMode.Like)
-            {
-                // Do nothing
-            }
-            else
-            {
-                if ((FieldValue != null) && (FieldProperties.ValueType != FieldValue.GetType()))
-                {
-                    FieldValue = ConvertValue(FieldValue);
-                }
             }
         }
 
@@ -767,25 +820,74 @@ namespace Cave.Data
             return result;
         }
 
-        /// <summary>Inverts the selection of the specified 'items' using the sorting present at specified 'all'.</summary>
-        /// <param name="all">All ids (sorting will be kept).</param>
-        /// <param name="items">The items to be inverted.</param>
-        /// <returns>The inverted selection.</returns>
-        static IEnumerable<Row> Invert(IEnumerable<Row> all, IEnumerable<Row> items) => all.Except(items);
-
-        static int Compare(DateTime tableValue, DateTime checkValue)
+        internal void LoadLayout(RowLayout layout)
         {
-            if (checkValue.Kind == DateTimeKind.Local)
+            if ((Mode == SearchMode.And) || (Mode == SearchMode.Or) || (Mode == SearchMode.None))
             {
-                checkValue = checkValue.ToUniversalTime();
+                return;
             }
 
-            if (tableValue.Kind == DateTimeKind.Local)
+            if (Layout != null)
             {
-                tableValue = tableValue.ToUniversalTime();
+                if (ReferenceEquals(layout, Layout))
+                {
+                    return;
+                }
             }
 
-            return tableValue.Ticks.CompareTo(checkValue.Ticks);
+            Layout = layout ?? throw new ArgumentNullException(nameof(layout));
+            if (FieldName == null)
+            {
+                throw new InvalidOperationException($"Property {nameof(FieldName)} has to be set!");
+            }
+
+            FieldNumber = layout.GetFieldIndex(FieldName, true);
+            FieldProperties = layout[FieldNumber];
+            if (Mode == SearchMode.In)
+            {
+                var result = new Set<object>();
+                foreach (var value in (Set<object>) FieldValue)
+                {
+                    result.Add(ConvertValue(value));
+                }
+
+                FieldValue = result;
+            }
+            else if (Mode == SearchMode.Like)
+            {
+                // Do nothing
+            }
+            else
+            {
+                if ((FieldValue != null) && (FieldProperties.ValueType != FieldValue.GetType()))
+                {
+                    FieldValue = ConvertValue(FieldValue);
+                }
+            }
+        }
+
+        object ConvertValue(object value)
+        {
+            try
+            {
+                if (FieldProperties.ValueType.IsPrimitive && FieldProperties.ValueType.IsValueType)
+                {
+                    try
+                    {
+                        if (value is IConvertible conv)
+                        {
+                            return conv.ToType(FieldProperties.ValueType, CultureInfo.InvariantCulture);
+                        }
+                    }
+                    catch { }
+                }
+
+                return FieldProperties.ParseValue(value.ToString(), null, CultureInfo.InvariantCulture);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidDataException($"Search {this} cannot convert value {value} to type {FieldProperties}!", ex);
+            }
         }
 
         bool Like(object value)
@@ -854,28 +956,6 @@ namespace Cave.Data
             return Expression.IsMatch(text);
         }
 
-        object ConvertValue(object value)
-        {
-            try
-            {
-                if (FieldProperties.ValueType.IsPrimitive && FieldProperties.ValueType.IsValueType)
-                {
-                    try
-                    {
-                        if (value is IConvertible conv)
-                        {
-                            return conv.ToType(FieldProperties.ValueType, CultureInfo.InvariantCulture);
-                        }
-                    }
-                    catch { }
-                }
-
-                return FieldProperties.ParseValue(value.ToString(), null, CultureInfo.InvariantCulture);
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidDataException($"Search {this} cannot convert value {value} to type {FieldProperties}!", ex);
-            }
-        }
+        #endregion
     }
 }

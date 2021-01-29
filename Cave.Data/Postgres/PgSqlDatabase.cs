@@ -9,6 +9,8 @@ namespace Cave.Data.Postgres
     /// <summary>Provides a postgre sql database implementation.</summary>
     public sealed class PgSqlDatabase : SqlDatabase
     {
+        #region Constructors
+
         /// <summary>Initializes a new instance of the <see cref="PgSqlDatabase" /> class.</summary>
         /// <param name="storage">the postgre sql storage engine.</param>
         /// <param name="name">the name of the database.</param>
@@ -17,31 +19,9 @@ namespace Cave.Data.Postgres
         {
         }
 
-        /// <inheritdoc />
-        public override bool IsSecure
-        {
-            get
-            {
-                var error = false;
-                var connection = SqlStorage.GetConnection(Name);
-                try
-                {
-                    return connection.ConnectionString.ToUpperInvariant().Contains("SSLMODE=REQUIRE");
-                }
-                catch
-                {
-                    error = true;
-                    throw;
-                }
-                finally
-                {
-                    SqlStorage.ReturnConnection(ref connection, error);
-                }
-            }
-        }
+        #endregion
 
-        /// <inheritdoc />
-        public override ITable GetTable(string tableName, TableFlags flags = default) => PgSqlTable.Connect(this, flags, tableName);
+        #region Overrides
 
         /// <summary>Adds a new tableName with the specified name.</summary>
         /// <param name="layout">Layout of the tableName.</param>
@@ -236,7 +216,7 @@ namespace Cave.Data.Postgres
                         if (fieldProperties.MaximumLength > 0)
                         {
                             var precision = (int) fieldProperties.MaximumLength;
-                            var scale = (int)((fieldProperties.MaximumLength - precision) * 100);
+                            var scale = (int) ((fieldProperties.MaximumLength - precision) * 100);
                             if (scale >= precision)
                             {
                                 throw new ArgumentOutOfRangeException(
@@ -326,7 +306,35 @@ namespace Cave.Data.Postgres
         }
 
         /// <inheritdoc />
+        public override ITable GetTable(string tableName, TableFlags flags = default) => PgSqlTable.Connect(this, flags, tableName);
+
+        /// <inheritdoc />
         protected override string[] GetTableNames() =>
             SqlStorage.Query(database: Name, table: "pg_tables", cmd: "SELECT tablename FROM pg_tables").Select(r => r[0].ToString()).ToArray();
+
+        /// <inheritdoc />
+        public override bool IsSecure
+        {
+            get
+            {
+                var error = false;
+                var connection = SqlStorage.GetConnection(Name);
+                try
+                {
+                    return connection.ConnectionString.ToUpperInvariant().Contains("SSLMODE=REQUIRE");
+                }
+                catch
+                {
+                    error = true;
+                    throw;
+                }
+                finally
+                {
+                    SqlStorage.ReturnConnection(ref connection, error);
+                }
+            }
+        }
+
+        #endregion
     }
 }

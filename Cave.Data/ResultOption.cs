@@ -10,7 +10,107 @@ namespace Cave.Data
     /// <summary>Provides resultset options for search, sort and grouping functions.</summary>
     public sealed class ResultOption : IEnumerable<ResultOption>
     {
+        #region Static
+
+        /// <summary>Group the fields with the specified fieldname.</summary>
+        /// <param name="field">Field to group.</param>
+        /// <returns>A new <see cref="ResultOption" /> instance.</returns>
+        public static ResultOption Group(string field) => new ResultOption(ResultOptionMode.Group, field);
+
+        /// <summary>Limit the number of result sets.</summary>
+        /// <param name="resultCount">Number of results to fetch.</param>
+        /// <returns>A new <see cref="ResultOption" /> instance.</returns>
+        public static ResultOption Limit(int resultCount) =>
+            resultCount < 0
+                ? throw new ArgumentOutOfRangeException(nameof(resultCount))
+                : new ResultOption(ResultOptionMode.Limit, resultCount.ToString(CultureInfo.InvariantCulture));
+
+        /// <summary>Set start offset of result sets.</summary>
+        /// <param name="offset">Offset at the result list.</param>
+        /// <returns>A new <see cref="ResultOption" /> instance.</returns>
+        public static ResultOption Offset(int offset) =>
+            offset < 0
+                ? throw new ArgumentOutOfRangeException(nameof(offset))
+                : new ResultOption(ResultOptionMode.Offset, offset.ToString(CultureInfo.InvariantCulture));
+
+        /// <summary>Sort ascending by the specified fieldname.</summary>
+        /// <param name="field">The field to sort.</param>
+        /// <returns>A new <see cref="ResultOption" /> instance.</returns>
+        public static ResultOption SortAscending(string field) => new ResultOption(ResultOptionMode.SortAsc, field);
+
+        /// <summary>Sort ascending by the specified fieldname.</summary>
+        /// <param name="fields">The fields to sort.</param>
+        /// <returns>A new <see cref="ResultOption" /> instance.</returns>
+        public static ResultOption SortAscending(params string[] fields)
+        {
+            var result = None;
+            if (fields != null)
+            {
+                foreach (var field in fields)
+                {
+                    result += SortAscending(field);
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>Sort descending by the specified fieldname.</summary>
+        /// <param name="field">The field to sort.</param>
+        /// <returns>A new <see cref="ResultOption" /> instance.</returns>
+        public static ResultOption SortDescending(string field) => new ResultOption(ResultOptionMode.SortDesc, field);
+
+        /// <summary>Sort descending by the specified fieldname.</summary>
+        /// <param name="fields">The fields to sort.</param>
+        /// <returns>A new <see cref="ResultOption" /> instance.</returns>
+        public static ResultOption SortDescending(params string[] fields)
+        {
+            var result = None;
+            if (fields != null)
+            {
+                foreach (var field in fields)
+                {
+                    result += SortDescending(field);
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>Combines two <see cref="ResultOption" />s with AND.</summary>
+        /// <param name="left">The first item.</param>
+        /// <param name="right">The second item.</param>
+        /// <returns>The result of the operator.</returns>
+        public static ResultOption operator +(ResultOption left, ResultOption right) => new ResultOption(left.Concat(right));
+
+        /// <summary>Implements the operator ==.</summary>
+        /// <param name="left">The first item.</param>
+        /// <param name="right">The second item.</param>
+        /// <returns>The result of the operator.</returns>
+        public static bool operator ==(ResultOption left, ResultOption right)
+        {
+            if (right is null)
+            {
+                return left is null;
+            }
+
+            return left is object && (left.Mode == right.Mode) && (left.Parameter == right.Parameter);
+        }
+
+        /// <summary>Implements the operator !=.</summary>
+        /// <param name="left">The first item.</param>
+        /// <param name="right">The second item.</param>
+        /// <returns>The result of the operator.</returns>
+        public static bool operator !=(ResultOption left, ResultOption right) => !(left == right);
+
+        /// <summary>Gets no option.</summary>
+        public static ResultOption None { get; } = new ResultOption(ResultOptionMode.None, null);
+
+        #endregion
+
         readonly IEnumerable<ResultOption> list;
+
+        #region Constructors
 
         ResultOption(IEnumerable<ResultOption> list)
         {
@@ -26,16 +126,9 @@ namespace Cave.Data
             Parameter = parameter;
         }
 
-        /// <summary>Gets no option.</summary>
-        public static ResultOption None { get; } = new ResultOption(ResultOptionMode.None, null);
+        #endregion
 
-        /// <summary>Gets the mode.</summary>
-        /// <value>The mode.</value>
-        public ResultOptionMode Mode { get; }
-
-        /// <summary>Gets the parameter name.</summary>
-        /// <value>The parameter name.</value>
-        public string Parameter { get; }
+        #region Properties
 
         /// <summary>Gets the field names.</summary>
         /// <value>The field names.</value>
@@ -60,137 +153,37 @@ namespace Cave.Data
             }
         }
 
-        /// <inheritdoc />
-        public IEnumerator<ResultOption> GetEnumerator() => (list ?? new[] { this }).Where(i => i.Mode != ResultOptionMode.None).GetEnumerator();
+        /// <summary>Gets the mode.</summary>
+        /// <value>The mode.</value>
+        public ResultOptionMode Mode { get; }
+
+        /// <summary>Gets the parameter name.</summary>
+        /// <value>The parameter name.</value>
+        public string Parameter { get; }
+
+        #endregion
+
+        #region IEnumerable<ResultOption> Members
 
         /// <inheritdoc />
         IEnumerator IEnumerable.GetEnumerator() => (list ?? new[] { this }).Where(i => i.Mode != ResultOptionMode.None).GetEnumerator();
 
-        /// <summary>Implements the operator ==.</summary>
-        /// <param name="left">The first item.</param>
-        /// <param name="right">The second item.</param>
-        /// <returns>The result of the operator.</returns>
-        public static bool operator ==(ResultOption left, ResultOption right)
-        {
-            if (right is null)
-            {
-                return left is null;
-            }
+        /// <inheritdoc />
+        public IEnumerator<ResultOption> GetEnumerator() => (list ?? new[] { this }).Where(i => i.Mode != ResultOptionMode.None).GetEnumerator();
 
-            return left is object && (left.Mode == right.Mode) && (left.Parameter == right.Parameter);
+        #endregion
+
+        #region Overrides
+
+        /// <inheritdoc />
+        public override bool Equals(object obj)
+        {
+            var o = obj as ResultOption;
+            return (o != null) && (o.Mode == Mode) && (o.Parameter == Parameter);
         }
 
-        /// <summary>Implements the operator !=.</summary>
-        /// <param name="left">The first item.</param>
-        /// <param name="right">The second item.</param>
-        /// <returns>The result of the operator.</returns>
-        public static bool operator !=(ResultOption left, ResultOption right) => !(left == right);
-
-        /// <summary>Combines two <see cref="ResultOption" />s with AND.</summary>
-        /// <param name="left">The first item.</param>
-        /// <param name="right">The second item.</param>
-        /// <returns>The result of the operator.</returns>
-        public static ResultOption operator +(ResultOption left, ResultOption right) => new ResultOption(left.Concat(right));
-
-        /// <summary>Sort ascending by the specified fieldname.</summary>
-        /// <param name="field">The field to sort.</param>
-        /// <returns>A new <see cref="ResultOption" /> instance.</returns>
-        public static ResultOption SortAscending(string field) => new ResultOption(ResultOptionMode.SortAsc, field);
-
-        /// <summary>Sort descending by the specified fieldname.</summary>
-        /// <param name="field">The field to sort.</param>
-        /// <returns>A new <see cref="ResultOption" /> instance.</returns>
-        public static ResultOption SortDescending(string field) => new ResultOption(ResultOptionMode.SortDesc, field);
-
-        /// <summary>Sort ascending by the specified fieldname.</summary>
-        /// <param name="fields">The fields to sort.</param>
-        /// <returns>A new <see cref="ResultOption" /> instance.</returns>
-        public static ResultOption SortAscending(params string[] fields)
-        {
-            var result = None;
-            if (fields != null)
-            {
-                foreach (var field in fields)
-                {
-                    result += SortAscending(field);
-                }
-            }
-            return result;
-        }
-
-        /// <summary>Sort descending by the specified fieldname.</summary>
-        /// <param name="fields">The fields to sort.</param>
-        /// <returns>A new <see cref="ResultOption" /> instance.</returns>
-        public static ResultOption SortDescending(params string[] fields)
-        {
-            var result = None;
-            if (fields != null)
-            {
-                foreach (var field in fields)
-                {
-                    result += SortDescending(field);
-                }
-            }
-            return result;
-        }
-
-        /// <summary>Limit the number of result sets.</summary>
-        /// <param name="resultCount">Number of results to fetch.</param>
-        /// <returns>A new <see cref="ResultOption" /> instance.</returns>
-        public static ResultOption Limit(int resultCount)
-        {
-            return resultCount < 0
-                ? throw new ArgumentOutOfRangeException(nameof(resultCount))
-                : new ResultOption(ResultOptionMode.Limit, resultCount.ToString(CultureInfo.InvariantCulture));
-        }
-
-        /// <summary>Set start offset of result sets.</summary>
-        /// <param name="offset">Offset at the result list.</param>
-        /// <returns>A new <see cref="ResultOption" /> instance.</returns>
-        public static ResultOption Offset(int offset)
-        {
-            return offset < 0
-                ? throw new ArgumentOutOfRangeException(nameof(offset))
-                : new ResultOption(ResultOptionMode.Offset, offset.ToString(CultureInfo.InvariantCulture));
-        }
-
-        /// <summary>Group the fields with the specified fieldname.</summary>
-        /// <param name="field">Field to group.</param>
-        /// <returns>A new <see cref="ResultOption" /> instance.</returns>
-        public static ResultOption Group(string field) => new ResultOption(ResultOptionMode.Group, field);
-
-        /// <summary>Returns an array with all options with the specified modes.</summary>
-        /// <param name="modes">The modes.</param>
-        /// <returns>Returns an array with all matching options.</returns>
-        public ResultOption[] Filter(params ResultOptionMode[] modes)
-        {
-            var results = new List<ResultOption>();
-            foreach (var option in this)
-            {
-                if (Array.IndexOf(modes, option.Mode) > -1)
-                {
-                    results.Add(option);
-                }
-            }
-
-            return results.ToArray();
-        }
-
-        /// <summary>Determines whether [contains] [the specified modes].</summary>
-        /// <param name="modes">The modes.</param>
-        /// <returns><c>true</c> if [contains] [the specified modes]; otherwise, <c>false</c>.</returns>
-        public bool Contains(params ResultOptionMode[] modes)
-        {
-            foreach (var option in this)
-            {
-                if (Array.IndexOf(modes, option.Mode) > -1)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
+        /// <inheritdoc />
+        public override int GetHashCode() => ToString().GetHashCode();
 
         /// <inheritdoc />
         public override string ToString()
@@ -215,14 +208,43 @@ namespace Cave.Data
             return result.ToString();
         }
 
-        /// <inheritdoc />
-        public override bool Equals(object obj)
+        #endregion
+
+        #region Members
+
+        /// <summary>Determines whether [contains] [the specified modes].</summary>
+        /// <param name="modes">The modes.</param>
+        /// <returns><c>true</c> if [contains] [the specified modes]; otherwise, <c>false</c>.</returns>
+        public bool Contains(params ResultOptionMode[] modes)
         {
-            var o = obj as ResultOption;
-            return o != null && (o.Mode == Mode) && (o.Parameter == Parameter);
+            foreach (var option in this)
+            {
+                if (Array.IndexOf(modes, option.Mode) > -1)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
-        /// <inheritdoc />
-        public override int GetHashCode() => ToString().GetHashCode();
+        /// <summary>Returns an array with all options with the specified modes.</summary>
+        /// <param name="modes">The modes.</param>
+        /// <returns>Returns an array with all matching options.</returns>
+        public ResultOption[] Filter(params ResultOptionMode[] modes)
+        {
+            var results = new List<ResultOption>();
+            foreach (var option in this)
+            {
+                if (Array.IndexOf(modes, option.Mode) > -1)
+                {
+                    results.Add(option);
+                }
+            }
+
+            return results.ToArray();
+        }
+
+        #endregion
     }
 }

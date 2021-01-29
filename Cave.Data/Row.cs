@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Cave.Collections;
 
@@ -15,6 +14,8 @@ namespace Cave.Data
 
         /// <summary>Gets the current values of the row.</summary>
         public readonly object[] Values;
+
+        #region Constructors
 
         #region constructors
 
@@ -40,6 +41,10 @@ namespace Cave.Data
 
         #endregion
 
+        #endregion
+
+        #region Properties
+
         /// <summary>Gets the fieldcount.</summary>
         public int FieldCount => Values.Length;
 
@@ -52,6 +57,20 @@ namespace Cave.Data
         /// <param name="fieldName">Name of the field.</param>
         /// <returns>Returns a value or null.</returns>
         public object this[string fieldName] => Values[Layout.GetFieldIndex(fieldName, true)];
+
+        #endregion
+
+        #region IEnumerable<KeyValuePair<string,object>> Members
+
+        /// <inheritdoc />
+        IEnumerator IEnumerable.GetEnumerator() => ToDictionary().GetEnumerator();
+
+        /// <inheritdoc />
+        public IEnumerator<KeyValuePair<string, object>> GetEnumerator() => ToDictionary().GetEnumerator();
+
+        #endregion
+
+        #region IEquatable<Row> Members
 
         /// <summary>Equalses the specified other.</summary>
         /// <param name="other">The other.</param>
@@ -76,85 +95,9 @@ namespace Cave.Data
             return true;
         }
 
-        /// <summary>Gets all values of the row.</summary>
-        /// <returns>A copy of all values.</returns>
-        public object[] CopyValues() => (object[]) Values.Clone();
-
-        /// <summary>Gets a struct containing all values of the row.</summary>
-        /// <param name="layout">Table layout.</param>
-        /// <typeparam name="TStruct">Structure type.</typeparam>
-        /// <returns>A new structure instance.</returns>
-        public TStruct GetStruct<TStruct>(RowLayout layout)
-            where TStruct : struct
-        {
-            if (layout == null) throw new ArgumentNullException(nameof(layout));
-            if (!layout.IsTyped)
-            {
-                throw new NotSupportedException("This Row was not created from a typed layout!");
-            }
-
-            object result = default(TStruct);
-            layout.SetValues(ref result, Values);
-            return (TStruct) result;
-        }
-
-        /// <summary>Obtains a row value as string using the string format defined at the rowlayout.</summary>
-        /// <param name="layout">The layout.</param>
-        /// <param name="index">The field index.</param>
-        /// <returns>The string to display.</returns>
-        public string GetDisplayString(RowLayout layout, int index)
-        {
-            if (layout == null) throw new ArgumentNullException(nameof(layout));
-            var value = Values[index];
-            return value == null ? string.Empty : layout.GetDisplayString(index, value);
-        }
-
-        /// <summary>Gets all row values as strings using the string format defined at the rowlayout.</summary>
-        /// <param name="layout">Table layout.</param>
-        /// <returns>An array containing the display strings for all fields.</returns>
-        public string[] GetDisplayStrings(RowLayout layout)
-        {
-            if (layout == null) throw new ArgumentNullException(nameof(layout));
-            var strings = new string[Values.Length];
-            for (var i = 0; i < Values.Length; i++)
-            {
-                strings[i] = layout.GetDisplayString(i, Values[i]);
-            }
-
-            return strings;
-        }
-
-        #region overrides
-
-        /// <inheritdoc />
-        public override string ToString() => CsvWriter.RowToString(CsvProperties.Default, Layout, this);
-
         #endregion
 
-        /// <summary>Gets the value with the specified name.</summary>
-        /// <typeparam name="T">The expected type.</typeparam>
-        /// <param name="fieldName">The name of the field.</param>
-        /// <returns>Returns the field value.</returns>
-        public T GetValue<T>(string fieldName) => GetValue<T>(Layout.GetFieldIndex(fieldName, true));
-
-        /// <summary>Gets the value with the specified name.</summary>
-        /// <typeparam name="T">The expected type.</typeparam>
-        /// <param name="fieldIndex">The index of the field.</param>
-        /// <returns>Returns the field value.</returns>
-        public T GetValue<T>(int fieldIndex)
-        {
-            var result = typeof(T).ConvertValue(Values[fieldIndex], null);
-            if (result is null)
-            {
-                return default;
-            }
-
-            return (T) result;
-        }
-
-        /// <summary>Gets a dictionary containing all field.Name = value combinations of this row.</summary>
-        /// <returns>Returns a new <see cref="IDictionary{TKey, TValue}" /> instance.</returns>
-        public IDictionary<string, object> ToDictionary() => Layout.ToDictionary(field => field.Name, field => Values[field.Index]);
+        #region Overrides
 
         /// <summary>Determines whether the specified <see cref="object" />, is equal to this instance.</summary>
         /// <param name="obj">The <see cref="object" /> to compare with this instance.</param>
@@ -191,10 +134,102 @@ namespace Cave.Data
             return hash;
         }
 
-        /// <inheritdoc/>
-        public IEnumerator<KeyValuePair<string, object>> GetEnumerator() => ToDictionary().GetEnumerator();
+        #region overrides
 
-        /// <inheritdoc/>
-        IEnumerator IEnumerable.GetEnumerator() => ToDictionary().GetEnumerator();
+        /// <inheritdoc />
+        public override string ToString() => CsvWriter.RowToString(CsvProperties.Default, Layout, this);
+
+        #endregion
+
+        #endregion
+
+        #region Members
+
+        /// <summary>Gets all values of the row.</summary>
+        /// <returns>A copy of all values.</returns>
+        public object[] CopyValues() => (object[]) Values.Clone();
+
+        /// <summary>Obtains a row value as string using the string format defined at the rowlayout.</summary>
+        /// <param name="layout">The layout.</param>
+        /// <param name="index">The field index.</param>
+        /// <returns>The string to display.</returns>
+        public string GetDisplayString(RowLayout layout, int index)
+        {
+            if (layout == null)
+            {
+                throw new ArgumentNullException(nameof(layout));
+            }
+
+            var value = Values[index];
+            return value == null ? string.Empty : layout.GetDisplayString(index, value);
+        }
+
+        /// <summary>Gets all row values as strings using the string format defined at the rowlayout.</summary>
+        /// <param name="layout">Table layout.</param>
+        /// <returns>An array containing the display strings for all fields.</returns>
+        public string[] GetDisplayStrings(RowLayout layout)
+        {
+            if (layout == null)
+            {
+                throw new ArgumentNullException(nameof(layout));
+            }
+
+            var strings = new string[Values.Length];
+            for (var i = 0; i < Values.Length; i++)
+            {
+                strings[i] = layout.GetDisplayString(i, Values[i]);
+            }
+
+            return strings;
+        }
+
+        /// <summary>Gets a struct containing all values of the row.</summary>
+        /// <param name="layout">Table layout.</param>
+        /// <typeparam name="TStruct">Structure type.</typeparam>
+        /// <returns>A new structure instance.</returns>
+        public TStruct GetStruct<TStruct>(RowLayout layout)
+            where TStruct : struct
+        {
+            if (layout == null)
+            {
+                throw new ArgumentNullException(nameof(layout));
+            }
+
+            if (!layout.IsTyped)
+            {
+                throw new NotSupportedException("This Row was not created from a typed layout!");
+            }
+
+            object result = default(TStruct);
+            layout.SetValues(ref result, Values);
+            return (TStruct) result;
+        }
+
+        /// <summary>Gets the value with the specified name.</summary>
+        /// <typeparam name="T">The expected type.</typeparam>
+        /// <param name="fieldName">The name of the field.</param>
+        /// <returns>Returns the field value.</returns>
+        public T GetValue<T>(string fieldName) => GetValue<T>(Layout.GetFieldIndex(fieldName, true));
+
+        /// <summary>Gets the value with the specified name.</summary>
+        /// <typeparam name="T">The expected type.</typeparam>
+        /// <param name="fieldIndex">The index of the field.</param>
+        /// <returns>Returns the field value.</returns>
+        public T GetValue<T>(int fieldIndex)
+        {
+            var result = typeof(T).ConvertValue(Values[fieldIndex], null);
+            if (result is null)
+            {
+                return default;
+            }
+
+            return (T) result;
+        }
+
+        /// <summary>Gets a dictionary containing all field.Name = value combinations of this row.</summary>
+        /// <returns>Returns a new <see cref="IDictionary{TKey, TValue}" /> instance.</returns>
+        public IDictionary<string, object> ToDictionary() => Layout.ToDictionary(field => field.Name, field => Values[field.Index]);
+
+        #endregion
     }
 }

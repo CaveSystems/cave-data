@@ -8,6 +8,85 @@ namespace Cave.Data
     /// <summary>Provides Row based serialization.</summary>
     public static partial class RowSerializer
     {
+        #region Static
+
+        #region private Data Deserializer
+
+        static Row DeserializeData(DataReader reader, RowLayout layout)
+        {
+            var values = new object[layout.FieldCount];
+            for (var i = 0; i < layout.FieldCount; i++)
+            {
+                var dataType = layout[i].DataType;
+                switch (dataType)
+                {
+                    case DataType.Binary:
+                        var size = reader.Read7BitEncodedInt32();
+                        values[i] = reader.ReadBytes(size);
+                        break;
+                    case DataType.Bool:
+                        values[i] = reader.ReadBool();
+                        break;
+                    case DataType.DateTime:
+                        values[i] = reader.ReadDateTime();
+                        break;
+                    case DataType.TimeSpan:
+                        values[i] = reader.ReadTimeSpan();
+                        break;
+                    case DataType.Int8:
+                        values[i] = reader.ReadInt8();
+                        break;
+                    case DataType.Int16:
+                        values[i] = reader.ReadInt16();
+                        break;
+                    case DataType.Int32:
+                        values[i] = reader.Read7BitEncodedInt32();
+                        break;
+                    case DataType.Int64:
+                        values[i] = reader.Read7BitEncodedInt64();
+                        break;
+                    case DataType.UInt32:
+                        values[i] = reader.Read7BitEncodedUInt32();
+                        break;
+                    case DataType.UInt64:
+                        values[i] = reader.Read7BitEncodedUInt64();
+                        break;
+                    case DataType.UInt8:
+                        values[i] = reader.ReadUInt8();
+                        break;
+                    case DataType.UInt16:
+                        values[i] = reader.ReadUInt16();
+                        break;
+                    case DataType.Char:
+                        values[i] = reader.ReadChar();
+                        break;
+                    case DataType.Single:
+                        values[i] = reader.ReadSingle();
+                        break;
+                    case DataType.Double:
+                        values[i] = reader.ReadDouble();
+                        break;
+                    case DataType.Decimal:
+                        values[i] = reader.ReadDecimal();
+                        break;
+                    case DataType.String:
+                        values[i] = reader.ReadString();
+                        break;
+                    case DataType.Enum:
+                        values[i] = reader.Read7BitEncodedInt64();
+                        break;
+                    case DataType.User:
+                        values[i] = reader.ReadString();
+                        break;
+                    default: throw new NotImplementedException($"Datatype {dataType} not implemented!");
+                }
+            }
+
+            return new Row(layout, values, false);
+        }
+
+        #endregion
+
         #region private Data Serializer
 
         static void SerializeData(DataWriter writer, RowLayout layout, Row row)
@@ -95,81 +174,6 @@ namespace Cave.Data
         }
 
         #endregion
-
-        #region private Data Deserializer
-
-        static Row DeserializeData(DataReader reader, RowLayout layout)
-        {
-            var values = new object[layout.FieldCount];
-            for (var i = 0; i < layout.FieldCount; i++)
-            {
-                var dataType = layout[i].DataType;
-                switch (dataType)
-                {
-                    case DataType.Binary:
-                        var size = reader.Read7BitEncodedInt32();
-                        values[i] = reader.ReadBytes(size);
-                        break;
-                    case DataType.Bool:
-                        values[i] = reader.ReadBool();
-                        break;
-                    case DataType.DateTime:
-                        values[i] = reader.ReadDateTime();
-                        break;
-                    case DataType.TimeSpan:
-                        values[i] = reader.ReadTimeSpan();
-                        break;
-                    case DataType.Int8:
-                        values[i] = reader.ReadInt8();
-                        break;
-                    case DataType.Int16:
-                        values[i] = reader.ReadInt16();
-                        break;
-                    case DataType.Int32:
-                        values[i] = reader.Read7BitEncodedInt32();
-                        break;
-                    case DataType.Int64:
-                        values[i] = reader.Read7BitEncodedInt64();
-                        break;
-                    case DataType.UInt32:
-                        values[i] = reader.Read7BitEncodedUInt32();
-                        break;
-                    case DataType.UInt64:
-                        values[i] = reader.Read7BitEncodedUInt64();
-                        break;
-                    case DataType.UInt8:
-                        values[i] = reader.ReadUInt8();
-                        break;
-                    case DataType.UInt16:
-                        values[i] = reader.ReadUInt16();
-                        break;
-                    case DataType.Char:
-                        values[i] = reader.ReadChar();
-                        break;
-                    case DataType.Single:
-                        values[i] = reader.ReadSingle();
-                        break;
-                    case DataType.Double:
-                        values[i] = reader.ReadDouble();
-                        break;
-                    case DataType.Decimal:
-                        values[i] = reader.ReadDecimal();
-                        break;
-                    case DataType.String:
-                        values[i] = reader.ReadString();
-                        break;
-                    case DataType.Enum:
-                        values[i] = reader.Read7BitEncodedInt64();
-                        break;
-                    case DataType.User:
-                        values[i] = reader.ReadString();
-                        break;
-                    default: throw new NotImplementedException($"Datatype {dataType} not implemented!");
-                }
-            }
-
-            return new Row(layout, values, false);
-        }
 
         #endregion
 
@@ -364,10 +368,7 @@ namespace Cave.Data
         #region Foreign Deserializer (needs layout at stream)
 
         /// <summary>Deserializes a foreign row.</summary>
-        /// <remarks>
-        ///     This can only deserialize rows written with layout. (Requires use of <see cref="Flags.WithLayout" /> when
-        ///     serializing.)
-        /// </remarks>
+        /// <remarks>This can only deserialize rows written with layout. (Requires use of <see cref="Flags.WithLayout" /> when serializing.)</remarks>
         /// <param name="reader">The reader to read from.</param>
         /// <returns>The deserialized row instance.</returns>
         public static Row DeserializeForeignRow(this DataReader reader)
@@ -395,10 +396,7 @@ namespace Cave.Data
         }
 
         /// <summary>Deserializes a foreign table.</summary>
-        /// <remarks>
-        ///     This can only deserialize rows written with layout. (Requires use of <see cref="Flags.WithLayout" /> when
-        ///     serializing.)
-        /// </remarks>
+        /// <remarks>This can only deserialize rows written with layout. (Requires use of <see cref="Flags.WithLayout" /> when serializing.)</remarks>
         /// <param name="reader">The reader to read from.</param>
         /// <returns>The deserialized table instance.</returns>
         public static ITable DeserializeForeignTable(this DataReader reader)

@@ -1,7 +1,7 @@
-﻿using Cave.Data;
-using NUnit.Framework;
-using System;
+﻿using System;
 using System.IO;
+using Cave.Data;
+using NUnit.Framework;
 
 #pragma warning disable CS0649
 #pragma warning disable CS0659
@@ -47,14 +47,13 @@ namespace Test
             {
                 var test_T2 = Math.Abs(T2.TotalSeconds - other.T2.TotalSeconds) < 1;
                 var test_T5 = Math.Abs(T5.TotalSeconds - other.T5.TotalSeconds) < 1;
-
-                return T1 == other.T1
-                    && test_T2
-                    && T3 == other.T3
-                    && T4 == other.T4
-                    && test_T5
-                    && T6 == other.T6
-                    && T7 == other.T7;
+                return (T1 == other.T1)
+                 && test_T2
+                 && (T3 == other.T3)
+                 && (T4 == other.T4)
+                 && test_T5
+                 && (T6 == other.T6)
+                 && (T7 == other.T7);
             }
 
             public override bool Equals(object obj)
@@ -63,6 +62,7 @@ namespace Test
                 {
                     return Equals(test);
                 }
+
                 return false;
             }
 
@@ -74,44 +74,15 @@ namespace Test
         }
 
         [Test]
-        public void TestDAT()
-        {
-            var layout = RowLayout.CreateTyped(typeof(TestStruct));
-
-            var t1 = new TestStruct();
-            t1.Init(TimeSpan.MinValue);
-            var t2 = new TestStruct();
-            t2.Init(TimeSpan.MaxValue);
-            var t3 = new TestStruct();
-            t3.Init(DateTime.Now.TimeOfDay);
-
-            var ms = new MemoryStream();
-            var w = new DatWriter(layout, ms);
-            w.Write(t1);
-            w.Write(t2);
-            w.Write(t3);
-            w.Close();
-            var ms2 = new MemoryStream(ms.ToArray());
-            var r = new DatReader(ms2);
-            var list = r.ReadList<TestStruct>();
-            Assert.AreEqual(3, list.Count);
-            Assert.AreEqual(t1, list[0]);
-            Assert.AreEqual(t2, list[1]);
-            Assert.AreEqual(t3, list[2]);
-        }
-
-        [Test]
         public void TestCSV()
         {
             var layout = RowLayout.CreateTyped(typeof(TestStruct));
-
             var t1 = new TestStruct();
             t1.Init(TimeSpan.MinValue);
             var t2 = new TestStruct();
             t2.Init(TimeSpan.MaxValue);
             var t3 = new TestStruct();
             t3.Init(DateTime.Now.TimeOfDay);
-
             var ms = new MemoryStream();
             var w = new CsvWriter(layout, ms);
             w.Write(t1);
@@ -120,6 +91,31 @@ namespace Test
             w.Close();
             var ms2 = new MemoryStream(ms.ToArray());
             var r = new CsvReader(layout, ms2);
+            var list = r.ReadList<TestStruct>();
+            Assert.AreEqual(3, list.Count);
+            Assert.AreEqual(t1, list[0]);
+            Assert.AreEqual(t2, list[1]);
+            Assert.AreEqual(t3, list[2]);
+        }
+
+        [Test]
+        public void TestDAT()
+        {
+            var layout = RowLayout.CreateTyped(typeof(TestStruct));
+            var t1 = new TestStruct();
+            t1.Init(TimeSpan.MinValue);
+            var t2 = new TestStruct();
+            t2.Init(TimeSpan.MaxValue);
+            var t3 = new TestStruct();
+            t3.Init(DateTime.Now.TimeOfDay);
+            var ms = new MemoryStream();
+            var w = new DatWriter(layout, ms);
+            w.Write(t1);
+            w.Write(t2);
+            w.Write(t3);
+            w.Close();
+            var ms2 = new MemoryStream(ms.ToArray());
+            var r = new DatReader(ms2);
             var list = r.ReadList<TestStruct>();
             Assert.AreEqual(3, list.Count);
             Assert.AreEqual(t1, list[0]);

@@ -7,6 +7,8 @@ namespace Test
 {
     class Program
     {
+        #region Static
+
         static int Main()
         {
             var errors = 0;
@@ -29,7 +31,6 @@ namespace Test
                     }
 
                     GC.Collect(999, GCCollectionMode.Default);
-
                     Console.ForegroundColor = ConsoleColor.Cyan;
                     Console.WriteLine($"{method.DeclaringType.Name}.cs: info TI0001: Start {method.Name}");
                     Console.ResetColor();
@@ -49,19 +50,22 @@ namespace Test
                         Console.ResetColor();
                         errors++;
                     }
+
                     Console.WriteLine("---");
                 }
             }
+
             if (errors == 0)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"---: info TI9999: All tests successfully completed.");
+                Console.WriteLine("---: info TI9999: All tests successfully completed.");
             }
             else
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"---: error TE9999: {errors} tests failed!");
             }
+
             Console.ResetColor();
             if (Debugger.IsAttached)
             {
@@ -79,5 +83,7 @@ namespace Test
                 ;
             }
         }
+
+        #endregion
     }
 }

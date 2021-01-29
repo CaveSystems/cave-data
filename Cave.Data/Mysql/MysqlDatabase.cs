@@ -10,6 +10,8 @@ namespace Cave.Data.Mysql
     /// <summary>Provides a mysql database implementation.</summary>
     public sealed class MySqlDatabase : SqlDatabase
     {
+        #region Constructors
+
         /// <summary>Initializes a new instance of the <see cref="MySqlDatabase" /> class.</summary>
         /// <param name="storage">the mysql storage engine.</param>
         /// <param name="name">the name of the database.</param>
@@ -18,32 +20,9 @@ namespace Cave.Data.Mysql
         {
         }
 
-        /// <summary>Gets a value indicating whether this instance is using a secure connection to the storage.</summary>
-        /// <value><c>true</c> if this instance is using a secure connection; otherwise, <c>false</c>.</value>
-        public override bool IsSecure
-        {
-            get
-            {
-                var error = false;
-                var connection = SqlStorage.GetConnection(Name);
-                try
-                {
-                    return connection.ConnectionString.ToUpperInvariant().Contains("SSLMODE=REQUIRED");
-                }
-                catch
-                {
-                    error = true;
-                    throw;
-                }
-                finally
-                {
-                    SqlStorage.ReturnConnection(ref connection, error);
-                }
-            }
-        }
+        #endregion
 
-        /// <inheritdoc />
-        public override ITable GetTable(string tableName, TableFlags flags) => MySqlTable.Connect(this, flags, tableName);
+        #region Overrides
 
         /// <inheritdoc />
         public override ITable CreateTable(RowLayout layout, TableFlags flags)
@@ -222,8 +201,8 @@ namespace Cave.Data.Mysql
                     case DataType.Decimal:
                         if (fieldProperties.MaximumLength > 0)
                         {
-                            var precision = (int)fieldProperties.MaximumLength;
-                            var scale = (int)((fieldProperties.MaximumLength - precision) * 100);
+                            var precision = (int) fieldProperties.MaximumLength;
+                            var scale = (int) ((fieldProperties.MaximumLength - precision) * 100);
                             if (scale >= precision)
                             {
                                 throw new ArgumentOutOfRangeException(
@@ -378,6 +357,9 @@ namespace Cave.Data.Mysql
         }
 
         /// <inheritdoc />
+        public override ITable GetTable(string tableName, TableFlags flags) => MySqlTable.Connect(this, flags, tableName);
+
+        /// <inheritdoc />
         protected override string[] GetTableNames()
         {
             var result = new List<string>();
@@ -391,5 +373,31 @@ namespace Cave.Data.Mysql
 
             return result.ToArray();
         }
+
+        /// <summary>Gets a value indicating whether this instance is using a secure connection to the storage.</summary>
+        /// <value><c>true</c> if this instance is using a secure connection; otherwise, <c>false</c>.</value>
+        public override bool IsSecure
+        {
+            get
+            {
+                var error = false;
+                var connection = SqlStorage.GetConnection(Name);
+                try
+                {
+                    return connection.ConnectionString.ToUpperInvariant().Contains("SSLMODE=REQUIRED");
+                }
+                catch
+                {
+                    error = true;
+                    throw;
+                }
+                finally
+                {
+                    SqlStorage.ReturnConnection(ref connection, error);
+                }
+            }
+        }
+
+        #endregion
     }
 }

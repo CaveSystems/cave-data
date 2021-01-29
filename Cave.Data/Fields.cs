@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -11,124 +10,7 @@ namespace Cave.Data
     /// <summary>Provides static functions for struct field reflections.</summary>
     public static class Fields
     {
-        /// <summary>Checks whether a field has the <see cref="FieldAttribute" /> and returns the name of the field.</summary>
-        /// <param name="member">The field / property info.</param>
-        /// <returns>The name specified with the field attribute or null.</returns>
-        public static string GetName(MemberInfo member)
-        {
-            if (member == null)
-            {
-                throw new ArgumentNullException(nameof(member));
-            }
-
-            foreach (var attribute in member.GetCustomAttributes(true))
-            {
-                if (attribute is FieldAttribute fieldAttribute)
-                {
-                    return !string.IsNullOrEmpty(fieldAttribute.Name) ? fieldAttribute.Name : member.Name;
-                }
-            }
-
-            return null;
-        }
-
-        /// <summary>Checks whether a field has the <see cref="FieldAttribute" /> and returns the length of the field.</summary>
-        /// <param name="member">The field / property info.</param>
-        /// <returns>The length specified with the field attribute or 0.</returns>
-        public static uint GetLength(MemberInfo member)
-        {
-            if (member == null)
-            {
-                throw new ArgumentNullException(nameof(member));
-            }
-
-            foreach (var attribute in member.GetCustomAttributes(true))
-            {
-                if (attribute is FieldAttribute fieldAttribute)
-                {
-                    return fieldAttribute.Length;
-                }
-            }
-
-            return 0;
-        }
-
-        /// <summary>Checks whether a field has the <see cref="FieldAttribute" /> and returns the flags of the field.</summary>
-        /// <param name="member">The field / property info.</param>
-        /// <returns>The flags specified with the field attribute or <see cref="FieldFlags.None" />.</returns>
-        public static FieldFlags GetFlags(MemberInfo member)
-        {
-            if (member == null)
-            {
-                throw new ArgumentNullException(nameof(member));
-            }
-
-            foreach (var attribute in member.GetCustomAttributes(true))
-            {
-                if (attribute is FieldAttribute fieldAttribute)
-                {
-                    return fieldAttribute.Flags;
-                }
-            }
-
-            return FieldFlags.None;
-        }
-
-        /// <summary>Gets the description of a field. If the attribute is not present null is returned.</summary>
-        /// <param name="member">The field / property info.</param>
-        /// <returns>The description specified with the field attribute or null.</returns>
-        public static string GetDescription(MemberInfo member)
-        {
-            if (member == null)
-            {
-                throw new ArgumentNullException(nameof(member));
-            }
-
-            foreach (var attribute in member.GetCustomAttributes(false))
-            {
-                if (attribute is DescriptionAttribute descriptionAttribute)
-                {
-                    return descriptionAttribute.Description;
-                }
-            }
-
-            return null;
-        }
-
-        /// <summary>Gets the description of a specified enum or field.</summary>
-        /// <param name="value">The enum or field value.</param>
-        /// <returns>The description if present or null otherwise.</returns>
-        /// <exception cref="ArgumentNullException">Value.</exception>
-        /// <exception cref="ArgumentException">Enum value is not defined!.</exception>
-        public static string GetDescription(object value)
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
-
-            var type = value.GetType();
-            if (type.IsEnum)
-            {
-                if (!Enum.IsDefined(type, value))
-                {
-                    return null;
-                }
-
-                var name = Enum.GetName(value.GetType(), value);
-                return GetDescription(type.GetField(name));
-            }
-
-            foreach (var attribute in type.GetCustomAttributes(false))
-            {
-                if (attribute is DescriptionAttribute descriptionAttribute)
-                {
-                    return descriptionAttribute.Description;
-                }
-            }
-
-            return null;
-        }
+        #region Static
 
         /// <summary>Converts a (primitive) value to the desired type.</summary>
         /// <param name="toType">Type to convert to.</param>
@@ -332,84 +214,123 @@ namespace Cave.Data
             }
         }
 
-
-        /// <summary>Sets all field values of a struct/class object.</summary>
-        /// <param name="obj">structure object.</param>
-        /// <param name="fields">fields to be set.</param>
-        /// <param name="values">values to set.</param>
-        /// <param name="cultureInfo">The culture to use during formatting.</param>
-        public static void SetValues(ref object obj, IList<FieldInfo> fields, IList<object> values, CultureInfo cultureInfo)
+        /// <summary>Gets the description of a field. If the attribute is not present null is returned.</summary>
+        /// <param name="member">The field / property info.</param>
+        /// <returns>The description specified with the field attribute or null.</returns>
+        public static string GetDescription(MemberInfo member)
         {
-            if (obj == null)
+            if (member == null)
             {
-                throw new ArgumentNullException(nameof(obj));
+                throw new ArgumentNullException(nameof(member));
             }
 
-            if (fields == null)
+            foreach (var attribute in member.GetCustomAttributes(false))
             {
-                throw new ArgumentNullException(nameof(fields));
+                if (attribute is DescriptionAttribute descriptionAttribute)
+                {
+                    return descriptionAttribute.Description;
+                }
             }
 
-            if (values == null)
-            {
-                throw new ArgumentNullException(nameof(values));
-            }
-
-            if (cultureInfo == null)
-            {
-                throw new ArgumentNullException(nameof(cultureInfo));
-            }
-
-            for (var i = 0; i < values.Count; i++)
-            {
-                var fieldInfo = fields[i];
-                var value = ConvertValue(fieldInfo.FieldType, values[i], cultureInfo);
-                fields[i].SetValue(obj, value);
-            }
+            return null;
         }
 
-        /// <summary>Gets an array containing all values of the specified fields.</summary>
-        /// <param name="fields">The fields to read.</param>
-        /// <param name="structure">The structure to read fields from.</param>
-        /// <returns>An array containing all values.</returns>
-        public static object[] GetValues(IList<FieldInfo> fields, object structure)
+        /// <summary>Gets the description of a specified enum or field.</summary>
+        /// <param name="value">The enum or field value.</param>
+        /// <returns>The description if present or null otherwise.</returns>
+        /// <exception cref="ArgumentNullException">Value.</exception>
+        /// <exception cref="ArgumentException">Enum value is not defined!.</exception>
+        public static string GetDescription(object value)
         {
-            if (fields == null)
+            if (value == null)
             {
-                throw new ArgumentNullException(nameof(fields));
+                throw new ArgumentNullException(nameof(value));
             }
 
-            var result = new object[fields.Count];
-            for (var i = 0; i < fields.Count; i++)
+            var type = value.GetType();
+            if (type.IsEnum)
             {
-                result[i] = fields[i].GetValue(structure);
+                if (!Enum.IsDefined(type, value))
+                {
+                    return null;
+                }
+
+                var name = Enum.GetName(value.GetType(), value);
+                return GetDescription(type.GetField(name));
             }
 
-            return result;
+            foreach (var attribute in type.GetCustomAttributes(false))
+            {
+                if (attribute is DescriptionAttribute descriptionAttribute)
+                {
+                    return descriptionAttribute.Description;
+                }
+            }
+
+            return null;
         }
 
-        /// <summary>Gets an array containing all values of the specified fields.</summary>
-        /// <param name="properties">The properties to read.</param>
-        /// <param name="obj">The object to read properties from.</param>
-        /// <returns>An array containing all values.</returns>
-        public static object[] GetValues(IList<PropertyInfo> properties, object obj)
+        /// <summary>Checks whether a field has the <see cref="FieldAttribute" /> and returns the flags of the field.</summary>
+        /// <param name="member">The field / property info.</param>
+        /// <returns>The flags specified with the field attribute or <see cref="FieldFlags.None" />.</returns>
+        public static FieldFlags GetFlags(MemberInfo member)
         {
-            if (properties == null)
+            if (member == null)
             {
-                throw new ArgumentNullException(nameof(properties));
+                throw new ArgumentNullException(nameof(member));
             }
 
-            var result = new object[properties.Count];
-            for (var i = 0; i < properties.Count; i++)
+            foreach (var attribute in member.GetCustomAttributes(true))
             {
-#if NET20 || NET35 || NET40
-                result[i] = properties[i].GetValue(obj, null);
-#else
-                result[i] = properties[i].GetValue(obj);
-#endif
+                if (attribute is FieldAttribute fieldAttribute)
+                {
+                    return fieldAttribute.Flags;
+                }
             }
 
-            return result;
+            return FieldFlags.None;
+        }
+
+        /// <summary>Checks whether a field has the <see cref="FieldAttribute" /> and returns the length of the field.</summary>
+        /// <param name="member">The field / property info.</param>
+        /// <returns>The length specified with the field attribute or 0.</returns>
+        public static uint GetLength(MemberInfo member)
+        {
+            if (member == null)
+            {
+                throw new ArgumentNullException(nameof(member));
+            }
+
+            foreach (var attribute in member.GetCustomAttributes(true))
+            {
+                if (attribute is FieldAttribute fieldAttribute)
+                {
+                    return fieldAttribute.Length;
+                }
+            }
+
+            return 0;
+        }
+
+        /// <summary>Checks whether a field has the <see cref="FieldAttribute" /> and returns the name of the field.</summary>
+        /// <param name="member">The field / property info.</param>
+        /// <returns>The name specified with the field attribute or null.</returns>
+        public static string GetName(MemberInfo member)
+        {
+            if (member == null)
+            {
+                throw new ArgumentNullException(nameof(member));
+            }
+
+            foreach (var attribute in member.GetCustomAttributes(true))
+            {
+                if (attribute is FieldAttribute fieldAttribute)
+                {
+                    return !string.IsNullOrEmpty(fieldAttribute.Name) ? fieldAttribute.Name : member.Name;
+                }
+            }
+
+            return null;
         }
 
         /// <summary>Gets a string for the specified field value.</summary>
@@ -537,5 +458,86 @@ namespace Cave.Data
             var s = value is IConvertible convertible ? convertible.ToString(provider) : value.ToString();
             return s.EscapeUtf8().Box(stringMarker);
         }
+
+        /// <summary>Gets an array containing all values of the specified fields.</summary>
+        /// <param name="fields">The fields to read.</param>
+        /// <param name="structure">The structure to read fields from.</param>
+        /// <returns>An array containing all values.</returns>
+        public static object[] GetValues(IList<FieldInfo> fields, object structure)
+        {
+            if (fields == null)
+            {
+                throw new ArgumentNullException(nameof(fields));
+            }
+
+            var result = new object[fields.Count];
+            for (var i = 0; i < fields.Count; i++)
+            {
+                result[i] = fields[i].GetValue(structure);
+            }
+
+            return result;
+        }
+
+        /// <summary>Gets an array containing all values of the specified fields.</summary>
+        /// <param name="properties">The properties to read.</param>
+        /// <param name="obj">The object to read properties from.</param>
+        /// <returns>An array containing all values.</returns>
+        public static object[] GetValues(IList<PropertyInfo> properties, object obj)
+        {
+            if (properties == null)
+            {
+                throw new ArgumentNullException(nameof(properties));
+            }
+
+            var result = new object[properties.Count];
+            for (var i = 0; i < properties.Count; i++)
+            {
+#if NET20 || NET35 || NET40
+                result[i] = properties[i].GetValue(obj, null);
+#else
+                result[i] = properties[i].GetValue(obj);
+#endif
+            }
+
+            return result;
+        }
+
+        /// <summary>Sets all field values of a struct/class object.</summary>
+        /// <param name="obj">structure object.</param>
+        /// <param name="fields">fields to be set.</param>
+        /// <param name="values">values to set.</param>
+        /// <param name="cultureInfo">The culture to use during formatting.</param>
+        public static void SetValues(ref object obj, IList<FieldInfo> fields, IList<object> values, CultureInfo cultureInfo)
+        {
+            if (obj == null)
+            {
+                throw new ArgumentNullException(nameof(obj));
+            }
+
+            if (fields == null)
+            {
+                throw new ArgumentNullException(nameof(fields));
+            }
+
+            if (values == null)
+            {
+                throw new ArgumentNullException(nameof(values));
+            }
+
+            if (cultureInfo == null)
+            {
+                throw new ArgumentNullException(nameof(cultureInfo));
+            }
+
+            for (var i = 0; i < values.Count; i++)
+            {
+                var fieldInfo = fields[i];
+                var value = ConvertValue(fieldInfo.FieldType, values[i], cultureInfo);
+                fields[i].SetValue(obj, value);
+            }
+        }
+
+        #endregion
     }
 }

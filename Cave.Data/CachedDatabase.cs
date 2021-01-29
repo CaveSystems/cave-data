@@ -10,6 +10,8 @@ namespace Cave.Data
         readonly IDatabase database;
         Dictionary<string, ITable> tables = new Dictionary<string, ITable>();
 
+        #region Constructors
+
         /// <summary>Initializes a new instance of the <see cref="CachedDatabase" /> class.</summary>
         /// <param name="database">Database instance.</param>
         public CachedDatabase(IDatabase database)
@@ -18,26 +20,9 @@ namespace Cave.Data
             Reload();
         }
 
-        /// <inheritdoc />
-        public StringComparison TableNameComparison => database.TableNameComparison;
+        #endregion
 
-        /// <inheritdoc />
-        public bool IsSecure => database.IsSecure;
-
-        /// <inheritdoc />
-        public IStorage Storage => database.Storage;
-
-        /// <inheritdoc />
-        public string Name => database.Name;
-
-        /// <inheritdoc />
-        public IList<string> TableNames => tables.Keys.ToArray();
-
-        /// <inheritdoc />
-        public bool IsClosed => database.IsClosed;
-
-        /// <inheritdoc />
-        public ITable this[string tableName] => GetTable(tableName);
+        #region IDatabase Members
 
         /// <inheritdoc />
         public void Close() => database.Close();
@@ -68,7 +53,7 @@ namespace Cave.Data
 
             if (cached.Flags != flags)
             {
-                throw new ArgumentOutOfRangeException(nameof(tableName),$"Table {cached} was already cached with flags {cached.Flags}!");
+                throw new ArgumentOutOfRangeException(nameof(tableName), $"Table {cached} was already cached with flags {cached.Flags}!");
             }
 
             return cached;
@@ -79,6 +64,31 @@ namespace Cave.Data
 
         /// <inheritdoc />
         public bool HasTable(string tableName) => tables.Keys.Any(t => string.Equals(tableName, t, TableNameComparison));
+
+        /// <inheritdoc />
+        public bool IsClosed => database.IsClosed;
+
+        /// <inheritdoc />
+        public bool IsSecure => database.IsSecure;
+
+        /// <inheritdoc />
+        public ITable this[string tableName] => GetTable(tableName);
+
+        /// <inheritdoc />
+        public string Name => database.Name;
+
+        /// <inheritdoc />
+        public IStorage Storage => database.Storage;
+
+        /// <inheritdoc />
+        public StringComparison TableNameComparison => database.TableNameComparison;
+
+        /// <inheritdoc />
+        public IList<string> TableNames => tables.Keys.ToArray();
+
+        #endregion
+
+        #region Members
 
         /// <summary>Clears the cache and reloads all tablenames.</summary>
         public void Reload()
@@ -91,5 +101,7 @@ namespace Cave.Data
 
             tables = newTables;
         }
+
+        #endregion
     }
 }

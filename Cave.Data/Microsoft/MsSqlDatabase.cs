@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Text;
 using Cave.Data.Sql;
 using Cave.IO;
@@ -10,6 +9,8 @@ namespace Cave.Data.Microsoft
     /// <summary>Provides a MsSql database implementation.</summary>
     public sealed class MsSqlDatabase : SqlDatabase
     {
+        #region Constructors
+
         /// <summary>Initializes a new instance of the <see cref="MsSqlDatabase" /> class.</summary>
         /// <param name="storage">the MsSql storage engine.</param>
         /// <param name="name">the name of the database.</param>
@@ -18,32 +19,9 @@ namespace Cave.Data.Microsoft
         {
         }
 
-        /// <inheritdoc />
-        public override bool IsSecure
-        {
-            get
-            {
-                var error = false;
-                var connection = SqlStorage.GetConnection(Name);
-                try
-                {
-                    var value = SqlStorage.QueryValue("SELECT encrypt_option FROM sys.dm_exec_connections WHERE session_id = @@SPID");
-                    return bool.Parse((string) value);
-                }
-                catch (Exception ex)
-                {
-                    error = true;
-                    throw new NotSupportedException("Could not retrieve connection state.", ex);
-                }
-                finally
-                {
-                    SqlStorage.ReturnConnection(ref connection, error);
-                }
-            }
-        }
+        #endregion
 
-        /// <inheritdoc />
-        public override ITable GetTable(string tableName, TableFlags flags) => MsSqlTable.Connect(this, flags, tableName);
+        #region Overrides
 
         /// <inheritdoc />
         public override ITable CreateTable(RowLayout layout, TableFlags flags)
@@ -182,8 +160,8 @@ namespace Cave.Data.Microsoft
                     case DataType.Decimal:
                         if (fieldProperties.MaximumLength > 0)
                         {
-                            var precision = (int)fieldProperties.MaximumLength;
-                            var scale = (int)((fieldProperties.MaximumLength - precision) * 100);
+                            var precision = (int) fieldProperties.MaximumLength;
+                            var scale = (int) ((fieldProperties.MaximumLength - precision) * 100);
                             if (scale >= precision)
                             {
                                 throw new ArgumentOutOfRangeException(
@@ -278,6 +256,9 @@ namespace Cave.Data.Microsoft
         }
 
         /// <inheritdoc />
+        public override ITable GetTable(string tableName, TableFlags flags) => MsSqlTable.Connect(this, flags, tableName);
+
+        /// <inheritdoc />
         protected override string[] GetTableNames()
         {
             var result = new List<string>();
@@ -290,5 +271,31 @@ namespace Cave.Data.Microsoft
 
             return result.ToArray();
         }
+
+        /// <inheritdoc />
+        public override bool IsSecure
+        {
+            get
+            {
+                var error = false;
+                var connection = SqlStorage.GetConnection(Name);
+                try
+                {
+                    var value = SqlStorage.QueryValue("SELECT encrypt_option FROM sys.dm_exec_connections WHERE session_id = @@SPID");
+                    return bool.Parse((string) value);
+                }
+                catch (Exception ex)
+                {
+                    error = true;
+                    throw new NotSupportedException("Could not retrieve connection state.", ex);
+                }
+                finally
+                {
+                    SqlStorage.ReturnConnection(ref connection, error);
+                }
+            }
+        }
+
+        #endregion
     }
 }

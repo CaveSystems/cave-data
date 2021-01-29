@@ -6,10 +6,7 @@ using Cave.Collections.Generic;
 
 namespace Cave.Data.Sql
 {
-    /// <summary>
-    ///     Provides a class used during custom searches to keep up with all parameters to be added during sql command
-    ///     generation.
-    /// </summary>
+    /// <summary>Provides a class used during custom searches to keep up with all parameters to be added during sql command generation.</summary>
     public sealed class SqlSearch
     {
         readonly IndexedSet<string> fieldNames = new IndexedSet<string>();
@@ -18,13 +15,19 @@ namespace Cave.Data.Sql
         readonly SqlStorage storage;
         readonly string text;
 
+        #region Constructors
+
         /// <summary>Initializes a new instance of the <see cref="SqlSearch" /> class.</summary>
         /// <param name="storage">Storage engine used.</param>
         /// <param name="layout">Layout of the table.</param>
         /// <param name="search">Search to perform.</param>
         public SqlSearch(SqlStorage storage, RowLayout layout, Search search)
         {
-            if (search == null) throw new ArgumentNullException(nameof(search));
+            if (search == null)
+            {
+                throw new ArgumentNullException(nameof(search));
+            }
+
             this.storage = storage ?? throw new ArgumentNullException(nameof(storage));
             this.layout = layout ?? throw new ArgumentNullException(nameof(layout));
             Parameters = new ReadOnlyCollection<SqlParam>(parameters);
@@ -34,17 +37,37 @@ namespace Cave.Data.Sql
             text = sb.ToString();
         }
 
+        #endregion
+
+        #region Properties
+
         /// <summary>Gets the field names.</summary>
         public IList<string> FieldNames { get; }
 
         /// <summary>Gets the parameters.</summary>
         public IList<SqlParam> Parameters { get; }
 
+        #endregion
+
+        #region Overrides
+
+        /// <summary>Gets the query text as string.</summary>
+        /// <returns>A the database specific search string.</returns>
+        public override string ToString() => text;
+
+        #endregion
+
+        #region Members
+
         /// <summary>Checks whether all fields used at options are present and adds them if not.</summary>
         /// <param name="option">Options to check.</param>
         public void CheckFieldsPresent(ResultOption option)
         {
-            if (option == null) throw new ArgumentNullException(nameof(option));
+            if (option == null)
+            {
+                throw new ArgumentNullException(nameof(option));
+            }
+
             foreach (var fieldName in option.FieldNames)
             {
                 if (!fieldNames.Contains(fieldName))
@@ -54,9 +77,16 @@ namespace Cave.Data.Sql
             }
         }
 
-        /// <summary>Gets the query text as string.</summary>
-        /// <returns>A the database specific search string.</returns>
-        public override string ToString() => text;
+        /// <summary>Adds a new parameter.</summary>
+        /// <param name="databaseValue">The databaseValue of the parameter.</param>
+        /// <returns>A new <see cref="SqlParam" /> instance.</returns>
+        SqlParam AddParameter(object databaseValue)
+        {
+            var name = storage.SupportsNamedParameters ? $"{storage.ParameterPrefix}{Parameters.Count + 1}" : storage.ParameterPrefix;
+            var parameter = new SqlParam(name, databaseValue);
+            parameters.Add(parameter);
+            return parameter;
+        }
 
         void Flatten(StringBuilder sb, Search search)
         {
@@ -202,15 +232,6 @@ namespace Cave.Data.Sql
             }
         }
 
-        /// <summary>Adds a new parameter.</summary>
-        /// <param name="databaseValue">The databaseValue of the parameter.</param>
-        /// <returns>A new <see cref="SqlParam" /> instance.</returns>
-        SqlParam AddParameter(object databaseValue)
-        {
-            var name = storage.SupportsNamedParameters ? $"{storage.ParameterPrefix}{Parameters.Count + 1}" : storage.ParameterPrefix;
-            var parameter = new SqlParam(name, databaseValue);
-            parameters.Add(parameter);
-            return parameter;
-        }
+        #endregion
     }
 }

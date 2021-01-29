@@ -14,13 +14,23 @@ namespace Cave.Data
         readonly Set<SqlConnection> used = new Set<SqlConnection>();
         TimeSpan? timeout = TimeSpan.FromMinutes(5);
 
+        #region Constructors
+
         /// <summary>Initializes a new instance of the <see cref="SqlConnectionPool" /> class.</summary>
         /// <param name="storage">The storage.</param>
         public SqlConnectionPool(SqlStorage storage) => this.storage = storage;
 
+        #endregion
+
+        #region Properties
+
         /// <summary>Gets or sets the connection close timeout.</summary>
         /// <value>The connection close timeout.</value>
         public TimeSpan ConnectionCloseTimeout { get => timeout.Value; set => timeout = value; }
+
+        #endregion
+
+        #region Overrides
 
         public override string ToString()
         {
@@ -29,6 +39,10 @@ namespace Cave.Data
                 return $"SqlConnectionPool {storage} queue:{queue.Count} used:{used.Count}";
             }
         }
+
+        #endregion
+
+        #region Members
 
         /// <summary>Clears the whole connection pool (forced, including connections in use).</summary>
         public void Clear()
@@ -51,6 +65,9 @@ namespace Cave.Data
                 used.Clear();
             }
         }
+
+        /// <summary>Closes this instance.</summary>
+        public void Close() => Clear();
 
         /// <summary>Gets the connection.</summary>
         /// <param name="databaseName">Name of the database.</param>
@@ -109,9 +126,6 @@ namespace Cave.Data
             connection = null;
         }
 
-        /// <summary>Closes this instance.</summary>
-        public void Close() => Clear();
-
         SqlConnection GetQueuedConnection(string database)
         {
             var nextNode = queue.First;
@@ -168,5 +182,7 @@ namespace Cave.Data
             // nothing found
             return null;
         }
+
+        #endregion
     }
 }

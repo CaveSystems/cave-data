@@ -14,6 +14,20 @@ namespace Cave.Data
     {
         int sequenceNumber;
 
+        #region Overrides
+
+        #region ToString and eXtended Text
+
+        /// <summary>Returns a <see cref="string" /> that represents this instance.</summary>
+        /// <returns>A <see cref="string" /> that represents this instance.</returns>
+        public override string ToString() => $"Table {Database.Name}.{Name}";
+
+        #endregion
+
+        #endregion
+
+        #region Members
+
         #region SequenceNumber
 
         /// <summary>Increases the sequence number.</summary>
@@ -21,12 +35,6 @@ namespace Cave.Data
         public int IncreaseSequenceNumber() => Interlocked.Increment(ref sequenceNumber);
 
         #endregion
-
-        #region ToString and eXtended Text
-
-        /// <summary>Returns a <see cref="string" /> that represents this instance.</summary>
-        /// <returns>A <see cref="string" /> that represents this instance.</returns>
-        public override string ToString() => $"Table {Database.Name}.{Name}";
 
         #endregion
 
@@ -275,6 +283,7 @@ namespace Cave.Data
             if (transactions == null)
             {
                 if (flags.HasFlag(TransactionFlags.NoExceptions)) { return -1; }
+
                 throw new ArgumentNullException(nameof(transactions));
             }
 
@@ -299,6 +308,7 @@ namespace Cave.Data
                             break;
                         default:
                             if (flags.HasFlag(TransactionFlags.NoExceptions)) { return -1; }
+
                             throw new NotImplementedException();
                     }
 

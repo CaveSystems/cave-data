@@ -11,12 +11,14 @@ using Cave.Data.Sql;
 namespace Cave.Data.Mysql
 {
     /// <summary>
-    ///     Provides a mysql storage implementation. Attention: <see cref="float" /> variables stored at the mysqldatabase
-    ///     loose their last precision digit (a value of 1 may differ by &lt;= 0.000001f).
+    /// Provides a mysql storage implementation. Attention: <see cref="float" /> variables stored at the mysqldatabase loose their last
+    /// precision digit (a value of 1 may differ by &lt;= 0.000001f).
     /// </summary>
     public sealed class MySqlStorage : SqlStorage
     {
         PropertyInfo isValidDateTimeProperty;
+
+        #region Constructors
 
         /// <summary>Initializes a new instance of the <see cref="MySqlStorage" /> class.</summary>
         /// <param name="connectionString">the connection details.</param>
@@ -54,6 +56,32 @@ namespace Cave.Data.Mysql
             ClearCachedConnections();
         }
 
+        #endregion
+
+        #region Properties
+
+        /// <summary>Gets the character set.</summary>
+        /// <value>The character set.</value>
+        public string CharacterSet { get; } = "utf8";
+
+        /// <summary>Gets the data encoding.</summary>
+        /// <value>The data encoding.</value>
+        public Encoding DataEncoding { get; } = Encoding.UTF8;
+
+        /// <summary>Gets a value indicating whether the server instance supports full utf8 or only the 3 byte (BMP characters only) character set.</summary>
+        /// <value><c>true</c> if [supports full utf8]; otherwise, <c>false</c>.</value>
+        public bool SupportsFullUTF8 { get; }
+
+        /// <summary>Gets the mysql storage version.</summary>
+        public Version Version { get; }
+
+        /// <summary>Gets the mysql storage version.</summary>
+        public string VersionString { get; }
+
+        #endregion
+
+        #region Overrides
+
         /// <inheritdoc />
         public override IList<string> DatabaseNames
         {
@@ -70,47 +98,32 @@ namespace Cave.Data.Mysql
             }
         }
 
-        /// <summary>Gets the data encoding.</summary>
-        /// <value>The data encoding.</value>
-        public Encoding DataEncoding { get; } = Encoding.UTF8;
-
-        /// <summary>
-        ///     Gets a value indicating whether the server instance supports full utf8 or only the 3 byte (BMP characters
-        ///     only) character set.
-        /// </summary>
-        /// <value><c>true</c> if [supports full utf8]; otherwise, <c>false</c>.</value>
-        public bool SupportsFullUTF8 { get; }
-
-        /// <summary>Gets the character set.</summary>
-        /// <value>The character set.</value>
-        public string CharacterSet { get; } = "utf8";
-
-        /// <summary>Gets the mysql storage version.</summary>
-        public string VersionString { get; }
-
-        /// <summary>Gets the mysql storage version.</summary>
-        public Version Version { get; }
-
         /// <inheritdoc />
-        public override bool SupportsNamedParameters => true;
-
-        /// <inheritdoc />
-        public override bool SupportsAllFieldsGroupBy => true;
-
-        /// <inheritdoc />
-        public override string ParameterPrefix => "?";
+        public override TimeSpan DateTimePrecision => TimeSpan.FromSeconds(1);
 
         /// <inheritdoc />
         public override float FloatPrecision => 0.00001f;
 
         /// <inheritdoc />
-        public override TimeSpan DateTimePrecision => TimeSpan.FromSeconds(1);
-
-        /// <inheritdoc />
         public override TimeSpan TimeSpanPrecision => TimeSpan.FromMilliseconds(1);
+
+        #endregion
+
+        #region Overrides
 
         /// <inheritdoc />
         protected internal override bool DBConnectionCanChangeDataBase => true;
+
+        /// <inheritdoc />
+        public override string ParameterPrefix => "?";
+
+        /// <inheritdoc />
+        public override bool SupportsAllFieldsGroupBy => true;
+
+        /// <inheritdoc />
+        public override bool SupportsNamedParameters => true;
+
+        #endregion
 
         #region functions
 
@@ -139,7 +152,7 @@ namespace Cave.Data.Mysql
                     }
                 }
 #if NET20 || NET35 || NET40
-                var isValid = (bool)isValidDateTimeProperty.GetValue(databaseValue, null);
+                var isValid = (bool) isValidDateTimeProperty.GetValue(databaseValue, null);
 #else
                 var isValid = (bool) isValidDateTimeProperty.GetValue(databaseValue);
 #endif

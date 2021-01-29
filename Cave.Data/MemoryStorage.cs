@@ -7,7 +7,17 @@ namespace Cave.Data
     /// <summary>Provides a memory based storage engine for databases, tables and rows.</summary>
     public sealed class MemoryStorage : Storage
     {
+        #region Static
+
+        /// <summary>Gets the default memory storage.</summary>
+        /// <value>The default memory storage.</value>
+        public static MemoryStorage Default { get; } = new MemoryStorage();
+
+        #endregion
+
         readonly Dictionary<string, IDatabase> databases = new Dictionary<string, IDatabase>();
+
+        #region Constructors
 
         /// <summary>Initializes a new instance of the <see cref="MemoryStorage" /> class.</summary>
         /// <param name="options">Options for the databaseName.</param>
@@ -16,45 +26,9 @@ namespace Cave.Data
         {
         }
 
-        /// <summary>Gets the default memory storage.</summary>
-        /// <value>The default memory storage.</value>
-        public static MemoryStorage Default { get; } = new MemoryStorage();
+        #endregion
 
-        /// <inheritdoc />
-        public override bool SupportsNativeTransactions { get; }
-
-        /// <inheritdoc />
-        public override IList<string> DatabaseNames
-        {
-            get
-            {
-                if (Closed)
-                {
-                    throw new ObjectDisposedException(ToString());
-                }
-
-                return databases.Keys.ToArray();
-            }
-        }
-
-        /// <inheritdoc />
-        public override bool HasDatabase(string databaseName) => databases.ContainsKey(databaseName);
-
-        /// <inheritdoc />
-        public override IDatabase GetDatabase(string databaseName)
-        {
-            if (Closed)
-            {
-                throw new ObjectDisposedException(ToString());
-            }
-
-            if (!HasDatabase(databaseName))
-            {
-                throw new ArgumentException($"The requested databaseName '{databaseName}' was not found!");
-            }
-
-            return databases[databaseName];
-        }
+        #region Overrides
 
         /// <inheritdoc />
         public override IDatabase CreateDatabase(string databaseName)
@@ -75,6 +49,20 @@ namespace Cave.Data
         }
 
         /// <inheritdoc />
+        public override IList<string> DatabaseNames
+        {
+            get
+            {
+                if (Closed)
+                {
+                    throw new ObjectDisposedException(ToString());
+                }
+
+                return databases.Keys.ToArray();
+            }
+        }
+
+        /// <inheritdoc />
         public override void DeleteDatabase(string database)
         {
             if (Closed)
@@ -87,5 +75,29 @@ namespace Cave.Data
                 throw new ArgumentException($"The requested databaseName '{database}' was not found!");
             }
         }
+
+        /// <inheritdoc />
+        public override IDatabase GetDatabase(string databaseName)
+        {
+            if (Closed)
+            {
+                throw new ObjectDisposedException(ToString());
+            }
+
+            if (!HasDatabase(databaseName))
+            {
+                throw new ArgumentException($"The requested databaseName '{databaseName}' was not found!");
+            }
+
+            return databases[databaseName];
+        }
+
+        /// <inheritdoc />
+        public override bool HasDatabase(string databaseName) => databases.ContainsKey(databaseName);
+
+        /// <inheritdoc />
+        public override bool SupportsNativeTransactions { get; }
+
+        #endregion
     }
 }

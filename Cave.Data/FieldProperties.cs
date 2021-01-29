@@ -18,31 +18,13 @@ namespace Cave
         bool parserInitialized;
         MethodInfo staticParse;
 
-        #region IFieldProperties properties
+        #region IFieldProperties Members
 
         /// <inheritdoc />
-        public bool IsNullable { get; set; }
-
-        /// <inheritdoc />
-        public int Index { get; set; }
-
-        /// <inheritdoc />
-        public Type ValueType { get; set; }
+        public string AlternativeNames { get; set; }
 
         /// <inheritdoc />
         public DataType DataType { get; set; }
-
-        /// <inheritdoc />
-        public FieldFlags Flags { get; set; }
-
-        /// <inheritdoc />
-        public string Name { get; set; }
-
-        /// <inheritdoc />
-        public string NameAtDatabase { get; set; }
-
-        /// <inheritdoc />
-        public DataType TypeAtDatabase { get; set; }
 
         /// <inheritdoc />
         public DateTimeKind DateTimeKind { get; set; }
@@ -51,25 +33,13 @@ namespace Cave
         public DateTimeType DateTimeType { get; set; }
 
         /// <inheritdoc />
-        public StringEncoding StringEncoding { get; set; }
-
-        /// <inheritdoc />
-        public float MaximumLength { get; set; }
+        public object DefaultValue { get; set; }
 
         /// <inheritdoc />
         public string Description { get; set; }
 
         /// <inheritdoc />
         public string DisplayFormat { get; set; }
-
-        /// <inheritdoc />
-        public string AlternativeNames { get; set; }
-
-        /// <inheritdoc />
-        public FieldInfo FieldInfo { get; set; }
-
-        /// <inheritdoc />
-        public object DefaultValue { get; set; }
 
         /// <inheritdoc />
         public string DotNetTypeName
@@ -107,6 +77,36 @@ namespace Cave
                 }
             }
         }
+
+        /// <inheritdoc />
+        public FieldInfo FieldInfo { get; set; }
+
+        /// <inheritdoc />
+        public FieldFlags Flags { get; set; }
+
+        /// <inheritdoc />
+        public int Index { get; set; }
+
+        /// <inheritdoc />
+        public bool IsNullable { get; set; }
+
+        /// <inheritdoc />
+        public float MaximumLength { get; set; }
+
+        /// <inheritdoc />
+        public string Name { get; set; }
+
+        /// <inheritdoc />
+        public string NameAtDatabase { get; set; }
+
+        /// <inheritdoc />
+        public StringEncoding StringEncoding { get; set; }
+
+        /// <inheritdoc />
+        public DataType TypeAtDatabase { get; set; }
+
+        /// <inheritdoc />
+        public Type ValueType { get; set; }
 
         #endregion
 
@@ -411,8 +411,8 @@ namespace Cave
         }
 
         /// <inheritdoc />
-        public string GetString(object value, string stringMarker = null, IFormatProvider provider = null)
-            => Fields.GetString(value, DataType, DateTimeKind, DateTimeType, stringMarker, provider);
+        public string GetString(object value, string stringMarker = null, IFormatProvider provider = null) =>
+            Fields.GetString(value, DataType, DateTimeKind, DateTimeType, stringMarker, provider);
 
         /// <inheritdoc />
         public object EnumValue(long value)
@@ -436,6 +436,7 @@ namespace Cave
         public IFieldProperties Validate()
         {
             if (TypeAtDatabase == 0) { TypeAtDatabase = DataType; }
+
             if (NameAtDatabase == null) { NameAtDatabase = Name; }
 
             switch (DataType)
@@ -557,8 +558,7 @@ namespace Cave
             StringEncoding = StringEncoding.Undefined;
             AlternativeNames = null;
             DefaultValue = null;
-
-            if (DataType == DataType.User && fieldInfo.FieldType.IsArray)
+            if ((DataType == DataType.User) && fieldInfo.FieldType.IsArray)
             {
                 throw new NotSupportedException(
                     "Array types (except byte[]) are not supported!\nPlease define a class with a valid ToString() member and static Parse(string) constructor instead!");
@@ -668,6 +668,7 @@ namespace Cave
             }
 
             if (NameAtDatabase == null) { NameAtDatabase = RowLayout.GetNameByStrategy(namingStrategy, fieldInfo.Name); }
+
             Validate();
         }
 

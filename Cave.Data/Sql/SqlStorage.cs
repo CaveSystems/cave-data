@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -43,17 +41,14 @@ namespace Cave.Data.Sql
 
         #region public properties
 
-        /// <summary>
-        ///     Gets a value indicating whether the storage engine supports native transactions with faster execution than
-        ///     single commands.
-        /// </summary>
+        /// <summary>Gets a value indicating whether the storage engine supports native transactions with faster execution than single commands.</summary>
         /// <value><c>true</c> if supports native transactions; otherwise, <c>false</c>.</value>
         public override bool SupportsNativeTransactions { get; } = true;
 
         /// <summary>
-        ///     Gets or sets a value indicating whether a result schema check on each query is done. (This impacts performance
-        ///     very badly if you query large amounts of single rows). A common practice is to use this while developing the
-        ///     application and unittest, running the unittests and set this to false on release builds.
+        /// Gets or sets a value indicating whether a result schema check on each query is done. (This impacts performance very badly if you
+        /// query large amounts of single rows). A common practice is to use this while developing the application and unittest, running the unittests
+        /// and set this to false on release builds.
         /// </summary>
 #if DEBUG
         public bool DoSchemaCheckOnQuery { get; set; } = Debugger.IsAttached;
@@ -65,16 +60,13 @@ namespace Cave.Data.Sql
         /// <remarks>After changing this you can use <see cref="ClearCachedConnections()" /> to force reconnecting.</remarks>
         public SqlCmd NewConnectionCommand { get; set; }
 
-        /// <summary>
-        ///     Gets or sets a value indicating whether we throw an <see cref="InvalidDataException" /> on date time field
-        ///     conversion errors.
-        /// </summary>
+        /// <summary>Gets or sets a value indicating whether we throw an <see cref="InvalidDataException" /> on date time field conversion errors.</summary>
         public bool ThrowDateTimeFieldExceptions { get; set; }
 
         /// <summary>Gets or sets the maximum error retries.</summary>
         /// <remarks>
-        ///     If set to &lt; 1 only a single try is made to execute a query. If set to any number &gt; 0 this values
-        ///     indicates the number of retries that are made after the first try and subsequent tries fail.
+        /// If set to &lt; 1 only a single try is made to execute a query. If set to any number &gt; 0 this values indicates the number of
+        /// retries that are made after the first try and subsequent tries fail.
         /// </remarks>
         /// <value>The maximum error retries.</value>
         public int MaxErrorRetries { get; set; } = 3;
@@ -99,10 +91,7 @@ namespace Cave.Data.Sql
 
         #region protected assembly interface properties
 
-        /// <summary>
-        ///     Gets a value indicating whether the db connections can change the database with the Sql92 "USE Database"
-        ///     command.
-        /// </summary>
+        /// <summary>Gets a value indicating whether the db connections can change the database with the Sql92 "USE Database" command.</summary>
         protected internal abstract bool DBConnectionCanChangeDataBase { get; }
 
         /// <summary>Gets the <see cref="IDbConnection" /> type.</summary>
@@ -224,11 +213,18 @@ namespace Cave.Data.Sql
                     DateTime dt;
                     switch (properties.DateTimeKind)
                     {
-                        case DateTimeKind.Unspecified: dt = dateTime; break;
-                        case DateTimeKind.Utc: dt = dateTime.ToUniversalTime(); break;
-                        case DateTimeKind.Local: dt = dateTime.ToLocalTime(); break;
+                        case DateTimeKind.Unspecified:
+                            dt = dateTime;
+                            break;
+                        case DateTimeKind.Utc:
+                            dt = dateTime.ToUniversalTime();
+                            break;
+                        case DateTimeKind.Local:
+                            dt = dateTime.ToLocalTime();
+                            break;
                         default: throw new NotSupportedException($"DateTimeKind {properties.DateTimeKind} not supported!");
                     }
+
                     switch (properties.DateTimeType)
                     {
                         case DateTimeType.Undefined:
@@ -283,7 +279,8 @@ namespace Cave.Data.Sql
                         {
                             case DateTimeType.Undefined:
                             case DateTimeType.Native: return value;
-                            case DateTimeType.BigIntHumanReadable: return long.Parse(new DateTime(value.Ticks).ToString(BigIntDateTimeFormat, Culture), Culture);
+                            case DateTimeType.BigIntHumanReadable:
+                                return long.Parse(new DateTime(value.Ticks).ToString(BigIntDateTimeFormat, Culture), Culture);
                             case DateTimeType.BigIntTicks: return value.Ticks;
                             case DateTimeType.DecimalSeconds: return (decimal) value.Ticks / TimeSpan.TicksPerSecond;
                             case DateTimeType.DoubleSeconds: return (double) value.Ticks / TimeSpan.TicksPerSecond;
@@ -349,10 +346,7 @@ namespace Cave.Data.Sql
             }
         }
 
-        /// <summary>
-        ///     Gets or sets the default <see cref="DateTimeKind" /> used when reading date fields without explicit
-        ///     definition.
-        /// </summary>
+        /// <summary>Gets or sets the default <see cref="DateTimeKind" /> used when reading date fields without explicit definition.</summary>
         public DateTimeKind DefaultDateTimeKind { get; set; } = DateTimeKind.Local;
 
         /// <summary>Converts a database value into a local value.</summary>
@@ -362,8 +356,16 @@ namespace Cave.Data.Sql
         /// <returns>Returns a value as local csharp value type.</returns>
         public virtual object GetLocalValue(IFieldProperties field, IDataReader reader, object databaseValue)
         {
-            if (field == null) throw new ArgumentNullException(nameof(field));
-            if (reader == null) throw new ArgumentNullException(nameof(reader));
+            if (field == null)
+            {
+                throw new ArgumentNullException(nameof(field));
+            }
+
+            if (reader == null)
+            {
+                throw new ArgumentNullException(nameof(reader));
+            }
+
             if (databaseValue is DBNull || databaseValue is null)
             {
                 return null;
@@ -545,6 +547,7 @@ namespace Cave.Data.Sql
                     {
                         LogQuery(command);
                     }
+
                     command.ExecuteNonQuery();
                 }
             }
@@ -651,6 +654,7 @@ namespace Cave.Data.Sql
                         {
                             LogQuery(command);
                         }
+
                         return command.ExecuteNonQuery();
                     }
                 }
@@ -710,6 +714,7 @@ namespace Cave.Data.Sql
                         {
                             LogQuery(command);
                         }
+
                         using (var reader = command.ExecuteReader(CommandBehavior.KeyInfo))
                         {
                             return ReadSchema(reader, table);
@@ -768,7 +773,11 @@ namespace Cave.Data.Sql
         /// <returns>The result value or null.</returns>
         public virtual object QueryValue(SqlCmd cmd, string database = null, string table = null, string fieldName = null)
         {
-            if (cmd == null) throw new ArgumentNullException(nameof(cmd));
+            if (cmd == null)
+            {
+                throw new ArgumentNullException(nameof(cmd));
+            }
+
             if (Closed)
             {
                 throw new ObjectDisposedException(ToString());
@@ -996,7 +1005,11 @@ namespace Cave.Data.Sql
         /// <param name="command">The command.</param>
         protected internal static void LogQuery(IDbCommand command)
         {
-            if (command == null) throw new ArgumentNullException(nameof(command));
+            if (command == null)
+            {
+                throw new ArgumentNullException(nameof(command));
+            }
+
             if (command.Parameters.Count > 0)
             {
                 var paramText = new StringBuilder();
@@ -1159,10 +1172,7 @@ namespace Cave.Data.Sql
         #endregion
 
         /// <summary>Releases unmanaged and - optionally - managed resources.</summary>
-        /// <param name="disposing">
-        ///     <c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only
-        ///     unmanaged resources.
-        /// </param>
+        /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
