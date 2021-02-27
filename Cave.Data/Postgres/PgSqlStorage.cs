@@ -199,7 +199,7 @@ namespace Cave.Data.Postgres
         /// <inheritdoc />
         protected override IDbConnection GetDbConnectionType()
         {
-            var flags = AppDom.LoadFlags.NoException | AppDom.LoadFlags.LoadAssemblies;
+            var flags = AppDom.LoadFlags.NoException | (AllowAssemblyLoad ? AppDom.LoadFlags.LoadAssemblies : 0);
             var type = AppDom.FindType("Npgsql.NpgsqlConnection", "Npgsql", flags);
             return (IDbConnection) Activator.CreateInstance(type);
         }

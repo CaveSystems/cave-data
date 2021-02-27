@@ -333,13 +333,24 @@ namespace Cave.Data.Mysql
         /// <inheritdoc />
         protected override IDbConnection GetDbConnectionType()
         {
-            var flags = AppDom.LoadFlags.NoException | AppDom.LoadFlags.LoadAssemblies;
+            var flags = AppDom.LoadFlags.NoException;
             var type =
                 AppDom.FindType("MySql.Data.MySqlClient.MySqlConnection", "MySql.Data", flags) ??
                 AppDom.FindType("MySql.Data.MySqlClient.MySqlConnection", "MySqlConnector", flags) ??
-                AppDom.FindType("MySqlConnector.MySqlConnection", "MySqlConnector", flags) ??
-                throw new TypeLoadException("Could not load type MySql.Data.MySqlClient.MySqlConnection!");
-            return (IDbConnection) Activator.CreateInstance(type);
+                AppDom.FindType("MySqlConnector.MySqlConnection", "MySqlConnector", flags);
+            if ((type == null) && AllowAssemblyLoad)
+            {
+                //try with unsafe load
+                flags |= AppDom.LoadFlags.LoadAssemblies;
+                type =
+                    AppDom.FindType("MySql.Data.MySqlClient.MySqlConnection", "MySql.Data", flags) ??
+                    AppDom.FindType("MySql.Data.MySqlClient.MySqlConnection", "MySqlConnector", flags) ??
+                    AppDom.FindType("MySqlConnector.MySqlConnection", "MySqlConnector", flags);
+            }
+
+            return type == null
+                ? throw new TypeLoadException("Could not load type MySql.Data.MySqlClient.MySqlConnection!")
+                : (IDbConnection) Activator.CreateInstance(type);
         }
 
         /// <inheritdoc />

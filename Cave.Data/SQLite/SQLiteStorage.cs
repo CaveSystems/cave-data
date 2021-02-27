@@ -126,12 +126,22 @@ namespace Cave.Data.SQLite
         /// <inheritdoc />
         protected override IDbConnection GetDbConnectionType()
         {
-            var flags = AppDom.LoadFlags.NoException | AppDom.LoadFlags.LoadAssemblies;
+            var flags = AppDom.LoadFlags.NoException;
             var type =
                 AppDom.FindType("System.Data.SQLite.SQLiteConnection", "System.Data.SQLite", flags) ??
-                AppDom.FindType("Mono.Data.SQLite.SQLiteConnection", "Mono.Data.SQLite", flags) ??
-                throw new TypeLoadException("Could neither load System.Data.SQLite.SQLiteConnection nor Mono.Data.SQLite.SQLiteConnection!");
-            return (IDbConnection) Activator.CreateInstance(type);
+                AppDom.FindType("Mono.Data.SQLite.SQLiteConnection", "Mono.Data.SQLite", flags);
+            if ((type == null) && AllowAssemblyLoad)
+            {
+                //try with unsafe load
+                flags |= AppDom.LoadFlags.LoadAssemblies;
+                type =
+                    AppDom.FindType("System.Data.SQLite.SQLiteConnection", "System.Data.SQLite", flags) ??
+                    AppDom.FindType("Mono.Data.SQLite.SQLiteConnection", "Mono.Data.SQLite", flags);
+            }
+
+            return type == null
+                ? throw new TypeLoadException("Could neither load System.Data.SQLite.SQLiteConnection nor Mono.Data.SQLite.SQLiteConnection!")
+                : (IDbConnection) Activator.CreateInstance(type);
         }
 
         /// <inheritdoc />

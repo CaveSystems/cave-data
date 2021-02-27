@@ -186,7 +186,7 @@ namespace Cave.Data.Microsoft
         /// <inheritdoc />
         protected override IDbConnection GetDbConnectionType()
         {
-            var flags = AppDom.LoadFlags.NoException | AppDom.LoadFlags.LoadAssemblies;
+            var flags = AppDom.LoadFlags.NoException | (AllowAssemblyLoad ? AppDom.LoadFlags.LoadAssemblies : 0);
             var type = AppDom.FindType("System.Data.SqlClient.SqlConnection", "System.Data.SqlClient", flags);
             return (IDbConnection) Activator.CreateInstance(type);
         }

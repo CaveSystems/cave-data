@@ -14,6 +14,9 @@ namespace Cave.Data
         /// <summary>Epoch DateTime in Ticks.</summary>
         public const long EpochTicks = 621355968000000000;
 
+        /// <summary>Allow to load assemblies (unsafe) if desired ado connection type cannot be found in application domain.</summary>
+        public static bool AllowAssemblyLoad { get; set; }
+
         /// <summary>Gets or sets the date time format for big int date time values.</summary>
         public static string BigIntDateTimeFormat { get; set; } = "yyyyMMddHHmmssfff";
 
