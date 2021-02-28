@@ -7,12 +7,16 @@ using System.Reflection;
 
 namespace Cave.Data
 {
-    /// <summary>Provides static functions for struct field reflections.</summary>
+    /// <summary>
+    /// Provides static functions for struct field reflections.
+    /// </summary>
     public static class Fields
     {
         #region Static
 
-        /// <summary>Converts a (primitive) value to the desired type.</summary>
+        /// <summary>
+        /// Converts a (primitive) value to the desired type.
+        /// </summary>
         /// <param name="toType">Type to convert to.</param>
         /// <param name="value">Value to convert.</param>
         /// <param name="cultureInfo">The culture to use during formatting.</param>
@@ -29,14 +33,18 @@ namespace Cave.Data
             }
         }
 
-        /// <summary>Converts a value to the desired field value.</summary>
+        /// <summary>
+        /// Converts a value to the desired field value.
+        /// </summary>
         /// <typeparam name="T">The field type.</typeparam>
         /// <param name="value">The value.</param>
         /// <param name="provider">The format provider to use during formatting.</param>
         /// <returns>An object converted to the specified type.</returns>
-        public static T ConvertValue<T>(object value, IFormatProvider provider = null) => (T) ConvertValue(typeof(T), value, provider);
+        public static T ConvertValue<T>(object value, IFormatProvider provider = null) => (T)ConvertValue(typeof(T), value, provider);
 
-        /// <summary>Converts a value to the desired field value.</summary>
+        /// <summary>
+        /// Converts a value to the desired field value.
+        /// </summary>
         /// <param name="fieldType">The field type.</param>
         /// <param name="value">The value.</param>
         /// <param name="provider">The format provider to use during formatting.</param>
@@ -80,13 +88,14 @@ namespace Cave.Data
                     case "ON":
                     case "YES":
                     case "1":
-                        return true;
+                    return true;
+
                     case "":
                     case "FALSE":
                     case "OFF":
                     case "NO":
                     case "0":
-                        return false;
+                    return false;
                 }
             }
 
@@ -106,7 +115,7 @@ namespace Cave.Data
             }
 
             // convert to string
-            if (!(value is string str))
+            if (value is not string str)
             {
                 // try to find public ToString(IFormatProvider) method in class
                 var method = value.GetType().GetMethod("ToString", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(IFormatProvider) },
@@ -115,7 +124,7 @@ namespace Cave.Data
                 {
                     try
                     {
-                        str = (string) method.Invoke(value, new object[] { provider });
+                        str = (string)method.Invoke(value, new object[] { provider });
                     }
                     catch (TargetInvocationException ex)
                     {
@@ -161,12 +170,12 @@ namespace Cave.Data
 
                     if (str.EndsWith("ms", StringComparison.Ordinal))
                     {
-                        return new TimeSpan((long) Math.Round(double.Parse(str.SubstringEnd(2), provider) * TimeSpan.TicksPerMillisecond));
+                        return new TimeSpan((long)Math.Round(double.Parse(str.SubstringEnd(2), provider) * TimeSpan.TicksPerMillisecond));
                     }
 
                     return str.EndsWith("s", StringComparison.Ordinal)
-                        ? new TimeSpan((long) Math.Round(double.Parse(str.SubstringEnd(1), provider) * TimeSpan.TicksPerSecond))
-                        : (object) new TimeSpan(long.Parse(str, provider));
+                        ? new TimeSpan((long)Math.Round(double.Parse(str.SubstringEnd(1), provider) * TimeSpan.TicksPerSecond))
+                        : (object)new TimeSpan(long.Parse(str, provider));
                 }
                 catch (Exception ex)
                 {
@@ -214,7 +223,9 @@ namespace Cave.Data
             }
         }
 
-        /// <summary>Gets the description of a field. If the attribute is not present null is returned.</summary>
+        /// <summary>
+        /// Gets the description of a field. If the attribute is not present null is returned.
+        /// </summary>
         /// <param name="member">The field / property info.</param>
         /// <returns>The description specified with the field attribute or null.</returns>
         public static string GetDescription(MemberInfo member)
@@ -235,7 +246,9 @@ namespace Cave.Data
             return null;
         }
 
-        /// <summary>Gets the description of a specified enum or field.</summary>
+        /// <summary>
+        /// Gets the description of a specified enum or field.
+        /// </summary>
         /// <param name="value">The enum or field value.</param>
         /// <returns>The description if present or null otherwise.</returns>
         /// <exception cref="ArgumentNullException">Value.</exception>
@@ -270,9 +283,11 @@ namespace Cave.Data
             return null;
         }
 
-        /// <summary>Checks whether a field has the <see cref="FieldAttribute" /> and returns the flags of the field.</summary>
+        /// <summary>
+        /// Checks whether a field has the <see cref="FieldAttribute"/> and returns the flags of the field.
+        /// </summary>
         /// <param name="member">The field / property info.</param>
-        /// <returns>The flags specified with the field attribute or <see cref="FieldFlags.None" />.</returns>
+        /// <returns>The flags specified with the field attribute or <see cref="FieldFlags.None"/>.</returns>
         public static FieldFlags GetFlags(MemberInfo member)
         {
             if (member == null)
@@ -291,7 +306,9 @@ namespace Cave.Data
             return FieldFlags.None;
         }
 
-        /// <summary>Checks whether a field has the <see cref="FieldAttribute" /> and returns the length of the field.</summary>
+        /// <summary>
+        /// Checks whether a field has the <see cref="FieldAttribute"/> and returns the length of the field.
+        /// </summary>
         /// <param name="member">The field / property info.</param>
         /// <returns>The length specified with the field attribute or 0.</returns>
         public static uint GetLength(MemberInfo member)
@@ -312,7 +329,9 @@ namespace Cave.Data
             return 0;
         }
 
-        /// <summary>Checks whether a field has the <see cref="FieldAttribute" /> and returns the name of the field.</summary>
+        /// <summary>
+        /// Checks whether a field has the <see cref="FieldAttribute"/> and returns the name of the field.
+        /// </summary>
         /// <param name="member">The field / property info.</param>
         /// <returns>The name specified with the field attribute or null.</returns>
         public static string GetName(MemberInfo member)
@@ -333,8 +352,10 @@ namespace Cave.Data
             return null;
         }
 
-        /// <summary>Gets a string for the specified field value.</summary>
-        /// <remarks>The result of this function can be used by <see cref="ConvertValue(Type, object, IFormatProvider)" />.</remarks>
+        /// <summary>
+        /// Gets a string for the specified field value.
+        /// </summary>
+        /// <remarks>The result of this function can be used by <see cref="ConvertValue(Type, object, IFormatProvider)"/>.</remarks>
         /// <param name="value">The value.</param>
         /// <param name="datatype">The datatype.</param>
         /// <param name="dateTimeKind">The date time kind (optional).</param>
@@ -364,45 +385,47 @@ namespace Cave.Data
             {
                 case DataType.DateTime:
                 {
-                    var dt = (DateTime) value;
+                    var dt = (DateTime)value;
                     switch (dateTimeKind)
                     {
                         case DateTimeKind.Utc:
-                            dt = dt.ToUniversalTime();
-                            break;
+                        dt = dt.ToUniversalTime();
+                        break;
+
                         case DateTimeKind.Local:
-                            dt = dt.ToLocalTime();
-                            break;
+                        dt = dt.ToLocalTime();
+                        break;
                     }
 
-                    switch (dateTimeType)
+                    return dateTimeType switch
                     {
-                        default: throw new NotSupportedException($"DateTimeType {dateTimeType} is not supported");
-                        case DateTimeType.BigIntHumanReadable: return dt.ToString(Storage.BigIntDateTimeFormat, provider).TrimStart('0');
-                        case DateTimeType.Native: return dt.ToString(StringExtensions.InterOpDateTimeFormat, provider).Box(stringMarker);
-                        case DateTimeType.BigIntTicks: return dt.Ticks.ToString(provider);
-                        case DateTimeType.DecimalSeconds: return (dt.Ticks / (decimal) TimeSpan.TicksPerSecond).ToString(provider);
-                        case DateTimeType.DoubleSeconds: return (dt.Ticks / (double) TimeSpan.TicksPerSecond).ToString(provider);
-                        case DateTimeType.DoubleEpoch: return ((dt.Ticks - Storage.EpochTicks) / (double) TimeSpan.TicksPerSecond).ToString(provider);
-                    }
+                        DateTimeType.BigIntHumanReadable => dt.ToString(Storage.BigIntDateTimeFormat, provider).TrimStart('0'),
+                        DateTimeType.Native => dt.ToString(StringExtensions.InterOpDateTimeFormat, provider).Box(stringMarker),
+                        DateTimeType.BigIntTicks => dt.Ticks.ToString(provider),
+                        DateTimeType.DecimalSeconds => (dt.Ticks / (decimal)TimeSpan.TicksPerSecond).ToString(provider),
+                        DateTimeType.DoubleSeconds => (dt.Ticks / (double)TimeSpan.TicksPerSecond).ToString(provider),
+                        DateTimeType.DoubleEpoch => ((dt.Ticks - Storage.EpochTicks) / (double)TimeSpan.TicksPerSecond).ToString(provider),
+                        _ => throw new NotSupportedException($"DateTimeType {dateTimeType} is not supported"),
+                    };
                 }
                 case DataType.Binary:
                 {
-                    var data = (byte[]) value;
+                    var data = (byte[])value;
                     return (data.Length == 0 ? string.Empty : Base64.NoPadding.Encode(data)).Box(stringMarker);
                 }
                 case DataType.Bool:
                 {
-                    return (bool) value ? "true" : "false";
+                    return (bool)value ? "true" : "false";
                 }
                 case DataType.TimeSpan:
                 {
-                    var ts = (TimeSpan) value;
+                    var ts = (TimeSpan)value;
                     switch (dateTimeType)
                     {
                         default: throw new NotSupportedException($"DateTimeType {dateTimeType} is not supported.");
                         case DateTimeType.BigIntHumanReadable:
-                            return new DateTime(ts.Ticks).ToString(Storage.BigIntDateTimeFormat, provider);
+                        return new DateTime(ts.Ticks).ToString(Storage.BigIntDateTimeFormat, provider);
+
                         case DateTimeType.Undefined:
                         case DateTimeType.Native:
                         {
@@ -415,23 +438,25 @@ namespace Cave.Data
                             return text;
                         }
                         case DateTimeType.BigIntTicks:
-                            return ts.Ticks.ToString(provider);
+                        return ts.Ticks.ToString(provider);
+
                         case DateTimeType.DecimalSeconds:
-                            return $"{(ts.Ticks / (decimal) TimeSpan.TicksPerSecond).ToString(provider)}";
+                        return $"{(ts.Ticks / (decimal)TimeSpan.TicksPerSecond).ToString(provider)}";
+
                         case DateTimeType.DoubleSeconds:
-                            return ts.TotalSeconds.ToString("R", provider);
+                        return ts.TotalSeconds.ToString("R", provider);
                     }
                 }
                 case DataType.Single:
                 {
-                    var f = (float) value;
+                    var f = (float)value;
                     return float.IsNaN(f) || float.IsInfinity(f)
                         ? throw new InvalidDataException($"Cannot serialize float with value {f}!")
                         : f.ToString(provider);
                 }
                 case DataType.Double:
                 {
-                    var d = (double) value;
+                    var d = (double)value;
                     if (double.IsNaN(d) || double.IsInfinity(d))
                     {
                         throw new InvalidDataException($"Cannot serialize double with value {d}!");
@@ -439,15 +464,15 @@ namespace Cave.Data
 
                     return d.ToString(provider);
                 }
-                case DataType.Decimal: return ((decimal) value).ToString(provider);
-                case DataType.Int8: return ((sbyte) value).ToString(provider);
-                case DataType.Int16: return ((short) value).ToString(provider);
-                case DataType.Int32: return ((int) value).ToString(provider);
-                case DataType.Int64: return ((long) value).ToString(provider);
-                case DataType.UInt8: return ((byte) value).ToString(provider);
-                case DataType.UInt16: return ((ushort) value).ToString(provider);
-                case DataType.UInt32: return ((uint) value).ToString(provider);
-                case DataType.UInt64: return ((ulong) value).ToString(provider);
+                case DataType.Decimal: return ((decimal)value).ToString(provider);
+                case DataType.Int8: return ((sbyte)value).ToString(provider);
+                case DataType.Int16: return ((short)value).ToString(provider);
+                case DataType.Int32: return ((int)value).ToString(provider);
+                case DataType.Int64: return ((long)value).ToString(provider);
+                case DataType.UInt8: return ((byte)value).ToString(provider);
+                case DataType.UInt16: return ((ushort)value).ToString(provider);
+                case DataType.UInt32: return ((uint)value).ToString(provider);
+                case DataType.UInt64: return ((ulong)value).ToString(provider);
                 case DataType.Enum: return value.ToString().Box(stringMarker);
                 case DataType.Char: return value.ToString().Box(stringMarker);
                 case DataType.String:
@@ -459,7 +484,9 @@ namespace Cave.Data
             return s.EscapeUtf8().Box(stringMarker);
         }
 
-        /// <summary>Gets an array containing all values of the specified fields.</summary>
+        /// <summary>
+        /// Gets an array containing all values of the specified fields.
+        /// </summary>
         /// <param name="fields">The fields to read.</param>
         /// <param name="structure">The structure to read fields from.</param>
         /// <returns>An array containing all values.</returns>
@@ -479,7 +506,9 @@ namespace Cave.Data
             return result;
         }
 
-        /// <summary>Gets an array containing all values of the specified fields.</summary>
+        /// <summary>
+        /// Gets an array containing all values of the specified fields.
+        /// </summary>
         /// <param name="properties">The properties to read.</param>
         /// <param name="obj">The object to read properties from.</param>
         /// <returns>An array containing all values.</returns>
@@ -503,7 +532,9 @@ namespace Cave.Data
             return result;
         }
 
-        /// <summary>Sets all field values of a struct/class object.</summary>
+        /// <summary>
+        /// Sets all field values of a struct/class object.
+        /// </summary>
         /// <param name="obj">structure object.</param>
         /// <param name="fields">fields to be set.</param>
         /// <param name="values">values to set.</param>
@@ -538,6 +569,6 @@ namespace Cave.Data
             }
         }
 
-        #endregion
+        #endregion Static
     }
 }

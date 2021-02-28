@@ -4,33 +4,60 @@ using System.Linq;
 
 namespace Cave.Data
 {
-    /// <summary>Provides a memory based storage engine for databases, tables and rows.</summary>
+    /// <summary>
+    /// Provides a memory based storage engine for databases, tables and rows.
+    /// </summary>
     public sealed class MemoryStorage : Storage
     {
-        #region Static
+        #region Private Fields
 
-        /// <summary>Gets the default memory storage.</summary>
-        /// <value>The default memory storage.</value>
-        public static MemoryStorage Default { get; } = new MemoryStorage();
+        readonly Dictionary<string, IDatabase> Databases = new Dictionary<string, IDatabase>();
 
-        #endregion
+        #endregion Private Fields
 
-        readonly Dictionary<string, IDatabase> databases = new Dictionary<string, IDatabase>();
+        #region Public Constructors
 
-        #region Constructors
-
-        /// <summary>Initializes a new instance of the <see cref="MemoryStorage" /> class.</summary>
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MemoryStorage"/> class.
+        /// </summary>
         /// <param name="options">Options for the databaseName.</param>
         public MemoryStorage(ConnectionFlags options = ConnectionFlags.None)
             : base("memory://", options)
         {
         }
 
-        #endregion
+        #endregion Public Constructors
 
-        #region Overrides
+        #region Public Properties
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets the default memory storage.
+        /// </summary>
+        /// <value>The default memory storage.</value>
+        public static MemoryStorage Default { get; } = new MemoryStorage();
+
+        /// <inheritdoc/>
+        public override IList<string> DatabaseNames
+        {
+            get
+            {
+                if (Closed)
+                {
+                    throw new ObjectDisposedException(ToString());
+                }
+
+                return Databases.Keys.ToArray();
+            }
+        }
+
+        /// <inheritdoc/>
+        public override bool SupportsNativeTransactions { get; }
+
+        #endregion Public Properties
+
+        #region Public Methods
+
+        /// <inheritdoc/>
         public override IDatabase CreateDatabase(string databaseName)
         {
             if (Closed)
@@ -44,25 +71,11 @@ namespace Cave.Data
             }
 
             IDatabase database = new MemoryDatabase(this, databaseName);
-            databases.Add(databaseName, database);
+            Databases.Add(databaseName, database);
             return database;
         }
 
-        /// <inheritdoc />
-        public override IList<string> DatabaseNames
-        {
-            get
-            {
-                if (Closed)
-                {
-                    throw new ObjectDisposedException(ToString());
-                }
-
-                return databases.Keys.ToArray();
-            }
-        }
-
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override void DeleteDatabase(string database)
         {
             if (Closed)
@@ -70,13 +83,13 @@ namespace Cave.Data
                 throw new ObjectDisposedException(ToString());
             }
 
-            if (!databases.Remove(database))
+            if (!Databases.Remove(database))
             {
                 throw new ArgumentException($"The requested databaseName '{database}' was not found!");
             }
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override IDatabase GetDatabase(string databaseName)
         {
             if (Closed)
@@ -89,15 +102,12 @@ namespace Cave.Data
                 throw new ArgumentException($"The requested databaseName '{databaseName}' was not found!");
             }
 
-            return databases[databaseName];
+            return Databases[databaseName];
         }
 
-        /// <inheritdoc />
-        public override bool HasDatabase(string databaseName) => databases.ContainsKey(databaseName);
+        /// <inheritdoc/>
+        public override bool HasDatabase(string databaseName) => Databases.ContainsKey(databaseName);
 
-        /// <inheritdoc />
-        public override bool SupportsNativeTransactions { get; }
-
-        #endregion
+        #endregion Public Methods
     }
 }

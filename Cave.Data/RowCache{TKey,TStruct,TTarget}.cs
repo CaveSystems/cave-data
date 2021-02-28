@@ -3,43 +3,67 @@ using System.Collections.Generic;
 
 namespace Cave.Data
 {
-    /// <summary>Provides a row cache class working with row structures.</summary>
+    /// <summary>
+    /// Provides a row cache class working with row structures.
+    /// </summary>
     /// <typeparam name="TKey">Key identifier type.</typeparam>
     /// <typeparam name="TStruct">Row structure type.</typeparam>
     /// <typeparam name="TTarget">Result and cache item type.</typeparam>
     public class RowCache<TKey, TStruct, TTarget> : IRowCache where TKey : IComparable<TKey> where TStruct : struct where TTarget : class
     {
-        #region Nested type: RowCacheConvertFunction
+        #region Private Fields
 
-        /// <summary>Converts a <typeparamref name="TStruct" /> row instance to the result <typeparamref name="TTarget" /> value.</summary>
-        /// <param name="id">Identifier of the dataset.</param>
-        /// <param name="row">Structure row read from table. This may be equal to null if the dataset was not found at the table.</param>
-        /// <returns>Returns a new <typeparamref name="TTarget" /> instance or null.</returns>
-        public delegate TTarget RowCacheConvertFunction(TKey id, TStruct? row);
+        readonly Dictionary<TKey, TTarget> Cache = new Dictionary<TKey, TTarget>();
 
-        #endregion
+        readonly RowCacheConvertFunction ConverterFunction;
 
-        readonly Dictionary<TKey, TTarget> cache = new Dictionary<TKey, TTarget>();
+        readonly ITable<TKey, TStruct> Table;
 
-        readonly RowCacheConvertFunction func;
-        readonly ITable<TKey, TStruct> table;
+        #endregion Private Fields
 
-        #region Constructors
+        #region Public Constructors
 
-        /// <summary>Creates a new row cache using the specified table.</summary>
+        /// <summary>
+        /// Creates a new row cache using the specified table.
+        /// </summary>
         /// <param name="table">Table to read rows from.</param>
-        /// <param name="func">Function to convert from <typeparamref name="TStruct" /> to <typeparamref name="TTarget" />.</param>
+        /// <param name="func">Function to convert from <typeparamref name="TStruct"/> to <typeparamref name="TTarget"/>.</param>
         public RowCache(ITable table, RowCacheConvertFunction func)
         {
-            this.table = new Table<TKey, TStruct>(table);
-            this.func = func ?? throw new ArgumentNullException(nameof(func));
+            this.Table = new Table<TKey, TStruct>(table);
+            this.ConverterFunction = func ?? throw new ArgumentNullException(nameof(func));
         }
 
-        #endregion
+        #endregion Public Constructors
 
-        #region IRowCache Members
+        #region Public Delegates
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Converts a <typeparamref name="TStruct"/> row instance to the result <typeparamref name="TTarget"/> value.
+        /// </summary>
+        /// <param name="id">Identifier of the dataset.</param>
+        /// <param name="row">Structure row read from table. This may be equal to null if the dataset was not found at the table.</param>
+        /// <returns>Returns a new <typeparamref name="TTarget"/> instance or null.</returns>
+        public delegate TTarget RowCacheConvertFunction(TKey id, TStruct? row);
+
+        #endregion Public Delegates
+
+        #region Public Properties
+
+        /// <inheritdoc/>
+        public long HitCount { get; set; }
+
+        /// <inheritdoc/>
+        public long MissCount { get; set; }
+
+        /// <inheritdoc/>
+        public long NotFoundCount { get; set; }
+
+        #endregion Public Properties
+
+        #region Public Methods
+
+        /// <inheritdoc/>
         public void Clear()
         {
             lock (this)
@@ -47,26 +71,15 @@ namespace Cave.Data
                 HitCount = 0;
                 MissCount = 0;
                 NotFoundCount = 0;
-                cache.Clear();
+                Cache.Clear();
             }
 
             ;
         }
 
-        /// <inheritdoc />
-        public long HitCount { get; set; }
-
-        /// <inheritdoc />
-        public long MissCount { get; set; }
-
-        /// <inheritdoc />
-        public long NotFoundCount { get; set; }
-
-        #endregion
-
-        #region Members
-
-        /// <summary>Gets the row with the specified identifier.</summary>
+        /// <summary>
+        /// Gets the row with the specified identifier.
+        /// </summary>
         /// <param name="id">Row identifier.</param>
         /// <returns>Returns the converted target value or null.</returns>
         public TTarget Get(TKey id)
@@ -75,7 +88,9 @@ namespace Cave.Data
             return value;
         }
 
-        /// <summary>Tries to get the value with the specified identifier.</summary>
+        /// <summary>
+        /// Tries to get the value with the specified identifier.
+        /// </summary>
         /// <param name="id">The identifier value.</param>
         /// <param name="value">Returns the result value.</param>
         /// <returns>Returns true on success, false otherwise.</returns>
@@ -83,25 +98,25 @@ namespace Cave.Data
         {
             lock (this)
             {
-                if (cache.TryGetValue(id, out value))
+                if (Cache.TryGetValue(id, out value))
                 {
                     HitCount++;
                     return true;
                 }
 
                 MissCount++;
-                if (table.TryGetStruct(id, out var row))
+                if (Table.TryGetStruct(id, out var row))
                 {
-                    value = cache[id] = func(id, row);
+                    value = Cache[id] = ConverterFunction(id, row);
                     return true;
                 }
             }
 
             NotFoundCount++;
-            value = cache[id] = func(id, null);
+            value = Cache[id] = ConverterFunction(id, null);
             return false;
         }
 
-        #endregion
+        #endregion Public Methods
     }
 }

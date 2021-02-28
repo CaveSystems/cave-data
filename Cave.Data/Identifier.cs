@@ -4,10 +4,18 @@ using System.Linq;
 
 namespace Cave.Data
 {
-    /// <summary>Provides a database identifier (alias primary key).</summary>
+    /// <summary>
+    /// Provides a database identifier (alias primary key).
+    /// </summary>
     public class Identifier : IEquatable<Identifier>
     {
-        #region Static
+        #region Private Fields
+
+        readonly object[] Data;
+
+        #endregion Private Fields
+
+        #region Private Methods
 
         static object[] GetData(Row row, IEnumerable<int> fields)
         {
@@ -20,13 +28,13 @@ namespace Cave.Data
             return result;
         }
 
-        #endregion
+        #endregion Private Methods
 
-        readonly object[] data;
+        #region Public Constructors
 
-        #region Constructors
-
-        /// <summary>Initializes a new instance of the <see cref="Identifier" /> class.</summary>
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Identifier"/> class.
+        /// </summary>
         /// <param name="row">Row to create to create identifier for.</param>
         /// <param name="layout">Table layout.</param>
         public Identifier(Row row, RowLayout layout)
@@ -43,43 +51,43 @@ namespace Cave.Data
 
             if (!layout.Identifier.Any())
             {
-                data = row.Values;
+                Data = row.Values;
             }
             else
             {
-                data = layout.Identifier.Select(field => row[field.Index]).ToArray();
+                Data = layout.Identifier.Select(field => row[field.Index]).ToArray();
             }
         }
 
-        /// <summary>Initializes a new instance of the <see cref="Identifier" /> class.</summary>
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Identifier"/> class.
+        /// </summary>
         /// <param name="row">Row to create to create identifier for.</param>
         /// <param name="fields">The fields to use for the identifier.</param>
-        public Identifier(Row row, params int[] fields) => data = GetData(row, fields);
+        public Identifier(Row row, params int[] fields) => Data = GetData(row, fields);
 
-        /// <summary>Initializes a new instance of the <see cref="Identifier" /> class.</summary>
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Identifier"/> class.
+        /// </summary>
         /// <param name="row">Row to create to create identifier for.</param>
         /// <param name="fields">The fields to use for the identifier.</param>
-        public Identifier(Row row, IEnumerable<int> fields) => data = GetData(row, fields);
+        public Identifier(Row row, IEnumerable<int> fields) => Data = GetData(row, fields);
 
-        #endregion
+        #endregion Public Constructors
 
-        #region IEquatable<Identifier> Members
+        #region Public Methods
 
-        /// <inheritdoc />
-        public bool Equals(Identifier other) => (other != null) && data.SequenceEqual(other.data);
+        /// <inheritdoc/>
+        public bool Equals(Identifier other) => (other != null) && Data.SequenceEqual(other.Data);
 
-        #endregion
-
-        #region Overrides
-
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override bool Equals(object obj) => obj is Identifier other && Equals(other);
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override int GetHashCode()
         {
             var hash = 0;
-            foreach (var item in data)
+            foreach (var item in Data)
             {
                 hash ^= item?.GetHashCode() ?? 0;
                 hash = hash.BitwiseRotateLeft(1);
@@ -88,9 +96,9 @@ namespace Cave.Data
             return hash;
         }
 
-        /// <inheritdoc />
-        public override string ToString() => data.Select(d => $"{d}").Join('|');
+        /// <inheritdoc/>
+        public override string ToString() => Data.Select(d => $"{d}").Join('|');
 
-        #endregion
+        #endregion Public Methods
     }
 }

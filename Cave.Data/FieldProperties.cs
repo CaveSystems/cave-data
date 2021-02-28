@@ -11,7 +11,9 @@ using Cave.IO;
 
 namespace Cave
 {
-    /// <summary>Provides field properties.</summary>
+    /// <summary>
+    /// Provides field properties.
+    /// </summary>
     public class FieldProperties : IFieldProperties
     {
         ConstructorInfo constructor;
@@ -20,28 +22,28 @@ namespace Cave
 
         #region IFieldProperties Members
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public string AlternativeNames { get; set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public DataType DataType { get; set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public DateTimeKind DateTimeKind { get; set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public DateTimeType DateTimeType { get; set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public object DefaultValue { get; set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public string Description { get; set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public string DisplayFormat { get; set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public string DotNetTypeName
         {
             get
@@ -66,55 +68,54 @@ namespace Cave
                     case DataType.UInt8: return "byte";
                     case DataType.Char: return "char";
                     default:
-                        // case DataType.User:
-                        // case DataType.Enum:
-                        if (ValueType != null)
-                        {
-                            return ValueType.Name;
-                        }
+                    // case DataType.User: case DataType.Enum:
+                    if (ValueType != null)
+                    {
+                        return ValueType.Name;
+                    }
 
-                        return $"unknown datatype {DataType}";
+                    return $"unknown datatype {DataType}";
                 }
             }
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public FieldInfo FieldInfo { get; set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public FieldFlags Flags { get; set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public int Index { get; set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public bool IsNullable { get; set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public float MaximumLength { get; set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public string Name { get; set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public string NameAtDatabase { get; set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public StringEncoding StringEncoding { get; set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public DataType TypeAtDatabase { get; set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public Type ValueType { get; set; }
 
-        #endregion
+        #endregion IFieldProperties Members
 
         #region public functions
 
         #region IFieldProperties
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public FieldProperties Clone() =>
             new FieldProperties
             {
@@ -136,9 +137,9 @@ namespace Cave
                 DefaultValue = DefaultValue
             };
 
-        #endregion
+        #endregion IFieldProperties
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public object ParseValue(string text, string stringMarker = null, IFormatProvider provider = null)
         {
             if (provider == null)
@@ -170,33 +171,36 @@ namespace Cave
                 {
                     if (string.IsNullOrEmpty(text) || (text == "null"))
                     {
-                        return IsNullable ? null : (object) default(TimeSpan);
+                        return IsNullable ? null : (object)default(TimeSpan);
                     }
 
                     switch (DateTimeType)
                     {
                         default: throw new NotSupportedException($"DateTimeType {DateTimeType} is not supported.");
                         case DateTimeType.BigIntHumanReadable:
-                            return new TimeSpan(DateTime.ParseExact(text, Storage.BigIntDateTimeFormat, provider).Ticks);
+                        return new TimeSpan(DateTime.ParseExact(text, Storage.BigIntDateTimeFormat, provider).Ticks);
+
                         case DateTimeType.Undefined:
                         case DateTimeType.Native:
-                            if (stringMarker != null)
-                            {
-                                text = text.Unbox(stringMarker, false);
-                            }
+                        if (stringMarker != null)
+                        {
+                            text = text.Unbox(stringMarker, false);
+                        }
 #if NET20 || NET35
                             return TimeSpan.Parse(text);
 #else
-                            return TimeSpan.Parse(text, provider);
+                        return TimeSpan.Parse(text, provider);
 #endif
                         case DateTimeType.BigIntTicks:
-                            return new TimeSpan(long.Parse(text, provider));
+                        return new TimeSpan(long.Parse(text, provider));
+
                         case DateTimeType.DecimalSeconds:
-                            return new TimeSpan((long) decimal.Round(decimal.Parse(text, provider) * TimeSpan.TicksPerSecond));
+                        return new TimeSpan((long)decimal.Round(decimal.Parse(text, provider) * TimeSpan.TicksPerSecond));
+
                         case DateTimeType.DoubleSeconds:
                         {
                             var value = double.Parse(text, provider) * TimeSpan.TicksPerSecond;
-                            var longValue = (long) value;
+                            var longValue = (long)value;
                             if ((value > 0) && (longValue < 0))
                             {
                                 Trace.WriteLine("DoubleSeconds exceeded (long) range. Overflow detected!");
@@ -216,30 +220,35 @@ namespace Cave
                 {
                     if (string.IsNullOrEmpty(text) || (text == "null"))
                     {
-                        return IsNullable ? null : (object) default(DateTime);
+                        return IsNullable ? null : (object)default(DateTime);
                     }
 
                     switch (DateTimeType)
                     {
                         default: throw new NotSupportedException($"DateTimeType {DateTimeType} is not supported.");
                         case DateTimeType.BigIntHumanReadable:
-                            return DateTime.ParseExact(text, Storage.BigIntDateTimeFormat, provider);
+                        return DateTime.ParseExact(text, Storage.BigIntDateTimeFormat, provider);
+
                         case DateTimeType.Undefined:
                         case DateTimeType.Native:
-                            if (stringMarker != null)
-                            {
-                                text = text.Unbox(stringMarker, false);
-                            }
+                        if (stringMarker != null)
+                        {
+                            text = text.Unbox(stringMarker, false);
+                        }
 
-                            return DateTime.ParseExact(text, StringExtensions.InterOpDateTimeFormat, provider);
+                        return DateTime.ParseExact(text, StringExtensions.InterOpDateTimeFormat, provider);
+
                         case DateTimeType.BigIntTicks:
-                            return new DateTime(long.Parse(text, provider), DateTimeKind);
+                        return new DateTime(long.Parse(text, provider), DateTimeKind);
+
                         case DateTimeType.DecimalSeconds:
-                            return new DateTime((long) decimal.Round(decimal.Parse(text, provider) * TimeSpan.TicksPerSecond), DateTimeKind);
+                        return new DateTime((long)decimal.Round(decimal.Parse(text, provider) * TimeSpan.TicksPerSecond), DateTimeKind);
+
                         case DateTimeType.DoubleSeconds:
-                            return new DateTime((long) Math.Round(double.Parse(text, provider) * TimeSpan.TicksPerSecond), DateTimeKind);
+                        return new DateTime((long)Math.Round(double.Parse(text, provider) * TimeSpan.TicksPerSecond), DateTimeKind);
+
                         case DateTimeType.DoubleEpoch:
-                            return new DateTime((long) Math.Round(double.Parse(text, provider) * TimeSpan.TicksPerSecond) + Storage.EpochTicks, DateTimeKind);
+                        return new DateTime((long)Math.Round(double.Parse(text, provider) * TimeSpan.TicksPerSecond) + Storage.EpochTicks, DateTimeKind);
                     }
                 }
                 case DataType.Binary:
@@ -257,120 +266,135 @@ namespace Cave
                     return Base64.NoPadding.Decode(text);
                 }
                 case DataType.Bool:
-                    if (text.Length == 0)
-                    {
-                        return IsNullable ? null : (object) false;
-                    }
+                if (text.Length == 0)
+                {
+                    return IsNullable ? null : (object)false;
+                }
 
-                    return (text.ToUpperInvariant() == "TRUE") || (text.ToUpperInvariant() == "YES") || (text == "1");
+                return (text.ToUpperInvariant() == "TRUE") || (text.ToUpperInvariant() == "YES") || (text == "1");
+
                 case DataType.Single:
-                    if (text.Length == 0)
-                    {
-                        return IsNullable ? null : (object) 0f;
-                    }
+                if (text.Length == 0)
+                {
+                    return IsNullable ? null : (object)0f;
+                }
 
-                    return float.Parse(text, provider);
+                return float.Parse(text, provider);
+
                 case DataType.Double:
-                    if (text.Length == 0)
-                    {
-                        return IsNullable ? null : (object) 0d;
-                    }
+                if (text.Length == 0)
+                {
+                    return IsNullable ? null : (object)0d;
+                }
 
-                    return double.Parse(text, provider);
+                return double.Parse(text, provider);
+
                 case DataType.Decimal:
-                    if (text.Length == 0)
-                    {
-                        return IsNullable ? null : (object) 0m;
-                    }
+                if (text.Length == 0)
+                {
+                    return IsNullable ? null : (object)0m;
+                }
 
-                    return decimal.Parse(text, provider);
+                return decimal.Parse(text, provider);
+
                 case DataType.Int8:
-                    if (text.Length == 0)
-                    {
-                        return IsNullable ? null : (object) (sbyte) 0;
-                    }
+                if (text.Length == 0)
+                {
+                    return IsNullable ? null : (object)(sbyte)0;
+                }
 
-                    return sbyte.Parse(text, provider);
+                return sbyte.Parse(text, provider);
+
                 case DataType.Int16:
-                    if (text.Length == 0)
-                    {
-                        return IsNullable ? null : (object) (short) 0;
-                    }
+                if (text.Length == 0)
+                {
+                    return IsNullable ? null : (object)(short)0;
+                }
 
-                    return short.Parse(text, provider);
+                return short.Parse(text, provider);
+
                 case DataType.Int32:
-                    if (text.Length == 0)
-                    {
-                        return IsNullable ? null : (object) 0;
-                    }
+                if (text.Length == 0)
+                {
+                    return IsNullable ? null : (object)0;
+                }
 
-                    return int.Parse(text, provider);
+                return int.Parse(text, provider);
+
                 case DataType.Int64:
-                    if (text.Length == 0)
-                    {
-                        return IsNullable ? null : (object) 0L;
-                    }
+                if (text.Length == 0)
+                {
+                    return IsNullable ? null : (object)0L;
+                }
 
-                    return long.Parse(text, provider);
+                return long.Parse(text, provider);
+
                 case DataType.UInt8:
-                    if (text.Length == 0)
-                    {
-                        return IsNullable ? null : (object) (byte) 0;
-                    }
+                if (text.Length == 0)
+                {
+                    return IsNullable ? null : (object)(byte)0;
+                }
 
-                    return byte.Parse(text, provider);
+                return byte.Parse(text, provider);
+
                 case DataType.UInt16:
-                    if (text.Length == 0)
-                    {
-                        return IsNullable ? null : (object) (ushort) 0;
-                    }
+                if (text.Length == 0)
+                {
+                    return IsNullable ? null : (object)(ushort)0;
+                }
 
-                    return ushort.Parse(text, provider);
+                return ushort.Parse(text, provider);
+
                 case DataType.UInt32:
-                    if (text.Length == 0)
-                    {
-                        return IsNullable ? null : (object) 0U;
-                    }
+                if (text.Length == 0)
+                {
+                    return IsNullable ? null : (object)0U;
+                }
 
-                    return uint.Parse(text, provider);
+                return uint.Parse(text, provider);
+
                 case DataType.UInt64:
-                    if (text.Length == 0)
-                    {
-                        return IsNullable ? null : (object) 0UL;
-                    }
+                if (text.Length == 0)
+                {
+                    return IsNullable ? null : (object)0UL;
+                }
 
-                    return ulong.Parse(text, provider);
+                return ulong.Parse(text, provider);
+
                 case DataType.Enum:
-                    if (stringMarker != null)
-                    {
-                        text = text.Unbox(stringMarker, false);
-                    }
+                if (stringMarker != null)
+                {
+                    text = text.Unbox(stringMarker, false);
+                }
 
-                    if (text.Length == 0)
-                    {
-                        text = "0";
-                    }
+                if (text.Length == 0)
+                {
+                    text = "0";
+                }
 
-                    return Enum.Parse(ValueType, text, true);
+                return Enum.Parse(ValueType, text, true);
+
                 case DataType.Char:
-                    if (stringMarker != null)
-                    {
-                        text = text.Unbox(stringMarker, false).Unescape();
-                    }
+                if (stringMarker != null)
+                {
+                    text = text.Unbox(stringMarker, false).Unescape();
+                }
 
-                    if (text.Length != 1)
-                    {
-                        throw new InvalidDataException();
-                    }
+                if (text.Length != 1)
+                {
+                    throw new InvalidDataException();
+                }
 
-                    return text[0];
+                return text[0];
+
                 case DataType.String:
-                    if (stringMarker != null)
-                    {
-                        text = text.Unbox(stringMarker, false).Unescape();
-                    }
+                if (stringMarker != null)
+                {
+                    text = text.Unbox(stringMarker, false).Unescape();
+                }
 
-                    return text;
+                return text;
+
                 case DataType.User: break;
                 default: throw new NotImplementedException();
             }
@@ -410,11 +434,11 @@ namespace Cave
             throw new MissingMethodException($"Could not find a way to parse or create {ValueType} from string!");
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public string GetString(object value, string stringMarker = null, IFormatProvider provider = null) =>
             Fields.GetString(value, DataType, DateTimeKind, DateTimeType, stringMarker, provider);
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public object EnumValue(long value)
         {
             if (ValueType == null)
@@ -431,7 +455,9 @@ namespace Cave
             return Enum.ToObject(ValueType, value);
         }
 
-        /// <summary>Checks properties and sets needed but unset settings.</summary>
+        /// <summary>
+        /// Checks properties and sets needed but unset settings.
+        /// </summary>
         /// <returns>Returns a reference to this instance.</returns>
         public IFieldProperties Validate()
         {
@@ -455,82 +481,92 @@ namespace Cave
                 case DataType.UInt64:
                 case DataType.Char:
                 case DataType.Single:
-                    break;
+                break;
+
                 case DataType.TimeSpan:
                 case DataType.DateTime:
-                    if (DateTimeType == DateTimeType.Undefined)
-                    {
-                        DateTimeType = DateTimeType.Native;
+                if (DateTimeType == DateTimeType.Undefined)
+                {
+                    DateTimeType = DateTimeType.Native;
 #if DEBUG
-                        Trace.TraceWarning("Field {0} DateTimeType undefined! Falling back to native date time type. (Precision may be only seconds!)", this);
+                    Trace.TraceWarning("Field {0} DateTimeType undefined! Falling back to native date time type. (Precision may be only seconds!)", this);
 #endif
-                    }
+                }
 
-                    break;
+                break;
+
                 case DataType.Enum:
-                    if (ValueType == null)
-                    {
-                        throw new InvalidOperationException($"Property {nameof(ValueType)} required!");
-                    }
+                if (ValueType == null)
+                {
+                    throw new InvalidOperationException($"Property {nameof(ValueType)} required!");
+                }
 
-                    if (TypeAtDatabase == DataType.Enum)
-                    {
-                        TypeAtDatabase = DataType.Int64;
+                if (TypeAtDatabase == DataType.Enum)
+                {
+                    TypeAtDatabase = DataType.Int64;
 #if DEBUG
-                        Trace.TraceWarning("Field {0} DatabaseDataType undefined! Using DatabaseDataType {1}!", this, TypeAtDatabase);
+                    Trace.TraceWarning("Field {0} DatabaseDataType undefined! Using DatabaseDataType {1}!", this, TypeAtDatabase);
 #endif
-                    }
+                }
 
-                    break;
+                break;
+
                 case DataType.String:
+                if (StringEncoding == StringEncoding.Undefined)
+                {
+                    StringEncoding = StringEncoding.UTF8;
+                }
+
+                break;
+
+                case DataType.User:
+                if (ValueType == null)
+                {
+                    throw new InvalidOperationException($"Property {nameof(ValueType)} required!");
+                }
+
+                switch (TypeAtDatabase)
+                {
+                    case DataType.User:
+                    TypeAtDatabase = DataType.String;
+                    Trace.TraceWarning("Field {0} DatabaseDataType undefined! Using DatabaseDataType {1}!", this, TypeAtDatabase);
                     if (StringEncoding == StringEncoding.Undefined)
                     {
                         StringEncoding = StringEncoding.UTF8;
                     }
 
                     break;
-                case DataType.User:
-                    if (ValueType == null)
+
+                    case DataType.String:
+                    if (StringEncoding == StringEncoding.Undefined)
                     {
-                        throw new InvalidOperationException($"Property {nameof(ValueType)} required!");
+                        StringEncoding = StringEncoding.UTF8;
                     }
 
-                    switch (TypeAtDatabase)
-                    {
-                        case DataType.User:
-                            TypeAtDatabase = DataType.String;
-                            Trace.TraceWarning("Field {0} DatabaseDataType undefined! Using DatabaseDataType {1}!", this, TypeAtDatabase);
-                            if (StringEncoding == StringEncoding.Undefined)
-                            {
-                                StringEncoding = StringEncoding.UTF8;
-                            }
+                    break;
 
-                            break;
-                        case DataType.String:
-                            if (StringEncoding == StringEncoding.Undefined)
-                            {
-                                StringEncoding = StringEncoding.UTF8;
-                            }
+                    default: throw new NotSupportedException($"Datatype {TypeAtDatabase} is not supported for field {this}!");
+                }
 
-                            break;
-                        default: throw new NotSupportedException($"Datatype {TypeAtDatabase} is not supported for field {this}!");
-                    }
-
-                    goto case DataType.String;
+                goto case DataType.String;
                 default:
-                    throw new NotImplementedException("Unknown DataType!");
+                throw new NotImplementedException("Unknown DataType!");
             }
 
             return this;
         }
 
-        /// <summary>Loads field properties using the specified FieldInfo.</summary>
+        /// <summary>
+        /// Loads field properties using the specified FieldInfo.
+        /// </summary>
         /// <param name="index">Field index.</param>
         /// <param name="fieldInfo">The field information.</param>
         /// <exception cref="NotSupportedException">Array types (except byte[]) are not supported!.</exception>
         public void LoadFieldInfo(int index, FieldInfo fieldInfo) => LoadFieldInfo(index, fieldInfo, NamingStrategy.Exact);
 
-        /// <summary>Loads field properties using the specified FieldInfo.</summary>
+        /// <summary>
+        /// Loads field properties using the specified FieldInfo.
+        /// </summary>
         /// <param name="index">Field index.</param>
         /// <param name="fieldInfo">The field information.</param>
         /// <param name="namingStrategy">Naming strategy used for building the database field names.</param>
@@ -558,21 +594,13 @@ namespace Cave
             StringEncoding = StringEncoding.Undefined;
             AlternativeNames = null;
             DefaultValue = null;
-            if ((DataType == DataType.User) && fieldInfo.FieldType.IsArray)
+            TypeAtDatabase = DataType switch
             {
-                throw new NotSupportedException(
-                    "Array types (except byte[]) are not supported!\nPlease define a class with a valid ToString() member and static Parse(string) constructor instead!");
-            }
-
-            switch (DataType)
-            {
-                case DataType.Enum:
-                    TypeAtDatabase = DataType.Int64;
-                    break;
-                case DataType.User:
-                    TypeAtDatabase = DataType.String;
-                    break;
-            }
+                DataType.Enum => DataType.Int64,
+                DataType.User => !fieldInfo.FieldType.IsArray ? DataType.String : throw new NotSupportedException(
+                    "Array types (except byte[]) are not supported!\nPlease define a class with a valid ToString() member and static Parse(string) constructor instead!"),
+                _ => DataType
+            };
 
             foreach (Attribute attribute in fieldInfo.GetCustomAttributes(false))
             {
@@ -600,53 +628,28 @@ namespace Cave
                 {
                     DateTimeKind = dateTimeFormatAttribute.Kind;
                     DateTimeType = dateTimeFormatAttribute.Type;
-                    switch (DateTimeType)
+                    TypeAtDatabase = DateTimeType switch
                     {
-                        case DateTimeType.BigIntTicks:
-                        case DateTimeType.BigIntHumanReadable:
-                            TypeAtDatabase = DataType.Int64;
-                            break;
-                        case DateTimeType.DecimalSeconds:
-                            TypeAtDatabase = DataType.Decimal;
-                            break;
-                        case DateTimeType.DoubleSeconds:
-                            TypeAtDatabase = DataType.Double;
-                            break;
-                        case DateTimeType.DoubleEpoch:
-                            TypeAtDatabase = DataType.Double;
-                            break;
-                        case DateTimeType.Undefined:
-                        case DateTimeType.Native:
-                            TypeAtDatabase = DataType.DateTime;
-                            break;
-                        default: throw new NotImplementedException($"DateTimeType {DateTimeType} is not implemented!");
-                    }
-
+                        DateTimeType.BigIntTicks or DateTimeType.BigIntHumanReadable => DataType.Int64,
+                        DateTimeType.DecimalSeconds => DataType.Decimal,
+                        DateTimeType.DoubleSeconds or DateTimeType.DoubleEpoch => DataType.Double,
+                        DateTimeType.Undefined or DateTimeType.Native => DataType.DateTime,
+                        _ => throw new NotImplementedException($"DateTimeType {DateTimeType} is not implemented!"),
+                    };
                     continue;
                 }
 
                 if (attribute is TimeSpanFormatAttribute timeSpanFormatAttribute)
                 {
                     DateTimeType = timeSpanFormatAttribute.Type;
-                    switch (DateTimeType)
+                    TypeAtDatabase = DateTimeType switch
                     {
-                        case DateTimeType.BigIntTicks:
-                        case DateTimeType.BigIntHumanReadable:
-                            TypeAtDatabase = DataType.Int64;
-                            break;
-                        case DateTimeType.DecimalSeconds:
-                            TypeAtDatabase = DataType.Decimal;
-                            break;
-                        case DateTimeType.DoubleSeconds:
-                            TypeAtDatabase = DataType.Double;
-                            break;
-                        case DateTimeType.Undefined:
-                        case DateTimeType.Native:
-                            TypeAtDatabase = DataType.TimeSpan;
-                            break;
-                        default: throw new NotImplementedException($"DateTimeType {DateTimeType} is not implemented!");
-                    }
-
+                        DateTimeType.BigIntTicks or DateTimeType.BigIntHumanReadable => DataType.Int64,
+                        DateTimeType.DecimalSeconds => DataType.Decimal,
+                        DateTimeType.DoubleSeconds => DataType.Double,
+                        DateTimeType.Undefined or DateTimeType.Native => DataType.TimeSpan,
+                        _ => throw new NotImplementedException($"DateTimeType {DateTimeType} is not implemented!"),
+                    };
                     continue;
                 }
 
@@ -672,7 +675,9 @@ namespace Cave
             Validate();
         }
 
-        /// <summary>Loads fieldproperties from the specified reader.</summary>
+        /// <summary>
+        /// Loads fieldproperties from the specified reader.
+        /// </summary>
         /// <param name="reader">The reader.</param>
         /// <param name="index">Field index.</param>
         public void Load(DataReader reader, int index)
@@ -682,9 +687,9 @@ namespace Cave
                 throw new ArgumentNullException(nameof(reader));
             }
 
-            DataType = (DataType) reader.Read7BitEncodedInt32();
-            TypeAtDatabase = (DataType) reader.Read7BitEncodedInt32();
-            Flags = (FieldFlags) reader.Read7BitEncodedInt32();
+            DataType = (DataType)reader.Read7BitEncodedInt32();
+            TypeAtDatabase = (DataType)reader.Read7BitEncodedInt32();
+            Flags = (FieldFlags)reader.Read7BitEncodedInt32();
             Name = reader.ReadString();
             NameAtDatabase = reader.ReadString();
             Index = index;
@@ -692,8 +697,8 @@ namespace Cave
             ValueType = Type.GetType(typeName, true);
             if (DataType == DataType.DateTime)
             {
-                DateTimeKind = (DateTimeKind) reader.Read7BitEncodedInt32();
-                DateTimeType = (DateTimeType) reader.Read7BitEncodedInt32();
+                DateTimeKind = (DateTimeKind)reader.Read7BitEncodedInt32();
+                DateTimeType = (DateTimeType)reader.Read7BitEncodedInt32();
             }
 
             if ((DataType == DataType.String) || (DataType == DataType.User))
@@ -704,20 +709,26 @@ namespace Cave
             Validate();
         }
 
-        #endregion
+        #endregion public functions
 
         #region public overrides
 
-        /// <summary>Checks another FieldProperties instance for equality.</summary>
+        /// <summary>
+        /// Checks another FieldProperties instance for equality.
+        /// </summary>
         /// <param name="obj">The FieldProperties to check for equality.</param>
         /// <returns>Returns true if the other instance equals this one, false otherwise.</returns>
         public override bool Equals(object obj) => obj is FieldProperties other && Equals(other);
 
-        /// <summary>Gets the hashcode for the instance.</summary>
+        /// <summary>
+        /// Gets the hashcode for the instance.
+        /// </summary>
         /// <returns>Hashcode for the field.</returns>
         public override int GetHashCode() => ToString().GetHashCode();
 
-        /// <summary>Checks another FieldProperties instance for equality.</summary>
+        /// <summary>
+        /// Checks another FieldProperties instance for equality.
+        /// </summary>
         /// <param name="other">The FieldProperties to check for equality.</param>
         /// <returns>Returns true if the other instance equals this one, false otherwise.</returns>
         public bool Equals(IFieldProperties other)
@@ -755,8 +766,10 @@ namespace Cave
             return false;
         }
 
-        /// <summary>Returns a <see cref="string" /> that represents this instance.</summary>
-        /// <returns>A <see cref="string" /> that represents this instance.</returns>
+        /// <summary>
+        /// Returns a <see cref="string"/> that represents this instance.
+        /// </summary>
+        /// <returns>A <see cref="string"/> that represents this instance.</returns>
         public override string ToString()
         {
             var result = new StringBuilder();
@@ -795,6 +808,6 @@ namespace Cave
             return result.ToString();
         }
 
-        #endregion
+        #endregion public overrides
     }
 }

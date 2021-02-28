@@ -3,74 +3,16 @@ using System.IO;
 
 namespace Cave.Data.SQLite
 {
-    /// <summary>Provides an interface to subversioned files and directories (reads .svn/entries).</summary>
+    /// <summary>
+    /// Provides an interface to subversioned files and directories (reads .svn/entries).
+    /// </summary>
     public static class Subversion
     {
-        #region Static
+        #region Private Methods
 
-        /// <summary>Gets the revision of a specified directory.</summary>
-        /// <param name="path">The path to check.</param>
-        /// <returns>The revision number.</returns>
-        public static int GetRevision(string path)
-        {
-            var svnRoot = GetRootPath(path);
-            if (GetVersion(path) > 10)
-            {
-                using (var storage = new SQLiteStorage(@"file:///" + svnRoot))
-                {
-                    var revision = (long) storage.QueryValue(database: "wc", table: "nodes", cmd: "SELECT MAX(revision) FROM " + storage.FQTN("wc", "nodes"));
-                    return (int) revision;
-                }
-            }
-
-            if (!Directory.Exists(svnRoot))
-            {
-                throw new DirectoryNotFoundException();
-            }
-
-            try
-            {
-                var svnEntries = ReadEntries(svnRoot);
-                return int.Parse(svnEntries[3], null);
-            }
-            catch
-            {
-                throw new InvalidDataException("Cannot determine svn revision!");
-            }
-        }
-
-        /// <summary>Gets the subversion version this repository was written by.</summary>
-        /// <param name="path">Path to check.</param>
-        /// <returns>The version code.</returns>
-        public static int GetVersion(string path)
-        {
-            var svnRoot = GetRootPath(path);
-            var entriesFile = Path.Combine(svnRoot, "entries");
-            if (File.Exists(entriesFile))
-            {
-                var svnEntries = File.ReadAllLines(entriesFile);
-                switch (svnEntries[0])
-                {
-                    case "8":
-                    case "9":
-                    case "10":
-                    case "12":
-                        return int.Parse(svnEntries[0], null);
-                    default:
-                        throw new InvalidDataException($"Unknown svn version {svnEntries[0]}!");
-                }
-            }
-
-            var databaseFile = Path.Combine(svnRoot, "wc.db");
-            if (File.Exists(databaseFile))
-            {
-                return 100;
-            }
-
-            throw new DirectoryNotFoundException("Could not find .svn directory!");
-        }
-
-        /// <summary>Gets the root .svn path of the repository.</summary>
+        /// <summary>
+        /// Gets the root .svn path of the repository.
+        /// </summary>
         /// <param name="path">The current path.</param>
         /// <returns>The root path.</returns>
         static string GetRootPath(string path)
@@ -92,17 +34,76 @@ namespace Cave.Data.SQLite
 
         static string[] ReadEntries(string path)
         {
-            switch (GetVersion(path))
+            return (GetVersion(path)) switch
             {
-                case 8:
-                case 9:
-                case 10:
-                    return File.ReadAllLines(Path.Combine(GetRootPath(path), "entries"));
-            }
-
-            throw new NotSupportedException();
+                8 or 9 or 10 => File.ReadAllLines(Path.Combine(GetRootPath(path), "entries")),
+                _ => throw new NotSupportedException(),
+            };
         }
 
-        #endregion
+        #endregion Private Methods
+
+        #region Public Methods
+
+        /// <summary>
+        /// Gets the revision of a specified directory.
+        /// </summary>
+        /// <param name="path">The path to check.</param>
+        /// <returns>The revision number.</returns>
+        public static int GetRevision(string path)
+        {
+            var svnRoot = GetRootPath(path);
+            if (GetVersion(path) > 10)
+            {
+                using var storage = new SQLiteStorage(@"file:///" + svnRoot);
+                var revision = (long)storage.QueryValue(database: "wc", table: "nodes", cmd: "SELECT MAX(revision) FROM " + storage.FQTN("wc", "nodes"));
+                return (int)revision;
+            }
+
+            if (!Directory.Exists(svnRoot))
+            {
+                throw new DirectoryNotFoundException();
+            }
+
+            try
+            {
+                var svnEntries = ReadEntries(svnRoot);
+                return int.Parse(svnEntries[3], null);
+            }
+            catch
+            {
+                throw new InvalidDataException("Cannot determine svn revision!");
+            }
+        }
+
+        /// <summary>
+        /// Gets the subversion version this repository was written by.
+        /// </summary>
+        /// <param name="path">Path to check.</param>
+        /// <returns>The version code.</returns>
+        public static int GetVersion(string path)
+        {
+            var svnRoot = GetRootPath(path);
+            var entriesFile = Path.Combine(svnRoot, "entries");
+            if (File.Exists(entriesFile))
+            {
+                var svnEntries = File.ReadAllLines(entriesFile);
+                return (svnEntries[0]) switch
+                {
+                    "8" or "9" or "10" or "12" => int.Parse(svnEntries[0], null),
+                    _ => throw new InvalidDataException($"Unknown svn version {svnEntries[0]}!"),
+                };
+            }
+
+            var databaseFile = Path.Combine(svnRoot, "wc.db");
+            if (File.Exists(databaseFile))
+            {
+                return 100;
+            }
+
+            throw new DirectoryNotFoundException("Could not find .svn directory!");
+        }
+
+        #endregion Public Methods
     }
 }

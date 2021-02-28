@@ -200,7 +200,7 @@ namespace Cave.Data
                 }
                 else
                 {
-                    var progress = (RowCount * 100f) / rowCount;
+                    var progress = RowCount * 100f / rowCount;
                     Trace.TraceInformation($"Loaded {rows.Count} rows from table {table} starting with offset {offset} to {nextOffset} ({progress:N}%)");
                 }
 

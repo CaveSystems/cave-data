@@ -214,10 +214,8 @@ namespace Cave.Data
                 throw new ArgumentNullException(nameof(table));
             }
 
-            using (var writer = new DatWriter(table.Layout, stream))
-            {
-                writer.WriteTable(table);
-            }
+            using var writer = new DatWriter(table.Layout, stream);
+            writer.WriteTable(table);
         }
 
         /// <summary>Saves the table to a dat file.</summary>
@@ -230,12 +228,10 @@ namespace Cave.Data
                 throw new ArgumentNullException(nameof(table));
             }
 
-            using (var stream = File.Create(fileName))
-            using (var writer = new DatWriter(table.Layout, stream))
-            {
-                writer.WriteTable(table);
-                writer.Close();
-            }
+            using var stream = File.Create(fileName);
+            using var writer = new DatWriter(table.Layout, stream);
+            writer.WriteTable(table);
+            writer.Close();
         }
 
         #endregion
@@ -403,13 +399,13 @@ namespace Cave.Data
 
             string GetName(string text)
             {
-                switch (namingStrategy)
+                return namingStrategy switch
                 {
-                    case NamingStrategy.CamelCase: return GetNameParts(text).JoinCamelCase();
-                    case NamingStrategy.SnakeCase: return GetNameParts(text).JoinSnakeCase();
-                    case NamingStrategy.Exact: return text;
-                    default: throw new NotImplementedException($"Unknown NamingStrategy {namingStrategy}.");
-                }
+                    NamingStrategy.CamelCase => GetNameParts(text).JoinCamelCase(),
+                    NamingStrategy.SnakeCase => GetNameParts(text).JoinSnakeCase(),
+                    NamingStrategy.Exact => text,
+                    _ => throw new NotImplementedException($"Unknown NamingStrategy {namingStrategy}."),
+                };
             }
 
             #endregion
@@ -551,7 +547,7 @@ namespace Cave.Data
 
                 if (field.MaximumLength < int.MaxValue)
                 {
-                    AddAttribute(field.MaximumLength, () => $"Length = {(int) field.MaximumLength}");
+                    AddAttribute(field.MaximumLength, () => $"Length = {(int)field.MaximumLength}");
                 }
 
                 AddAttribute(field.AlternativeNames, () => $"AlternativeNames = \"{field.AlternativeNames.Join(", ")}\"");
@@ -676,7 +672,10 @@ namespace Cave.Data
             code.Replace("\t", "    ");
             return new GenerateTableCodeResult
             {
-                ClassName = className, TableName = tableName, DatabaseName = databaseName, Code = code.ToString()
+                ClassName = className,
+                TableName = tableName,
+                DatabaseName = databaseName,
+                Code = code.ToString()
             };
         }
 

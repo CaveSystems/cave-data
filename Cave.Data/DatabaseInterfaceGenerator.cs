@@ -55,9 +55,9 @@ namespace Cave.Data
 
         #endregion
 
-        readonly string codeFooter;
-        readonly string codeHeader;
-        readonly Set<TableInfo> tables = new Set<TableInfo>();
+        readonly string Footer;
+        readonly string Header;
+        readonly Set<TableInfo> Tables = new Set<TableInfo>();
 
         #region Constructors
 
@@ -106,11 +106,11 @@ namespace Cave.Data
             code.AppendLine($"\t\t\t\tdatabase = storage.GetDatabase(\"{database.Name}\");");
             code.AppendLine("\t\t\t}");
             code.AppendLine("\t\t}");
-            codeHeader = code.ToString();
+            Header = code.ToString();
             code = new StringBuilder();
             code.AppendLine("\t}");
             code.AppendLine("}");
-            codeFooter = code.ToString();
+            Footer = code.ToString();
         }
 
         #endregion
@@ -163,7 +163,7 @@ namespace Cave.Data
         /// <param name="className">Name of the (table) class to use.</param>
         /// <param name="getterName">Name of the getter in the resulting class (optional).</param>
         public void Add(string tableName, string className = null, string getterName = null) =>
-            tables.Add(new TableInfo
+            Tables.Add(new TableInfo
             {
                 TableName = tableName ?? throw new ArgumentNullException(nameof(tableName)),
                 ClassName = className ?? GetName(Database.Name) + GetName(tableName) + "Row",
@@ -175,15 +175,15 @@ namespace Cave.Data
         public string Generate()
         {
             var result = new StringBuilder();
-            result.Append(codeHeader);
-            foreach (var table in tables)
+            result.Append(Header);
+            foreach (var table in Tables)
             {
                 result.AppendLine();
                 result.AppendLine($"\t\t/// <summary>Gets a new <see cref=\"ITable{{{table.ClassName}}}\"/> instance for accessing the <c>{table.TableName}</c> table.</summary>");
                 result.AppendLine($"\t\tpublic static ITable<{table.ClassName}> {table.GetterName} => new Table<{table.ClassName}>(database[\"{table.TableName}\"]);");
             }
 
-            result.Append(codeFooter);
+            result.Append(Footer);
             return result.ToString();
         }
 
