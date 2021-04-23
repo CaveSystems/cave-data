@@ -968,6 +968,7 @@ namespace Cave.Data.Sql
             commandBuilder.Append("UPDATE ");
             commandBuilder.Append(FQTN);
             commandBuilder.Append(" SET ");
+            var firstCommand = true;
             for (var i = 0; i < Layout.FieldCount; i++)
             {
                 var field = Layout[i];
@@ -976,9 +977,13 @@ namespace Cave.Data.Sql
                     continue;
                 }
 
-                if (i > 0)
+                if (firstCommand)
                 {
                     commandBuilder.Append(",");
+                }
+                else
+                {
+                    firstCommand = false;
                 }
 
                 commandBuilder.Append(Storage.EscapeFieldName(field));
