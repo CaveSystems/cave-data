@@ -169,6 +169,25 @@ namespace Cave.Data.Mysql
             return base.GetLocalValue(field, reader, databaseValue);
         }
 
+        /// <inheritdoc/>
+        public override IFieldProperties GetDatabaseFieldProperties(IFieldProperties field)
+        {
+            if (field == null)
+            {
+                throw new ArgumentNullException(nameof(field));
+            }
+
+            switch (field.DataType)
+            {
+                case DataType.DateTime:
+                    var result = field.Clone();
+                    result.ValueType = typeof(DateTime);
+                    return result;
+            }
+
+            return base.GetDatabaseFieldProperties(field);
+        }
+
         /// <inheritdoc />
         public override object GetDatabaseValue(IFieldProperties field, object localValue)
         {
