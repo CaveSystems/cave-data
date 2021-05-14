@@ -14,10 +14,11 @@ namespace Cave.Data.Sql
         #region Private Fields
 
         readonly IndexedSet<string> FieldNameSet = new IndexedSet<string>();
-        readonly RowLayout Layout;
+        RowLayout Layout => Table.Layout;
         readonly List<SqlParam> ParameterList = new List<SqlParam>();
-        readonly SqlStorage Storage;
+        SqlStorage Storage => Table.Database.Storage as SqlStorage;
         readonly string Text;
+        readonly SqlTable Table;
 
         #endregion Private Fields
 
@@ -38,7 +39,7 @@ namespace Cave.Data.Sql
 
         void Flatten(StringBuilder sb, Search search)
         {
-            search.LoadLayout(Layout);
+            search.LoadLayout(Layout, Table.GetFieldNameComparison());
             switch (search.Mode)
             {
                 case SearchMode.None:
@@ -188,18 +189,15 @@ namespace Cave.Data.Sql
         /// <summary>
         /// Initializes a new instance of the <see cref="SqlSearch"/> class.
         /// </summary>
-        /// <param name="storage">Storage engine used.</param>
-        /// <param name="layout">Layout of the table.</param>
         /// <param name="search">Search to perform.</param>
-        public SqlSearch(SqlStorage storage, RowLayout layout, Search search)
+        internal SqlSearch(SqlTable table, Search search)
         {
             if (search == null)
             {
                 throw new ArgumentNullException(nameof(search));
             }
 
-            this.Storage = storage ?? throw new ArgumentNullException(nameof(storage));
-            this.Layout = layout ?? throw new ArgumentNullException(nameof(layout));
+            this.Table = table;
             Parameters = new ReadOnlyCollection<SqlParam>(ParameterList);
             FieldNames = new ReadOnlyCollection<string>(FieldNameSet);
             var sb = new StringBuilder();
