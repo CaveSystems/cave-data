@@ -12,8 +12,6 @@ namespace Cave.Data
     {
         #region Constructors
 
-        #region constructor
-
         /// <summary>Initializes a new instance of the <see cref="Table{TStruct}" /> class.</summary>
         /// <param name="table">The table instance to wrap.</param>
         public Table(ITable table)
@@ -21,22 +19,24 @@ namespace Cave.Data
             BaseTable = table ?? throw new ArgumentNullException(nameof(table));
             if (table.Flags.HasFlag(TableFlags.IgnoreMissingFields))
             {
+                var comparison = table.GetFieldNameComparison();
                 var result = new List<IFieldProperties>();
                 var layout = RowLayout.CreateTyped(typeof(TStruct));
                 foreach (var field in layout)
                 {
-                    var match = BaseTable.Layout.FirstOrDefault(f => f.Equals(field));
+                    var match = BaseTable.Layout.FirstOrDefault(f => f.Equals(field, comparison));
                     if (match == null)
                     {
                         throw new InvalidDataException($"Field {field} cannot be found at table {BaseTable}");
                     }
 
-                    var target = match.Clone();
-                    target.FieldInfo = field.FieldInfo;
+                    var target = field.Clone();
+                    target.Index = match.Index;
                     result.Add(target);
                 }
 
-                Layout = new RowLayout(table.Name, result.ToArray(), typeof(TStruct));
+                if (result.Select(i => i.Index).Distinct().Count() != result.Count) throw new Exception("Index assignment is not distinct!");
+                Layout = new(table.Name, result.OrderBy(i => i.Index).ToArray(), typeof(TStruct));
             }
             else
             {
@@ -49,9 +49,7 @@ namespace Cave.Data
 
         #endregion
 
-        #endregion
-
-        #region Overrides
+        #region AbstractTable<TStruct> Overrides
 
         /// <inheritdoc />
         protected override ITable BaseTable { get; }
