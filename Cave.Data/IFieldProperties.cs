@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using Cave.Data;
@@ -12,7 +13,7 @@ namespace Cave
         #region Properties
 
         /// <summary>Gets the alternative names for this field.</summary>
-        string AlternativeNames { get; }
+        IList<string> AlternativeNames { get; }
 
         /// <summary>Gets the <see cref="DataType" /> of the field.</summary>
         DataType DataType { get; }
@@ -77,6 +78,12 @@ namespace Cave
         /// <param name="value">64 bit long value for the enum.</param>
         /// <returns>Enum value.</returns>
         object EnumValue(long value);
+
+        /// <summary>Checks another FieldProperties instance for equality.</summary>
+        /// <param name="other">The FieldProperties to check for equality.</param>
+        /// <param name="fieldNameComparison">StringComparison to be used for field names.</param>
+        /// <returns>Returns true if the other instance equals this one, false otherwise.</returns>
+        bool Equals(IFieldProperties other, StringComparison fieldNameComparison);
 
         /// <summary>
         /// Retrieves a string for the specified value. The string may be parsed back to a value using

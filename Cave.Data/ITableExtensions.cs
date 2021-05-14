@@ -141,6 +141,11 @@ namespace Cave.Data
 
         #endregion
 
+        public static StringComparison GetFieldNameComparison(this ITable table)
+        {
+            return table.Flags.HasFlag(TableFlags.FieldNamesCaseInsensitive) ? StringComparison.InvariantCultureIgnoreCase : StringComparison.Ordinal;
+        }
+
         /// <summary>Searches the table for a single row with given field value combination.</summary>
         /// <param name="table">The table.</param>
         /// <param name="field">The field name to match.</param>

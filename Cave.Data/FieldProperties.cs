@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
@@ -23,7 +24,7 @@ namespace Cave
         #region IFieldProperties Members
 
         /// <inheritdoc/>
-        public string AlternativeNames { get; set; }
+        public IList<string> AlternativeNames { get; set; }
 
         /// <inheritdoc/>
         public DataType DataType { get; set; }
@@ -614,7 +615,7 @@ namespace Cave
 
                     Flags = fieldAttribute.Flags;
                     DisplayFormat = fieldAttribute.DisplayFormat;
-                    AlternativeNames = fieldAttribute.AlternativeNames;
+                    AlternativeNames = fieldAttribute.AlternativeNames?.Split(";, \t".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
                     continue;
                 }
 
@@ -731,7 +732,15 @@ namespace Cave
         /// </summary>
         /// <param name="other">The FieldProperties to check for equality.</param>
         /// <returns>Returns true if the other instance equals this one, false otherwise.</returns>
-        public bool Equals(IFieldProperties other)
+        public bool Equals(IFieldProperties other) => Equals(other, StringComparison.Ordinal);
+
+        /// <summary>
+        /// Checks another FieldProperties instance for equality.
+        /// </summary>
+        /// <param name="other">The FieldProperties to check for equality.</param>
+        /// <param name="fieldNameComparison">StringComparison to be used for fieldnames.</param>
+        /// <returns>Returns true if the other instance equals this one, false otherwise.</returns>
+        public bool Equals(IFieldProperties other, StringComparison fieldNameComparison)
         {
             if (other == null)
             {
@@ -739,16 +748,12 @@ namespace Cave
             }
 
             // check name
-            if ((other.Name != Name) && (other.NameAtDatabase != NameAtDatabase))
+            if (!string.Equals(other.Name, Name, fieldNameComparison) && !string.Equals(other.NameAtDatabase, NameAtDatabase, fieldNameComparison))
             {
-                var splitters = " ,;".ToCharArray();
-                if (AlternativeNames?.Split(splitters, StringSplitOptions.RemoveEmptyEntries).Any(n => (n == other.Name) || (n == other.NameAtDatabase)) ==
-                    true)
-                {
-                    return true;
-                }
-
-                return other.AlternativeNames?.Split(splitters, StringSplitOptions.RemoveEmptyEntries).Any(n => (n == Name) || (n == NameAtDatabase)) == true;
+                var nameMatching =
+                    AlternativeNames?.Any(n => string.Equals(n, other.Name, fieldNameComparison) || string.Equals(n, other.NameAtDatabase, fieldNameComparison)) ??
+                    other.AlternativeNames?.Any(n => string.Equals(n, Name, fieldNameComparison) || string.Equals(n, NameAtDatabase, fieldNameComparison));
+                if (nameMatching != true) return false;
             }
 
             if ((other.FieldInfo != null) && (FieldInfo != null))
