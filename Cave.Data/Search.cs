@@ -655,7 +655,7 @@ namespace Cave.Data
 
             if (layout == null) { throw new ArgumentNullException(nameof(layout)); }
 
-            LoadLayout(layout);
+            LoadLayout(layout, table.GetFieldNameComparison());
             switch (Mode)
             {
                 case SearchMode.None:
@@ -900,7 +900,7 @@ namespace Cave.Data
             return result;
         }
 
-        internal void LoadLayout(RowLayout layout)
+        internal void LoadLayout(RowLayout layout, StringComparison fieldNameComparison)
         {
             if ((Mode == SearchMode.And) || (Mode == SearchMode.Or) || (Mode == SearchMode.None))
             {
@@ -921,7 +921,7 @@ namespace Cave.Data
                 throw new InvalidOperationException($"Property {nameof(FieldName)} has to be set!");
             }
 
-            FieldNumber = layout.GetFieldIndex(FieldName, true);
+            FieldNumber = layout.GetFieldIndex(FieldName, fieldNameComparison, true);
             FieldProperties = layout[FieldNumber];
             if (Mode == SearchMode.In)
             {

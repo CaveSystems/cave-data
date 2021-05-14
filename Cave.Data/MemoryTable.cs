@@ -268,7 +268,7 @@ namespace Cave.Data
                 throw new ArgumentNullException(nameof(search));
             }
 
-            search.LoadLayout(Layout);
+            search.LoadLayout(Layout, this.GetFieldNameComparison());
             return rows.Values.Any(row => search.Check(row));
         }
 
@@ -562,7 +562,7 @@ namespace Cave.Data
             }
             else
             {
-                search.LoadLayout(Layout);
+                search.LoadLayout(Layout, this.GetFieldNameComparison());
             }
 
             var grouping = new List<int>();
