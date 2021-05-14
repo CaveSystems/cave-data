@@ -21,6 +21,9 @@ namespace Cave.Data
         InMemory = 1 << 2,
 
         /// <summary>Allows rows structures with missing fields.</summary>
-        IgnoreMissingFields = 1 << 3
+        IgnoreMissingFields = 1 << 3,
+
+        /// <summary>Allows rows structures with missing fields.</summary>
+        FieldNamesCaseInsensitive = 1 << 4,
     }
 }
