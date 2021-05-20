@@ -170,7 +170,7 @@ namespace Cave.Data
                 throw new ArgumentNullException(nameof(table));
             }
 
-            Storage.CheckLayout(Layout, table.Layout);
+            Storage.CheckLayout(table.Layout, Layout, table.Flags);
             if (search == null)
             {
                 search = Search.None;

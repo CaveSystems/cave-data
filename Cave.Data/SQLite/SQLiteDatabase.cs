@@ -31,9 +31,9 @@ namespace Cave.Data.SQLite
                 field.Validate();
             }
 
-            var expected = RowLayout.CreateUntyped(name, fields.ToArray());
+            var table = RowLayout.CreateUntyped(name, fields.ToArray());
             var schema = SqlStorage.QuerySchema(Name, "sqlite_master");
-            SqlStorage.CheckLayout(expected, schema);
+            SqlStorage.CheckLayout(schema, table, 0);
         }
 
         #endregion

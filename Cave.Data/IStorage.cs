@@ -57,9 +57,10 @@ namespace Cave.Data
         #region Members
 
         /// <summary>Checks two layouts for equality using the databaseName field type conversion and throws an error if the layouts do not match.</summary>
-        /// <param name="expected">The expected layout.</param>
-        /// <param name="current">The layout to check.</param>
-        void CheckLayout(RowLayout expected, RowLayout current);
+        /// <param name="databaseLayout">The databaseLayout layout.</param>
+        /// <param name="localLayout">The layout to check.</param>
+        /// <param name="flags">Settings to use.</param>
+        void CheckLayout(RowLayout databaseLayout, RowLayout localLayout, TableFlags flags);
 
         /// <summary>closes the connection to the storage engine.</summary>
         void Close();

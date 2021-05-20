@@ -86,7 +86,7 @@ namespace Cave.Data
             var layout = RowLayout.CreateTyped(typeof(TStruct), tableName, database.Storage, excludedFields);
             if (flags.HasFlag(TableFlags.IgnoreMissingFields))
             {
-                return new Table<TStruct>(database.GetTable(tableName ?? layout.Name));
+                return new Table<TStruct>(database.GetTable(tableName ?? layout.Name, flags));
             }
 
             var table = database.GetTable(layout, flags);
@@ -114,7 +114,7 @@ namespace Cave.Data
             var layout = RowLayout.CreateTyped(typeof(TStruct), tableName, database.Storage, excludedFields);
             if (flags.HasFlag(TableFlags.IgnoreMissingFields))
             {
-                return new Table<TKey, TStruct>(database.GetTable(tableName ?? layout.Name));
+                return new Table<TKey, TStruct>(database.GetTable(tableName ?? layout.Name, flags));
             }
 
             var table = database.GetTable(layout, flags);

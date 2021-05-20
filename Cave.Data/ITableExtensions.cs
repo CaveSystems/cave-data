@@ -11,186 +11,7 @@ namespace Cave.Data
     /// <summary>Provides extension functions for ITable instances.</summary>
     public static class ITableExtensions
     {
-        #region ITable extensions
-
-        #region TryInsert
-
-        /// <summary>Tries to insert the specified dataset (id has to be set).</summary>
-        /// <param name="table">The table.</param>
-        /// <param name="row">The row.</param>
-        /// <returns>Returns true if the dataset was inserted, false otherwise.</returns>
-        public static bool TryInsert(this ITable table, Row row)
-        {
-            if (table == null)
-            {
-                throw new ArgumentNullException(nameof(table));
-            }
-
-            // TODO, implement this without exceptions: needed at Table, SqlTable, MemoryTable
-            try
-            {
-                table.Insert(row);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Trace.TraceWarning($"Exception during TryInsert(): {ex}");
-                return false;
-            }
-        }
-
-        #endregion
-
-        #region TryUpdate
-
-        /// <summary>Tries to insert the specified dataset (id has to be set).</summary>
-        /// <param name="table">The table.</param>
-        /// <param name="row">The row.</param>
-        /// <returns>Returns true if the dataset was inserted, false otherwise.</returns>
-        public static bool TryUpdate(this ITable table, Row row)
-        {
-            if (table == null)
-            {
-                throw new ArgumentNullException(nameof(table));
-            }
-
-            // TODO, implement this without exceptions: needed at Table, SqlTable, MemoryTable
-            try
-            {
-                table.Update(row);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Trace.TraceWarning($"Exception during TryUpdate(): {ex}");
-                return false;
-            }
-        }
-
-        #endregion
-
-        #region TryDelete
-
-        /// <summary>Tries to delete the data set with the specified id.</summary>
-        /// <param name="table">The table.</param>
-        /// <param name="id">The identifier.</param>
-        /// <returns>Returns true if the data set was removed, false otherwise.</returns>
-        /// <typeparam name="TIdentifier">Identifier type. This has to be convertible to the database <see cref="DataType" />.</typeparam>
-        public static bool TryDelete<TIdentifier>(this ITable table, TIdentifier id)
-        {
-            if (table == null)
-            {
-                throw new ArgumentNullException(nameof(table));
-            }
-
-            var idField = table.Layout?.Where(f => f.Flags.HasFlag(FieldFlags.ID)).SingleOrDefault()
-             ?? throw new InvalidOperationException("Could not find identifier field!");
-            return table.TryDelete(idField.Name, id) > 0;
-        }
-
-        /// <summary>Tries to delete the data sets with the specified identifiers.</summary>
-        /// <param name="table">The table.</param>
-        /// <param name="ids">The identifiers.</param>
-        /// <returns>The number of data sets removed, 0 if the database does not support deletion count or no data set was removed.</returns>
-        /// <typeparam name="TIdentifier">Identifier type. This has to be convertible to the database <see cref="DataType" />.</typeparam>
-        public static int TryDelete<TIdentifier>(this ITable table, IEnumerable<TIdentifier> ids)
-        {
-            if (table == null)
-            {
-                throw new ArgumentNullException(nameof(table));
-            }
-
-            var idField = table.Layout?.Where(f => f.Flags.HasFlag(FieldFlags.ID)).SingleOrDefault()
-             ?? throw new InvalidOperationException("Could not find identifier field!");
-            return table.TryDelete(Search.FieldIn(idField.Name, ids));
-        }
-
-        /// <summary>Removes all rows from the table matching the given search.</summary>
-        /// <param name="table">The table.</param>
-        /// <param name="field">The field name to match.</param>
-        /// <param name="value">The value to match.</param>
-        /// <returns>The number of data sets deleted.</returns>
-        public static int TryDelete(this ITable table, string field, object value)
-        {
-            if (table == null)
-            {
-                throw new ArgumentNullException(nameof(table));
-            }
-
-            return table.TryDelete(Search.FieldEquals(field, value));
-        }
-
-        #endregion
-
-        #region Exist
-
-        /// <summary>Checks a given search for any data sets matching.</summary>
-        /// <param name="table">The table.</param>
-        /// <param name="field">The fields name.</param>
-        /// <param name="value">The value.</param>
-        /// <returns>Returns true if a data set exists, false otherwise.</returns>
-        public static bool Exist(this ITable table, string field, object value)
-        {
-            if (table == null)
-            {
-                throw new ArgumentNullException(nameof(table));
-            }
-
-            return table.Exist(Search.FieldEquals(field, value));
-        }
-
-        #endregion
-
-        public static StringComparison GetFieldNameComparison(this ITable table)
-        {
-            return table.Flags.HasFlag(TableFlags.FieldNamesCaseInsensitive) ? StringComparison.InvariantCultureIgnoreCase : StringComparison.Ordinal;
-        }
-
-        /// <summary>Searches the table for a single row with given field value combination.</summary>
-        /// <param name="table">The table.</param>
-        /// <param name="field">The field name to match.</param>
-        /// <param name="value">The value to match.</param>
-        /// <returns>The row found.</returns>
-        public static Row GetRow(this ITable table, string field, object value)
-        {
-            if (table == null)
-            {
-                throw new ArgumentNullException(nameof(table));
-            }
-
-            return table.GetRow(Search.FieldEquals(field, value));
-        }
-
-        /// <summary>Searches the table for rows with given field value combinations.</summary>
-        /// <param name="table">The table.</param>
-        /// <param name="field">The field name to match.</param>
-        /// <param name="value">The value to match.</param>
-        /// <returns>The rows found.</returns>
-        public static IList<Row> GetRows(this ITable table, string field, object value)
-        {
-            if (table == null)
-            {
-                throw new ArgumentNullException(nameof(table));
-            }
-
-            return table.GetRows(Search.FieldEquals(field, value));
-        }
-
-        /// <summary>Caches the whole table into memory and provides a new ITable instance.</summary>
-        /// <param name="table">The table.</param>
-        /// <returns>Returns a new memory table.</returns>
-        public static MemoryTable ToMemory(this ITable table)
-        {
-            if (table == null)
-            {
-                throw new ArgumentNullException(nameof(table));
-            }
-
-            Trace.TraceInformation("Copy {0} rows to memory table", table.RowCount);
-            var result = MemoryTable.Create(table.Layout);
-            result.LoadTable(table);
-            return result;
-        }
+        #region Static
 
         /// <summary>Counts the rows with specified field value combination.</summary>
         /// <param name="table">The table.</param>
@@ -207,59 +28,19 @@ namespace Cave.Data
             return table.Count(Search.FieldEquals(field, value), ResultOption.None);
         }
 
-        #region SaveTo
-
-        /// <summary>Saves the table to a dat stream.</summary>
-        /// <param name="table">Table to save.</param>
-        /// <param name="stream">The stream to save to.</param>
-        public static void SaveTo(this ITable table, Stream stream)
+        /// <summary>Checks a given search for any data sets matching.</summary>
+        /// <param name="table">The table.</param>
+        /// <param name="field">The fields name.</param>
+        /// <param name="value">The value.</param>
+        /// <returns>Returns true if a data set exists, false otherwise.</returns>
+        public static bool Exist(this ITable table, string field, object value)
         {
             if (table == null)
             {
                 throw new ArgumentNullException(nameof(table));
             }
 
-            using var writer = new DatWriter(table.Layout, stream);
-            writer.WriteTable(table);
-        }
-
-        /// <summary>Saves the table to a dat file.</summary>
-        /// <param name="table">Table to save.</param>
-        /// <param name="fileName">The filename to save to.</param>
-        public static void SaveTo(this ITable table, string fileName)
-        {
-            if (table == null)
-            {
-                throw new ArgumentNullException(nameof(table));
-            }
-
-            using var stream = File.Create(fileName);
-            using var writer = new DatWriter(table.Layout, stream);
-            writer.WriteTable(table);
-            writer.Close();
-        }
-
-        #endregion
-
-        #region GenerateStruct/-File (ITable)
-
-        /// <summary>Builds the csharp code file containing the row layout structure.</summary>
-        /// <param name="table">The table to use.</param>
-        /// <param name="databaseName">The database name (only used for the structure name).</param>
-        /// <param name="tableName">The table name (only used for the structure name).</param>
-        /// <param name="className">The name of the class to generate.</param>
-        /// <param name="structFile">The struct file name (defaults to classname.cs).</param>
-        /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
-        /// <returns>The struct file name.</returns>
-        public static GenerateTableCodeResult GenerateStructFile(this ITable table, string databaseName, string tableName,
-            string className, string structFile, NamingStrategy namingStrategy)
-        {
-            if (table == null)
-            {
-                throw new ArgumentNullException(nameof(table));
-            }
-
-            return GenerateStruct(table.Layout, databaseName, tableName, className, namingStrategy).SaveStructFile(structFile);
+            return table.Exist(Search.FieldEquals(field, value));
         }
 
         /// <summary>Builds the csharp code containing the row layout structure.</summary>
@@ -280,27 +61,6 @@ namespace Cave.Data
             return GenerateStruct(table.Layout, databaseName ?? table.Database.Name, tableName, className, namingStrategy);
         }
 
-        /// <summary>Builds the csharp code file containing the row layout structure.</summary>
-        /// <param name="table">The table to use.</param>
-        /// <param name="databaseName">The database name (only used for the structure name).</param>
-        /// <param name="tableName">The table name (only used for the structure name).</param>
-        /// <param name="className">The name of the class to generate.</param>
-        /// <param name="structFile">The struct file name (defaults to classname.cs).</param>
-        /// <param name="nameSpace">The namespace to use for the class (defaults to "Database").</param>
-        /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
-        /// <returns>The struct file name.</returns>
-        public static GenerateTableCodeResult GenerateStructFile(this ITable table, string databaseName = null, string tableName = null,
-            string className = null, string structFile = null, string nameSpace = null, NamingStrategy namingStrategy = NamingStrategy.CamelCase)
-        {
-            if (table == null)
-            {
-                throw new ArgumentNullException(nameof(table));
-            }
-
-            return GenerateStruct(table.Layout, databaseName ?? table.Database.Name, tableName, className, nameSpace, namingStrategy)
-               .SaveStructFile(structFile);
-        }
-
         /// <summary>Builds the csharp code containing the row layout structure.</summary>
         /// <param name="table">The table to use.</param>
         /// <param name="databaseName">The database name (only used for the structure name).</param>
@@ -318,49 +78,6 @@ namespace Cave.Data
             }
 
             return GenerateStruct(table.Layout, databaseName ?? table.Database.Name, tableName, className, nameSpace, namingStrategy);
-        }
-
-        #endregion
-
-        #region GenerateStruct/-File (RowLayout)
-
-        /// <summary>Builds the csharp code file containing the row layout structure.</summary>
-        /// <param name="layout">The layout to use.</param>
-        /// <param name="databaseName">The database name (only used for the structure name).</param>
-        /// <param name="tableName">The table name (only used for the structure name).</param>
-        /// <param name="className">The name of the class to generate.</param>
-        /// <param name="structFile">The struct file name (defaults to classname.cs).</param>
-        /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
-        /// <returns>The struct file name.</returns>
-        public static GenerateTableCodeResult GenerateStructFile(this RowLayout layout, string databaseName, string tableName, string className,
-            string structFile, NamingStrategy namingStrategy)
-        {
-            if (layout == null)
-            {
-                throw new ArgumentNullException(nameof(layout));
-            }
-
-            return GenerateStruct(layout, databaseName, tableName, className, namingStrategy).SaveStructFile(structFile);
-        }
-
-        /// <summary>Builds the csharp code file containing the row layout structure.</summary>
-        /// <param name="layout">The layout to use.</param>
-        /// <param name="databaseName">The database name (only used for the structure name).</param>
-        /// <param name="tableName">The table name (only used for the structure name).</param>
-        /// <param name="className">The name of the class to generate.</param>
-        /// <param name="structFile">The struct file name (defaults to classname.cs).</param>
-        /// <param name="nameSpace">The namespace to use for the class (defaults to "Database").</param>
-        /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
-        /// <returns>The struct file name.</returns>
-        public static GenerateTableCodeResult GenerateStructFile(this RowLayout layout, string databaseName = null, string tableName = null,
-            string className = null, string structFile = null, string nameSpace = null, NamingStrategy namingStrategy = NamingStrategy.CamelCase)
-        {
-            if (layout == null)
-            {
-                throw new ArgumentNullException(nameof(layout));
-            }
-
-            return GenerateStruct(layout, databaseName, tableName, className, nameSpace, namingStrategy).SaveStructFile(structFile);
         }
 
         /// <summary>Builds the csharp code containing the row layout structure.</summary>
@@ -399,19 +116,16 @@ namespace Cave.Data
 
             #region GetName()
 
-            string[] GetNameParts(string text) =>
-                text.ReplaceInvalidChars(ASCII.Strings.Letters + ASCII.Strings.Digits, "_").Split('_').SelectMany(s => s.SplitCamelCase()).ToArray();
+            string[] GetNameParts(string text) => text.ReplaceInvalidChars(ASCII.Strings.Letters + ASCII.Strings.Digits, "_").Split('_').SelectMany(s => s.SplitCamelCase()).ToArray();
 
-            string GetName(string text)
-            {
-                return namingStrategy switch
+            string GetName(string text) =>
+                namingStrategy switch
                 {
                     NamingStrategy.CamelCase => GetNameParts(text).JoinCamelCase(),
                     NamingStrategy.SnakeCase => GetNameParts(text).JoinSnakeCase(),
                     NamingStrategy.Exact => text,
-                    _ => throw new NotImplementedException($"Unknown NamingStrategy {namingStrategy}."),
+                    _ => throw new NotImplementedException($"Unknown NamingStrategy {namingStrategy}.")
                 };
-            }
 
             #endregion
 
@@ -675,7 +389,7 @@ namespace Cave.Data
             code.AppendLine("\t}");
             code.AppendLine("}");
             code.Replace("\t", "    ");
-            return new GenerateTableCodeResult
+            return new()
             {
                 ClassName = className,
                 TableName = tableName,
@@ -684,9 +398,141 @@ namespace Cave.Data
             };
         }
 
-        #endregion
+        /// <summary>Builds the csharp code file containing the row layout structure.</summary>
+        /// <param name="table">The table to use.</param>
+        /// <param name="databaseName">The database name (only used for the structure name).</param>
+        /// <param name="tableName">The table name (only used for the structure name).</param>
+        /// <param name="className">The name of the class to generate.</param>
+        /// <param name="structFile">The struct file name (defaults to classname.cs).</param>
+        /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
+        /// <returns>The struct file name.</returns>
+        public static GenerateTableCodeResult GenerateStructFile(this ITable table, string databaseName, string tableName,
+            string className, string structFile, NamingStrategy namingStrategy)
+        {
+            if (table == null)
+            {
+                throw new ArgumentNullException(nameof(table));
+            }
 
-        #region SaveStructFile
+            return GenerateStruct(table.Layout, databaseName, tableName, className, namingStrategy).SaveStructFile(structFile);
+        }
+
+        /// <summary>Builds the csharp code file containing the row layout structure.</summary>
+        /// <param name="table">The table to use.</param>
+        /// <param name="databaseName">The database name (only used for the structure name).</param>
+        /// <param name="tableName">The table name (only used for the structure name).</param>
+        /// <param name="className">The name of the class to generate.</param>
+        /// <param name="structFile">The struct file name (defaults to classname.cs).</param>
+        /// <param name="nameSpace">The namespace to use for the class (defaults to "Database").</param>
+        /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
+        /// <returns>The struct file name.</returns>
+        public static GenerateTableCodeResult GenerateStructFile(this ITable table, string databaseName = null, string tableName = null,
+            string className = null, string structFile = null, string nameSpace = null, NamingStrategy namingStrategy = NamingStrategy.CamelCase)
+        {
+            if (table == null)
+            {
+                throw new ArgumentNullException(nameof(table));
+            }
+
+            return GenerateStruct(table.Layout, databaseName ?? table.Database.Name, tableName, className, nameSpace, namingStrategy)
+               .SaveStructFile(structFile);
+        }
+
+        /// <summary>Builds the csharp code file containing the row layout structure.</summary>
+        /// <param name="layout">The layout to use.</param>
+        /// <param name="databaseName">The database name (only used for the structure name).</param>
+        /// <param name="tableName">The table name (only used for the structure name).</param>
+        /// <param name="className">The name of the class to generate.</param>
+        /// <param name="structFile">The struct file name (defaults to classname.cs).</param>
+        /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
+        /// <returns>The struct file name.</returns>
+        public static GenerateTableCodeResult GenerateStructFile(this RowLayout layout, string databaseName, string tableName, string className,
+            string structFile, NamingStrategy namingStrategy)
+        {
+            if (layout == null)
+            {
+                throw new ArgumentNullException(nameof(layout));
+            }
+
+            return GenerateStruct(layout, databaseName, tableName, className, namingStrategy).SaveStructFile(structFile);
+        }
+
+        /// <summary>Builds the csharp code file containing the row layout structure.</summary>
+        /// <param name="layout">The layout to use.</param>
+        /// <param name="databaseName">The database name (only used for the structure name).</param>
+        /// <param name="tableName">The table name (only used for the structure name).</param>
+        /// <param name="className">The name of the class to generate.</param>
+        /// <param name="structFile">The struct file name (defaults to classname.cs).</param>
+        /// <param name="nameSpace">The namespace to use for the class (defaults to "Database").</param>
+        /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
+        /// <returns>The struct file name.</returns>
+        public static GenerateTableCodeResult GenerateStructFile(this RowLayout layout, string databaseName = null, string tableName = null,
+            string className = null, string structFile = null, string nameSpace = null, NamingStrategy namingStrategy = NamingStrategy.CamelCase)
+        {
+            if (layout == null)
+            {
+                throw new ArgumentNullException(nameof(layout));
+            }
+
+            return GenerateStruct(layout, databaseName, tableName, className, nameSpace, namingStrategy).SaveStructFile(structFile);
+        }
+
+        /// <summary>Gets the string comparison to use for field name comparison.</summary>
+        /// <param name="tableFlags">Flags to use for setting.</param>
+        /// <returns>Returns a <see cref="StringComparison" /> value.</returns>
+        public static StringComparison GetFieldNameComparison(this TableFlags tableFlags) => tableFlags.HasFlag(TableFlags.FieldNamesCaseInsensitive) ? StringComparison.InvariantCultureIgnoreCase : StringComparison.Ordinal;
+
+        /// <summary>Gets the string comparison to use for field name comparison.</summary>
+        /// <param name="table">Flags to use for setting.</param>
+        /// <returns>Returns a <see cref="StringComparison" /> value.</returns>
+        public static StringComparison GetFieldNameComparison(this ITable table) => GetFieldNameComparison(table.Flags);
+
+        /// <summary>Searches the table for a single row with given field value combination.</summary>
+        /// <param name="table">The table.</param>
+        /// <param name="field">The field name to match.</param>
+        /// <param name="value">The value to match.</param>
+        /// <returns>The row found.</returns>
+        public static Row GetRow(this ITable table, string field, object value)
+        {
+            if (table == null)
+            {
+                throw new ArgumentNullException(nameof(table));
+            }
+
+            return table.GetRow(Search.FieldEquals(field, value));
+        }
+
+        /// <summary>Searches the table for rows with given field value combinations.</summary>
+        /// <param name="table">The table.</param>
+        /// <param name="field">The field name to match.</param>
+        /// <param name="value">The value to match.</param>
+        /// <returns>The rows found.</returns>
+        public static IList<Row> GetRows(this ITable table, string field, object value)
+        {
+            if (table == null)
+            {
+                throw new ArgumentNullException(nameof(table));
+            }
+
+            return table.GetRows(Search.FieldEquals(field, value));
+        }
+
+        /// <summary>Searches the table for rows with given field value combinations.</summary>
+        /// <typeparam name="TStruct">Structure type.</typeparam>
+        /// <param name="table">The table.</param>
+        /// <param name="field">The fieldname to match.</param>
+        /// <param name="value">The value to match.</param>
+        /// <returns>The rows found.</returns>
+        public static IList<TStruct> GetStructs<TStruct>(this ITable<TStruct> table, string field, object value)
+            where TStruct : struct
+        {
+            if (table == null)
+            {
+                throw new ArgumentNullException(nameof(table));
+            }
+
+            return table.GetStructs(Search.FieldEquals(field, value));
+        }
 
         /// <summary>Saves the generated code to a file and returns the updated result.</summary>
         /// <param name="result">Result to update.</param>
@@ -715,11 +561,51 @@ namespace Cave.Data
             return result;
         }
 
-        #endregion
+        /// <summary>Saves the table to a dat stream.</summary>
+        /// <param name="table">Table to save.</param>
+        /// <param name="stream">The stream to save to.</param>
+        public static void SaveTo(this ITable table, Stream stream)
+        {
+            if (table == null)
+            {
+                throw new ArgumentNullException(nameof(table));
+            }
 
-        #endregion
+            using var writer = new DatWriter(table.Layout, stream);
+            writer.WriteTable(table);
+        }
 
-        #region ITable<TStruct> extensions
+        /// <summary>Saves the table to a dat file.</summary>
+        /// <param name="table">Table to save.</param>
+        /// <param name="fileName">The filename to save to.</param>
+        public static void SaveTo(this ITable table, string fileName)
+        {
+            if (table == null)
+            {
+                throw new ArgumentNullException(nameof(table));
+            }
+
+            using var stream = File.Create(fileName);
+            using var writer = new DatWriter(table.Layout, stream);
+            writer.WriteTable(table);
+            writer.Close();
+        }
+
+        /// <summary>Caches the whole table into memory and provides a new ITable instance.</summary>
+        /// <param name="table">The table.</param>
+        /// <returns>Returns a new memory table.</returns>
+        public static MemoryTable ToMemory(this ITable table)
+        {
+            if (table == null)
+            {
+                throw new ArgumentNullException(nameof(table));
+            }
+
+            Trace.TraceInformation("Copy {0} rows to memory table", table.RowCount);
+            var result = MemoryTable.Create(table.Layout);
+            result.LoadTable(table);
+            return result;
+        }
 
         /// <summary>Caches the whole table into memory and provides a new ITable{TStruct} instance.</summary>
         /// <typeparam name="TStruct">Structure type.</typeparam>
@@ -739,13 +625,13 @@ namespace Cave.Data
             return new Table<TStruct>(result);
         }
 
-        /// <summary>Searches the table for rows with given field value combinations.</summary>
-        /// <typeparam name="TStruct">Structure type.</typeparam>
+        /// <summary>Caches the whole table into memory and provides a new ITable{TStruct} instance.</summary>
+        /// <typeparam name="TKey">Key identifier type.</typeparam>
+        /// <typeparam name="TStruct">Row structure type.</typeparam>
         /// <param name="table">The table.</param>
-        /// <param name="field">The fieldname to match.</param>
-        /// <param name="value">The value to match.</param>
-        /// <returns>The rows found.</returns>
-        public static IList<TStruct> GetStructs<TStruct>(this ITable<TStruct> table, string field, object value)
+        /// <returns>Returns a new memory table.</returns>
+        public static ITable<TKey, TStruct> ToMemory<TKey, TStruct>(this ITable<TKey, TStruct> table)
+            where TKey : IComparable<TKey>
             where TStruct : struct
         {
             if (table == null)
@@ -753,7 +639,58 @@ namespace Cave.Data
                 throw new ArgumentNullException(nameof(table));
             }
 
-            return table.GetStructs(Search.FieldEquals(field, value));
+            var result = MemoryTable.Create(table.Layout);
+            result.LoadTable(table);
+            return new Table<TKey, TStruct>(result);
+        }
+
+        /// <summary>Tries to delete the data set with the specified id.</summary>
+        /// <param name="table">The table.</param>
+        /// <param name="id">The identifier.</param>
+        /// <returns>Returns true if the data set was removed, false otherwise.</returns>
+        /// <typeparam name="TIdentifier">Identifier type. This has to be convertible to the database <see cref="DataType" />.</typeparam>
+        public static bool TryDelete<TIdentifier>(this ITable table, TIdentifier id)
+        {
+            if (table == null)
+            {
+                throw new ArgumentNullException(nameof(table));
+            }
+
+            var idField = table.Layout?.Where(f => f.Flags.HasFlag(FieldFlags.ID)).SingleOrDefault()
+             ?? throw new InvalidOperationException("Could not find identifier field!");
+            return table.TryDelete(idField.Name, id) > 0;
+        }
+
+        /// <summary>Tries to delete the data sets with the specified identifiers.</summary>
+        /// <param name="table">The table.</param>
+        /// <param name="ids">The identifiers.</param>
+        /// <returns>The number of data sets removed, 0 if the database does not support deletion count or no data set was removed.</returns>
+        /// <typeparam name="TIdentifier">Identifier type. This has to be convertible to the database <see cref="DataType" />.</typeparam>
+        public static int TryDelete<TIdentifier>(this ITable table, IEnumerable<TIdentifier> ids)
+        {
+            if (table == null)
+            {
+                throw new ArgumentNullException(nameof(table));
+            }
+
+            var idField = table.Layout?.Where(f => f.Flags.HasFlag(FieldFlags.ID)).SingleOrDefault()
+             ?? throw new InvalidOperationException("Could not find identifier field!");
+            return table.TryDelete(Search.FieldIn(idField.Name, ids));
+        }
+
+        /// <summary>Removes all rows from the table matching the given search.</summary>
+        /// <param name="table">The table.</param>
+        /// <param name="field">The field name to match.</param>
+        /// <param name="value">The value to match.</param>
+        /// <returns>The number of data sets deleted.</returns>
+        public static int TryDelete(this ITable table, string field, object value)
+        {
+            if (table == null)
+            {
+                throw new ArgumentNullException(nameof(table));
+            }
+
+            return table.TryDelete(Search.FieldEquals(field, value));
         }
 
         /// <summary>Tries to get the row with the specified <paramref name="value" /> from <paramref name="table" />.</summary>
@@ -783,10 +720,6 @@ namespace Cave.Data
             return false;
         }
 
-        #endregion
-
-        #region ITable<TKey, TStruct> extensions
-
         /// <summary>Tries to get the row with the specified <paramref name="key" /> from <paramref name="table" />.</summary>
         /// <typeparam name="TKey">The identifier field type.</typeparam>
         /// <typeparam name="TStruct">The row structure type.</typeparam>
@@ -815,23 +748,52 @@ namespace Cave.Data
             return false;
         }
 
-        /// <summary>Caches the whole table into memory and provides a new ITable{TStruct} instance.</summary>
-        /// <typeparam name="TKey">Key identifier type.</typeparam>
-        /// <typeparam name="TStruct">Row structure type.</typeparam>
+        /// <summary>Tries to insert the specified dataset (id has to be set).</summary>
         /// <param name="table">The table.</param>
-        /// <returns>Returns a new memory table.</returns>
-        public static ITable<TKey, TStruct> ToMemory<TKey, TStruct>(this ITable<TKey, TStruct> table)
-            where TKey : IComparable<TKey>
-            where TStruct : struct
+        /// <param name="row">The row.</param>
+        /// <returns>Returns true if the dataset was inserted, false otherwise.</returns>
+        public static bool TryInsert(this ITable table, Row row)
         {
             if (table == null)
             {
                 throw new ArgumentNullException(nameof(table));
             }
 
-            var result = MemoryTable.Create(table.Layout);
-            result.LoadTable(table);
-            return new Table<TKey, TStruct>(result);
+            // TODO, implement this without exceptions: needed at Table, SqlTable, MemoryTable
+            try
+            {
+                table.Insert(row);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceWarning($"Exception during TryInsert(): {ex}");
+                return false;
+            }
+        }
+
+        /// <summary>Tries to insert the specified dataset (id has to be set).</summary>
+        /// <param name="table">The table.</param>
+        /// <param name="row">The row.</param>
+        /// <returns>Returns true if the dataset was inserted, false otherwise.</returns>
+        public static bool TryUpdate(this ITable table, Row row)
+        {
+            if (table == null)
+            {
+                throw new ArgumentNullException(nameof(table));
+            }
+
+            // TODO, implement this without exceptions: needed at Table, SqlTable, MemoryTable
+            try
+            {
+                table.Update(row);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceWarning($"Exception during TryUpdate(): {ex}");
+                return false;
+            }
         }
 
         #endregion

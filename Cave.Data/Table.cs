@@ -320,7 +320,7 @@ namespace Cave.Data
         /// <inheritdoc/>
         public virtual void UseLayout(RowLayout layout)
         {
-            Storage.CheckLayout(Layout, layout);
+            Storage.CheckLayout(Layout, layout, Flags);
             Layout = layout;
         }
 

@@ -96,7 +96,7 @@ namespace Cave.Data.Sql
 
             FQTN = Storage.FQTN(database.Name, layout.Name);
             var schema = QueryLayout(database.Name, layout.Name);
-            Storage.CheckLayout(layout, schema);
+            Storage.CheckLayout(schema, layout, flags);
             base.Connect(database, flags, schema);
         }
 

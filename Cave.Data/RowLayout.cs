@@ -15,17 +15,6 @@ namespace Cave.Data
     [DebuggerDisplay("{" + nameof(Name) + "} [{" + nameof(FieldCount) + "}]")]
     public sealed class RowLayout : IEquatable<RowLayout>, IEnumerable<IFieldProperties>
     {
-        #region MatchType enum
-
-        public enum MatchType
-        {
-            None = 0,
-            Perfect = 1,
-            FieldNames = 2
-        }
-
-        #endregion
-
         #region Static
 
         static readonly Dictionary<string, RowLayout> LayoutCache = new();
@@ -358,70 +347,6 @@ namespace Cave.Data
             }
 
             return new(tableName, fieldProperties, null);
-        }
-
-        /// <summary>Checks two layouts for equality.</summary>
-        /// <param name="expected">The expected layout.</param>
-        /// <param name="current">The layout to check.</param>
-        /// <param name="fieldPropertiesConversion">field conversion function to use.</param>
-        public static MatchType TryMatch(RowLayout expected, RowLayout current, Func<IFieldProperties, IFieldProperties> fieldPropertiesConversion = null)
-        {
-            if (ReferenceEquals(expected, current))
-            {
-                return MatchType.Perfect;
-            }
-
-            if (expected == null)
-            {
-                throw new ArgumentNullException(nameof(expected));
-            }
-
-            if (current == null)
-            {
-                throw new ArgumentNullException(nameof(current));
-            }
-
-            var perfectMatches = 0;
-            for (var i = 0; i < expected.FieldCount; i++)
-            {
-                var expectedField = expected[i];
-                var currentField = current[i];
-                if (fieldPropertiesConversion != null)
-                {
-                    expectedField = fieldPropertiesConversion(expectedField);
-                    currentField = fieldPropertiesConversion(currentField);
-                }
-
-                if (expectedField.Equals(currentField))
-                {
-                    perfectMatches++;
-                    continue;
-                }
-
-                var n = current.GetFieldIndex(expectedField.Name, false);
-                if (n == -1)
-                {
-                    n = (expectedField.AlternativeNames?.Select(a => current.GetFieldIndex(a, false)) ?? new int[0]).Single(i => i > -1);
-                }
-
-                currentField = current[n];
-                if (fieldPropertiesConversion != null)
-                {
-                    currentField = fieldPropertiesConversion(currentField);
-                }
-
-                if (!expectedField.Equals(currentField))
-                {
-                    return MatchType.None;
-                }
-            }
-
-            if ((expected.FieldCount == perfectMatches) && (current.FieldCount == perfectMatches))
-            {
-                return MatchType.Perfect;
-            }
-
-            return MatchType.FieldNames;
         }
 
         /// <summary>Gets or sets a value indicating whether caching for known typed layouts is disabled or not.</summary>
@@ -860,5 +785,28 @@ namespace Cave.Data
         }
 
         #endregion
+
+        public RowLayout GetMatching(RowLayout baseTableLayout, TableFlags flags)
+        {
+            if (RowType == null) throw new InvalidOperationException("GetMatching is only supported on Typed Layouts!");
+            var comparison = flags.GetFieldNameComparison();
+            var result = new List<IFieldProperties>();
+
+            foreach (var field in this)
+            {
+                var match = baseTableLayout.FirstOrDefault(f => f.Equals(field, comparison));
+                if (match == null)
+                {
+                    throw new InvalidDataException($"Field {field} cannot be found at table {baseTableLayout}");
+                }
+
+                var target = field.Clone();
+                target.Index = match.Index;
+                result.Add(target);
+            }
+
+            if (result.Select(i => i.Index).Distinct().Count() != result.Count) throw new Exception("Index assignment is not distinct!");
+            return new(this.Name, result.OrderBy(i => i.Index).ToArray(), this.RowType);
+        }
     }
 }

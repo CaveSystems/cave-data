@@ -1033,7 +1033,7 @@ namespace Cave.Data.Sql
                     else if (DoSchemaCheckOnQuery)
                     {
                         // yes: check schema
-                        CheckLayout(layout, schema);
+                        CheckLayout(schema, layout, 0);
                     }
 
                     // load rows
