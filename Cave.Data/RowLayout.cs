@@ -573,6 +573,7 @@ namespace Cave.Data
 
         /// <summary>Gets the field index of the specified field name.</summary>
         /// <param name="fieldName">The field name to search for.</param>
+        /// <param name="comparison">Field name comparison</param>
         /// <param name="throwException">Throw exception if field cannot be found.</param>
         /// <returns>The field index of the specified field name.</returns>
         public int GetFieldIndex(string fieldName, StringComparison comparison, bool throwException)
@@ -678,6 +679,7 @@ namespace Cave.Data
 
         /// <summary>Checks whether a field with the specified name exists or not.</summary>
         /// <param name="fieldName">The field name.</param>
+        /// <param name="comparison">Field name comparison</param>
         /// <returns>True is the field exists.</returns>
         public bool HasField(string fieldName, StringComparison comparison) => GetFieldIndex(fieldName, comparison, false) > -1;
 
@@ -786,6 +788,12 @@ namespace Cave.Data
 
         #endregion
 
+        /// <summary>
+        /// Calculates a new <see cref="RowLayout"/> instance by matching the current typed layout to a database layout.
+        /// </summary>
+        /// <param name="baseTableLayout">Database table layout.</param>
+        /// <param name="flags">Table flags</param>
+        /// <returns>Returns a new <see cref="RowLayout"/> instance</returns>
         public RowLayout GetMatching(RowLayout baseTableLayout, TableFlags flags)
         {
             if (RowType == null) throw new InvalidOperationException("GetMatching is only supported on Typed Layouts!");

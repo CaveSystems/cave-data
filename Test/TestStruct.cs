@@ -6,6 +6,8 @@ using Cave.Collections;
 using Cave.Data;
 using Cave.IO;
 
+#pragma warning disable CS0618
+
 namespace Test.Cave
 {
     public enum TestEnum

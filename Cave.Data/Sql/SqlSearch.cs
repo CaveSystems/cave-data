@@ -189,6 +189,7 @@ namespace Cave.Data.Sql
         /// <summary>
         /// Initializes a new instance of the <see cref="SqlSearch"/> class.
         /// </summary>
+        /// <param name="table">Table the search is performed on.</param>
         /// <param name="search">Search to perform.</param>
         internal SqlSearch(SqlTable table, Search search)
         {
