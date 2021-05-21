@@ -17,8 +17,6 @@ namespace Cave.Data
 
         #region Constructors
 
-        #region constructors
-
         /// <summary>Initializes a new instance of the <see cref="Row" /> class.</summary>
         /// <param name="layout">Layout of this row.</param>
         /// <param name="values">Values for all fields.</param>
@@ -31,15 +29,13 @@ namespace Cave.Data
                 throw new ArgumentNullException(nameof(values));
             }
 
-            if (values.Length != layout.FieldCount)
+            if (values.Length < layout.MaxIndex)
             {
-                throw new ArgumentOutOfRangeException(nameof(layout), "values.Length != layout.FieldCount");
+                throw new ArgumentOutOfRangeException(nameof(layout), "values.Length < layout.MaxIndex");
             }
 
-            Values = clone ? (object[]) values.Clone() : values;
+            Values = clone ? (object[])values.Clone() : values;
         }
-
-        #endregion
 
         #endregion
 

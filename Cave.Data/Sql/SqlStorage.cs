@@ -1033,7 +1033,7 @@ namespace Cave.Data.Sql
                     else if (DoSchemaCheckOnQuery)
                     {
                         // yes: check schema
-                        CheckLayout(schema, layout, 0);
+                        CheckLayout(schema, layout, TableFlags.IgnoreMissingFields);
                     }
 
                     // load rows
@@ -1278,18 +1278,14 @@ namespace Cave.Data.Sql
         /// <returns>A row read from the reader.</returns>
         Row ReadRow(RowLayout layout, IDataReader reader)
         {
-            var values = new object[layout.FieldCount];
+            var values = new object[reader.FieldCount];
             reader.GetValues(values);
-            if (reader.FieldCount != layout.FieldCount)
-            {
-                throw new InvalidDataException($"Error while reading row data at table {layout}!" + "\n" + "Invalid field count!");
-            }
 
             try
             {
-                for (var fieldNumber = 0; fieldNumber < layout.FieldCount; fieldNumber++)
+                foreach (var field in layout)
                 {
-                    values[fieldNumber] = GetLocalValue(layout[fieldNumber], reader, values[fieldNumber]);
+                    values[field.Index] = GetLocalValue(field, reader, values[field.Index]);
                 }
             }
             catch (Exception ex)

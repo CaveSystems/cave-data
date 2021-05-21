@@ -389,6 +389,12 @@ namespace Cave.Data
 
         readonly IList<IFieldProperties> FieldProperties;
 
+        /// <summary>Maximum field index.</summary>
+        public readonly int MaxIndex;
+
+        /// <summary>Minimum field index.</summary>
+        public readonly int MinIndex;
+
         /// <summary>Gets the name of the layout.</summary>
         public readonly string Name;
 
@@ -411,6 +417,19 @@ namespace Cave.Data
             if (name.HasInvalidChars(ASCII.Strings.SafeName))
             {
                 throw new ArgumentException("Invalid characters at table name!");
+            }
+
+            var indices = fields.Select(f => f.Index).ToList();
+            if (indices.Distinct().Count() != fields.Length)
+            {
+                throw new ArgumentOutOfRangeException(nameof(fields), "Fields do not use unique indices!");
+            }
+
+            MinIndex = indices.Min();
+            MaxIndex = indices.Max();
+            if (MinIndex < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(fields), "Minimum index < 0!");
             }
 
             FieldCount = fields.Length;
@@ -600,6 +619,40 @@ namespace Cave.Data
             return !throwException ? -1 : throw new ArgumentOutOfRangeException(nameof(fieldName), $"FieldName {fieldName} is not present at layout {this}!");
         }
 
+        /// <summary>Calculates a new <see cref="RowLayout" /> instance by matching the current typed layout to a database layout.</summary>
+        /// <param name="baseTableLayout">Database table layout.</param>
+        /// <param name="flags">Table flags</param>
+        /// <returns>Returns a new <see cref="RowLayout" /> instance</returns>
+        public RowLayout GetMatching(RowLayout baseTableLayout, TableFlags flags)
+        {
+            if (RowType == null)
+            {
+                throw new InvalidOperationException("GetMatching is only supported on Typed Layouts!");
+            }
+
+            var comparison = flags.GetFieldNameComparison();
+            var result = new List<IFieldProperties>();
+            foreach (var field in this)
+            {
+                var match = baseTableLayout.FirstOrDefault(f => f.Equals(field, comparison));
+                if (match == null)
+                {
+                    throw new InvalidDataException($"Field {field} cannot be found at table {baseTableLayout}");
+                }
+
+                var target = field.Clone();
+                target.Index = match.Index;
+                result.Add(target);
+            }
+
+            if (result.Select(i => i.Index).Distinct().Count() != result.Count)
+            {
+                throw new("Index assignment is not distinct!");
+            }
+
+            return new(Name, result.OrderBy(i => i.Index).ToArray(), RowType);
+        }
+
         /// <summary>Gets the name of the field with the given number.</summary>
         /// <param name="index">The field index.</param>
         /// <returns>The name of the field.</returns>
@@ -787,34 +840,5 @@ namespace Cave.Data
         }
 
         #endregion
-
-        /// <summary>
-        /// Calculates a new <see cref="RowLayout"/> instance by matching the current typed layout to a database layout.
-        /// </summary>
-        /// <param name="baseTableLayout">Database table layout.</param>
-        /// <param name="flags">Table flags</param>
-        /// <returns>Returns a new <see cref="RowLayout"/> instance</returns>
-        public RowLayout GetMatching(RowLayout baseTableLayout, TableFlags flags)
-        {
-            if (RowType == null) throw new InvalidOperationException("GetMatching is only supported on Typed Layouts!");
-            var comparison = flags.GetFieldNameComparison();
-            var result = new List<IFieldProperties>();
-
-            foreach (var field in this)
-            {
-                var match = baseTableLayout.FirstOrDefault(f => f.Equals(field, comparison));
-                if (match == null)
-                {
-                    throw new InvalidDataException($"Field {field} cannot be found at table {baseTableLayout}");
-                }
-
-                var target = field.Clone();
-                target.Index = match.Index;
-                result.Add(target);
-            }
-
-            if (result.Select(i => i.Index).Distinct().Count() != result.Count) throw new Exception("Index assignment is not distinct!");
-            return new(this.Name, result.OrderBy(i => i.Index).ToArray(), this.RowType);
-        }
     }
 }
