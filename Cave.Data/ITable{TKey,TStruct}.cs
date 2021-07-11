@@ -60,10 +60,6 @@ namespace Cave.Data
         /// <returns>The rows.</returns>
         IList<TStruct> GetStructs(IEnumerable<TKey> ids);
 
-        /// <summary>Gets a dictionary with all datasets.</summary>
-        /// <param name="search">The search to run.</param>
-        /// <param name="resultOption">Options for the search and the result set.</param>
-        /// <returns>A readonly dictionary.</returns>
-        IDictionary<TKey, TStruct> GetDictionary(Search search = null, ResultOption resultOption = null);
+        #endregion
     }
 }
