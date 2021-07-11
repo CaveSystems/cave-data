@@ -16,6 +16,6 @@ namespace Cave.Data
         ThrowExceptions = 1 << 0,
 
         /// <summary>Do not throw exceptions</summary>
-        NoExceptions = 1 << 1,
+        NoExceptions = 1 << 1
     }
 }

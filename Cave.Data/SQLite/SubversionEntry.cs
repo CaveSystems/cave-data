@@ -1,64 +1,90 @@
 namespace Cave.Data.SQLite
 {
-    /// <summary>Provides access to a subversion entry.</summary>
+    /// <summary>
+    /// Provides access to a subversion entry.
+    /// </summary>
     public class SubversionEntry
     {
-        readonly string[] data;
+        #region Private Fields
 
-        /// <summary>Initializes a new instance of the <see cref="SubversionEntry" /> class.</summary>
+        readonly string[] Data;
+
+        #endregion Private Fields
+
+        #region Internal Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SubversionEntry"/> class.
+        /// </summary>
         /// <param name="data">Lines.</param>
         /// <param name="version">Version code.</param>
         internal SubversionEntry(string[] data, int version)
         {
             Version = version;
-            this.data = data;
+            this.Data = data;
             IsValid = (Version >= 8) || (Version <= 10);
         }
 
-        /// <summary>Gets the subversion entry version.</summary>
-        public int Version { get; }
+        #endregion Internal Constructors
 
-        /// <summary>Gets a value indicating whether the entry is valid or not.</summary>
-        public bool IsValid { get; }
+        #region Public Properties
 
-        /// <summary>Gets the type of the <see cref="SubversionEntry" />.</summary>
-        public SubversionEntryType Type
-        {
-            get
-            {
-                switch (data[1])
-                {
-                    case "dir": return SubversionEntryType.Directory;
-                    case "file": return SubversionEntryType.File;
-                    default: return SubversionEntryType.Unknown;
-                }
-            }
-        }
-
-        /// <summary>Gets the name of the <see cref="SubversionEntry" />.</summary>
-        public string Name => data[0];
-
-        /// <summary>Gets a value indicating whether the entry was deleted or not.</summary>
+        /// <summary>
+        /// Gets a value indicating whether the entry was deleted or not.
+        /// </summary>
         public bool Deleted
         {
             get
             {
-                switch (Version)
+                return Version switch
                 {
-                    case 8:
-                    case 9:
-                    case 10:
-                        return data[5] == "delete";
-                    default:
-                        return false;
-                }
+                    8 or 9 or 10 => Data[5] == "delete",
+                    _ => false,
+                };
             }
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets a value indicating whether the entry is valid or not.
+        /// </summary>
+        public bool IsValid { get; }
+
+        /// <summary>
+        /// Gets the name of the <see cref="SubversionEntry"/>.
+        /// </summary>
+        public string Name => Data[0];
+
+        /// <summary>
+        /// Gets the type of the <see cref="SubversionEntry"/>.
+        /// </summary>
+        public SubversionEntryType Type
+        {
+            get
+            {
+                return (Data[1]) switch
+                {
+                    "dir" => SubversionEntryType.Directory,
+                    "file" => SubversionEntryType.File,
+                    _ => SubversionEntryType.Unknown,
+                };
+            }
+        }
+
+        /// <summary>
+        /// Gets the subversion entry version.
+        /// </summary>
+        public int Version { get; }
+
+        #endregion Public Properties
+
+        #region Public Methods
+
+        /// <inheritdoc/>
+        public override int GetHashCode() => ToString().GetHashCode();
+
+        /// <inheritdoc/>
         public override string ToString() => Name + " " + Type;
 
-        /// <inheritdoc />
-        public override int GetHashCode() => ToString().GetHashCode();
+        #endregion Public Methods
     }
 }

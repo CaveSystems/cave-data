@@ -11,13 +11,12 @@ namespace Cave.Data
     {
         DataWriter writer;
 
+        #region Members
+
         #region IDisposable Support
 
         /// <summary>Releases unmanaged and - optionally - managed resources.</summary>
-        /// <param name="disposing">
-        ///     <c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only
-        ///     unmanaged resources.
-        /// </param>
+        /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
         void Dispose(bool disposing)
         {
             if (disposing)
@@ -33,6 +32,8 @@ namespace Cave.Data
                 writer = null;
             }
         }
+
+        #endregion
 
         #endregion
 
@@ -129,9 +130,21 @@ namespace Cave.Data
         /// <returns>Returns a new string representing the row.</returns>
         public static string RowToString(CsvProperties properties, RowLayout layout, Row row, IFormatProvider provider = null)
         {
-            if (layout == null) throw new ArgumentNullException(nameof(layout));
-            if (row == null) throw new ArgumentNullException(nameof(row));
-            if (provider == null) provider = properties.Format;
+            if (layout == null)
+            {
+                throw new ArgumentNullException(nameof(layout));
+            }
+
+            if (row == null)
+            {
+                throw new ArgumentNullException(nameof(row));
+            }
+
+            if (provider == null)
+            {
+                provider = properties.Format;
+            }
+
             var result = new StringBuilder();
             var values = row.Values;
             for (var i = 0; i < layout.FieldCount; i++)
@@ -405,13 +418,12 @@ namespace Cave.Data
         /// <param name="row">The row to write.</param>
         /// <typeparam name="TStruct">Structure type.</typeparam>
         public void Write<TStruct>(TStruct row)
-            where TStruct : struct
-            => WriteRow(new Row(Layout, Layout.GetValues(row), false));
+            where TStruct : struct =>
+            WriteRow(new Row(Layout, Layout.GetValues(row), false));
 
         /// <summary>Writes a row to the file.</summary>
         /// <param name="row">Row to write.</param>
-        public void WriteRow(Row row)
-            => writer.WriteLine(RowToString(Properties, Layout, row));
+        public void WriteRow(Row row) => writer.WriteLine(RowToString(Properties, Layout, row));
 
         /// <summary>Writes a number of rows to the file.</summary>
         /// <param name="table">Table to write.</param>

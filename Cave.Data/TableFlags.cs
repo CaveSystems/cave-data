@@ -17,13 +17,13 @@ namespace Cave.Data
         /// <summary>Always create the table</summary>
         CreateNew = 1 << 1,
 
-        /// <summary>
-        ///     Tell the storage engine to use an in-memory-table. This will throw an exception if the storage engine cannot
-        ///     store to memory.
-        /// </summary>
+        /// <summary>Tell the storage engine to use an in-memory-table. This will throw an exception if the storage engine cannot store to memory.</summary>
         InMemory = 1 << 2,
 
         /// <summary>Allows rows structures with missing fields.</summary>
-        IgnoreMissingFields = 1 << 3
+        IgnoreMissingFields = 1 << 3,
+
+        /// <summary>Allows rows structures with missing fields.</summary>
+        FieldNamesCaseInsensitive = 1 << 4,
     }
 }

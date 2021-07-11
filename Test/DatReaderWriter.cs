@@ -1,6 +1,6 @@
-﻿using Cave.Data;
+﻿using System.IO;
+using Cave.Data;
 using NUnit.Framework;
-using System.IO;
 
 namespace Test.Cave.Data
 {
@@ -17,6 +17,7 @@ namespace Test.Cave.Data
                 var t = TestStructClean.Create(i);
                 writer.Write(t);
             }
+
             stream.Seek(0, SeekOrigin.Begin);
             var reader = new DatReader(stream);
             for (var i = 0; i < 100; i++)

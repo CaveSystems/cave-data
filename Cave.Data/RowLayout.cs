@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -16,41 +15,9 @@ namespace Cave.Data
     [DebuggerDisplay("{" + nameof(Name) + "} [{" + nameof(FieldCount) + "}]")]
     public sealed class RowLayout : IEquatable<RowLayout>, IEnumerable<IFieldProperties>
     {
-        /// <inheritdoc />
-        public IEnumerator<IFieldProperties> GetEnumerator() => properties.GetEnumerator();
+        #region Static
 
-        /// <inheritdoc />
-        IEnumerator IEnumerable.GetEnumerator() => properties.GetEnumerator();
-
-        /// <inheritdoc />
-        public bool Equals(RowLayout other)
-        {
-            if (other is null) return false;
-
-            if (other.FieldCount != FieldCount)
-            {
-                return false;
-            }
-
-            for (var i = 0; i < FieldCount; i++)
-            {
-                if (!other.properties[i].Equals(properties[i]))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        /// <summary>Clears the layout cache.</summary>
-        public static void ClearCache()
-        {
-            lock (LayoutCache)
-            {
-                LayoutCache.Clear();
-            }
-        }
+        static readonly Dictionary<string, RowLayout> LayoutCache = new();
 
         /// <summary>Checks two layouts for equality.</summary>
         /// <param name="expected">The expected layout.</param>
@@ -95,26 +62,13 @@ namespace Cave.Data
             }
         }
 
-        /// <summary>Loads the row layout from the specified reader.</summary>
-        /// <param name="reader">The reader.</param>
-        /// <returns>A new <see cref="RowLayout" /> instance.</returns>
-        public static RowLayout Load(DataReader reader)
+        /// <summary>Clears the layout cache.</summary>
+        public static void ClearCache()
         {
-            if (reader == null)
+            lock (LayoutCache)
             {
-                throw new ArgumentNullException(nameof(reader));
+                LayoutCache.Clear();
             }
-
-            var count = reader.Read7BitEncodedInt32();
-            var tableName = reader.ReadString();
-            var fieldProperties = new FieldProperties[count];
-            for (var i = 0; i < count; i++)
-            {
-                var field = fieldProperties[i] = new FieldProperties();
-                field.Load(reader, i);
-            }
-
-            return new RowLayout(tableName, fieldProperties, null);
         }
 
         /// <summary>Creates an alien row layout without using any field properies.</summary>
@@ -159,19 +113,12 @@ namespace Cave.Data
                 }
                 catch (Exception ex)
                 {
-                    throw new InvalidDataException(
-                        $"Error while loading field properties of type {type.FullName} field {fieldInfo}!", ex);
+                    throw new InvalidDataException($"Error while loading field properties of type {type.FullName} field {fieldInfo}!", ex);
                 }
             }
 
-            return new RowLayout(type.Name, properties, type);
+            return new(type.Name, properties, type);
         }
-
-        /// <summary>Creates a new layout with the given name and field properties.</summary>
-        /// <param name="name">Name of the layout.</param>
-        /// <param name="fields">FieldProperties to use.</param>
-        /// <returns>A new <see cref="RowLayout" /> instance.</returns>
-        public static RowLayout CreateUntyped(string name, params IFieldProperties[] fields) => new RowLayout(name, fields, null);
 
         /// <summary>Creates a RowLayout instance for the specified struct.</summary>
         /// <param name="type">The type to build the rowlayout for.</param>
@@ -200,8 +147,7 @@ namespace Cave.Data
                     var isStruct = type.IsValueType && !type.IsEnum && !type.IsPrimitive;
                     if (!isStruct)
                     {
-                        throw new ArgumentException(
-                            $"Type {type} is not a struct! Only structs may be used as row definition!");
+                        throw new ArgumentException($"Type {type} is not a struct! Only structs may be used as row definition!");
                     }
 
                     var tableAttribute = TableAttribute.Get(type);
@@ -242,12 +188,11 @@ namespace Cave.Data
                         }
                         catch (Exception ex)
                         {
-                            throw new InvalidOperationException(
-                                $"Error while loading field properties of type {type.FullName} field {fieldInfo}!", ex);
+                            throw new InvalidOperationException($"Error while loading field properties of type {type.FullName} field {fieldInfo}!", ex);
                         }
                     }
 
-                    result = new RowLayout(tableName, properties.ToArray(), type);
+                    result = new(tableName, properties.ToArray(), type);
                     if (!DisableLayoutCache)
                     {
                         LayoutCache[cacheName] = result;
@@ -258,25 +203,11 @@ namespace Cave.Data
             }
         }
 
-        /// <summary>Builds a new name matching the the specified <paramref name="namingStrategy" />.</summary>
-        /// <param name="namingStrategy">Naming strategy to use.</param>
-        /// <param name="name">Original name.</param>
-        /// <returns>A new string containing the new name.</returns>
-        public static string GetNameByStrategy(NamingStrategy namingStrategy, string name)
-        {
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
-            switch (namingStrategy)
-            {
-                case NamingStrategy.Exact: return name;
-                case NamingStrategy.CamelCase: return name.GetCamelCaseName();
-                case NamingStrategy.SnakeCase: return name.GetSnakeCaseName();
-                default: throw new NotImplementedException();
-            }
-        }
+        /// <summary>Creates a new layout with the given name and field properties.</summary>
+        /// <param name="name">Name of the layout.</param>
+        /// <param name="fields">FieldProperties to use.</param>
+        /// <returns>A new <see cref="RowLayout" /> instance.</returns>
+        public static RowLayout CreateUntyped(string name, params IFieldProperties[] fields) => new(name, fields, null);
 
         /// <summary>Gets the <see cref="DataType" /> for a given <see cref="Type" />.</summary>
         /// <param name="type">The <see cref="Type" /> to convert.</param>
@@ -376,19 +307,238 @@ namespace Cave.Data
             return type.IsEnum ? DataType.Enum : DataType.User;
         }
 
-        /// <summary>
-        ///     Retrieves a string for the specified value. The string may be parsed back to a value using
-        ///     <see cref="ParseValue(int, string, string, IFormatProvider)" />.
-        /// </summary>
-        /// <param name="fieldIndex">The field number.</param>
-        /// <param name="value">The value.</param>
-        /// <param name="stringMarker">The string marker.</param>
-        /// <param name="culture">The culture.</param>
-        /// <returns>A string for the value.</returns>
-        public string GetString(int fieldIndex, object value, string stringMarker, CultureInfo culture = null)
+        /// <summary>Builds a new name matching the the specified <paramref name="namingStrategy" />.</summary>
+        /// <param name="namingStrategy">Naming strategy to use.</param>
+        /// <param name="name">Original name.</param>
+        /// <returns>A new string containing the new name.</returns>
+        public static string GetNameByStrategy(NamingStrategy namingStrategy, string name)
         {
-            var field = properties[fieldIndex];
-            return field.GetString(value, stringMarker, culture);
+            if (name == null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
+            return namingStrategy switch
+            {
+                NamingStrategy.Exact => name,
+                NamingStrategy.CamelCase => name.GetCamelCaseName(),
+                NamingStrategy.SnakeCase => name.GetSnakeCaseName(),
+                _ => throw new NotImplementedException()
+            };
+        }
+
+        /// <summary>Loads the row layout from the specified reader.</summary>
+        /// <param name="reader">The reader.</param>
+        /// <returns>A new <see cref="RowLayout" /> instance.</returns>
+        public static RowLayout Load(DataReader reader)
+        {
+            if (reader == null)
+            {
+                throw new ArgumentNullException(nameof(reader));
+            }
+
+            var count = reader.Read7BitEncodedInt32();
+            var tableName = reader.ReadString();
+            var fieldProperties = new FieldProperties[count];
+            for (var i = 0; i < count; i++)
+            {
+                var field = fieldProperties[i] = new();
+                field.Load(reader, i);
+            }
+
+            return new(tableName, fieldProperties, null);
+        }
+
+        /// <summary>Gets or sets a value indicating whether caching for known typed layouts is disabled or not.</summary>
+        public static bool DisableLayoutCache { get; set; }
+
+        /// <summary>Saves the fieldproperties to the specified writer.</summary>
+        /// <param name="writer">The writer.</param>
+        /// <param name="field">Field properties to save.</param>
+        static void Save(DataWriter writer, IFieldProperties field)
+        {
+            if (writer == null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            writer.Write7BitEncoded32((int)field.DataType);
+            writer.Write7BitEncoded32((int)field.TypeAtDatabase);
+            writer.Write7BitEncoded32((int)field.Flags);
+            writer.WritePrefixed(field.Name);
+            writer.WritePrefixed(field.NameAtDatabase);
+            var typeName =
+                field.ValueType.AssemblyQualifiedName.Substring(0, field.ValueType.AssemblyQualifiedName.IndexOf(','));
+            writer.WritePrefixed(typeName);
+            if (field.DataType == DataType.DateTime)
+            {
+                writer.Write7BitEncoded32((int)field.DateTimeKind);
+                writer.Write7BitEncoded32((int)field.DateTimeType);
+            }
+
+            if ((field.DataType == DataType.String) || (field.DataType == DataType.User))
+            {
+                writer.Write(field.MaximumLength);
+            }
+        }
+
+        #endregion
+
+        /// <summary>Gets the fieldcount.</summary>
+        public readonly int FieldCount;
+
+        readonly IList<IFieldProperties> FieldProperties;
+
+        /// <summary>Maximum field index.</summary>
+        public readonly int MaxIndex;
+
+        /// <summary>Minimum field index.</summary>
+        public readonly int MinIndex;
+
+        /// <summary>Gets the name of the layout.</summary>
+        public readonly string Name;
+
+        /// <summary>The row type.</summary>
+        public readonly Type RowType;
+
+        #region Constructors
+
+        /// <summary>Initializes a new instance of the <see cref="RowLayout" /> class.</summary>
+        /// <param name="name">The Name of the Layout.</param>
+        /// <param name="fields">The fieldproperties to use.</param>
+        /// <param name="rowtype">Dotnet row type.</param>
+        internal RowLayout(string name, IFieldProperties[] fields, Type rowtype)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
+            if (name.HasInvalidChars(ASCII.Strings.SafeName))
+            {
+                throw new ArgumentException("Invalid characters at table name!");
+            }
+
+            var indices = fields.Select(f => f.Index).ToList();
+            if (indices.Distinct().Count() != fields.Length)
+            {
+                throw new ArgumentOutOfRangeException(nameof(fields), "Fields do not use unique indices!");
+            }
+
+            MinIndex = indices.Min();
+            MaxIndex = indices.Max();
+            if (MinIndex < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(fields), "Minimum index < 0!");
+            }
+
+            FieldCount = fields.Length;
+            FieldProperties = fields;
+            Name = name;
+            RowType = rowtype;
+        }
+
+        /// <summary>Initializes a new instance of the <see cref="RowLayout" /> class.</summary>
+        public RowLayout()
+        {
+            FieldProperties = new IFieldProperties[0];
+            Name = "Undefined";
+        }
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>Gets the field properties.</summary>
+        /// <value>A new readonly collection instance containing all field properties.</value>
+        public IList<IFieldProperties> Fields => new ReadOnlyCollection<IFieldProperties>(FieldProperties);
+
+        /// <summary>Gets the fields marked with the <see cref="FieldFlags.ID" />.</summary>
+        public IEnumerable<IFieldProperties> Identifier => FieldProperties.Where(p => p.Flags.HasFlag(FieldFlags.ID));
+
+        /// <summary>Gets a value indicating whether the layout was created from a typed struct or not.</summary>
+        public bool IsTyped => RowType != null;
+
+        /// <summary>Gets the field properties of the field with the specified index.</summary>
+        /// <param name="index">Field index.</param>
+        /// <returns>The <see cref="Cave.FieldProperties" /> instance.</returns>
+        public IFieldProperties this[int index] => FieldProperties[index];
+
+        /// <summary>Gets the field properties of the field with the specified name.</summary>
+        /// <param name="fieldName">Field name.</param>
+        /// <returns>The <see cref="Cave.FieldProperties" /> instance.</returns>
+        public IFieldProperties this[string fieldName] => FieldProperties[GetFieldIndex(fieldName, true)];
+
+        #endregion
+
+        #region IEnumerable<IFieldProperties> Members
+
+        /// <inheritdoc />
+        IEnumerator IEnumerable.GetEnumerator() => FieldProperties.GetEnumerator();
+
+        /// <inheritdoc />
+        public IEnumerator<IFieldProperties> GetEnumerator() => FieldProperties.GetEnumerator();
+
+        #endregion
+
+        #region IEquatable<RowLayout> Members
+
+        /// <inheritdoc />
+        public bool Equals(RowLayout other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (other.FieldCount != FieldCount)
+            {
+                return false;
+            }
+
+            for (var i = 0; i < FieldCount; i++)
+            {
+                if (!other.FieldProperties[i].Equals(FieldProperties[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        #endregion
+
+        #region object Overrides
+
+        /// <inheritdoc />
+        public override bool Equals(object obj) => obj is RowLayout layout && Equals(layout);
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            var result = IsTyped ? 0x00001234 : 0x12345678;
+            for (var i = 0; i < FieldCount; i++)
+            {
+                result ^= FieldProperties[i].GetHashCode() ^ i;
+            }
+
+            return result;
+        }
+
+        #endregion
+
+        #region Members
+
+        /// <summary>Enums the value.</summary>
+        /// <param name="index">The field index.</param>
+        /// <param name="value">The value.</param>
+        /// <param name="provider">The format provider.</param>
+        /// <returns>The enum value.</returns>
+        public object EnumValue(int index, long value, IFormatProvider provider = null)
+        {
+            var field = FieldProperties[index];
+            return Enum.Parse(field.ValueType, value.ToString(provider), true);
         }
 
         /// <summary>Gets the string representing the specified value using the field properties.</summary>
@@ -398,70 +548,138 @@ namespace Cave.Data
         /// <returns>The string to display.</returns>
         public string GetDisplayString(int fieldIndex, object value, CultureInfo culture = null)
         {
-            var field = properties[fieldIndex];
-            switch (field.DisplayFormat)
+            var field = FieldProperties[fieldIndex];
+            return field.DisplayFormat switch
             {
-                case "FormatTimeSpan":
-                case "TimeSpan":
-                    switch (field.DataType)
-                    {
-                        case DataType.TimeSpan: return ((TimeSpan) value).FormatTime();
-                        default: return Convert.ToDouble(value, culture).FormatTime();
-                    }
-                case "FormatValue":
-                case "Size":
-                    return Convert.ToDecimal(value, culture).FormatSize();
-                case "FormatBinary":
-                case "Binary":
-                    return Convert.ToDecimal(value, culture).FormatSize();
-            }
-
-            switch (field.DataType)
-            {
-                case DataType.Int8: return ((sbyte) value).ToString(field.DisplayFormat, culture);
-                case DataType.Int16: return ((short) value).ToString(field.DisplayFormat, culture);
-                case DataType.Int32: return ((int) value).ToString(field.DisplayFormat, culture);
-                case DataType.Int64: return ((long) value).ToString(field.DisplayFormat, culture);
-                case DataType.UInt8: return ((byte) value).ToString(field.DisplayFormat, culture);
-                case DataType.UInt16: return ((ushort) value).ToString(field.DisplayFormat, culture);
-                case DataType.UInt32: return ((uint) value).ToString(field.DisplayFormat, culture);
-                case DataType.UInt64: return ((ulong) value).ToString(field.DisplayFormat, culture);
-                case DataType.Binary: return Base64.NoPadding.Encode((byte[]) value);
-                case DataType.DateTime: return ((DateTime) value).ToString(field.DisplayFormat, culture);
-                case DataType.Single: return ((float) value).ToString(field.DisplayFormat, culture);
-                case DataType.Double: return ((double) value).ToString(field.DisplayFormat, culture);
-                case DataType.Decimal: return ((decimal) value).ToString(field.DisplayFormat, culture);
-                default: return value == null ? string.Empty : value.ToString();
-            }
+                "FormatTimeSpan" or "TimeSpan" => field.DataType switch
+                {
+                    DataType.TimeSpan => ((TimeSpan)value).FormatTime(),
+                    _ => Convert.ToDouble(value, culture).FormatTime()
+                },
+                "FormatValue" or "Size" => Convert.ToDecimal(value, culture).FormatSize(),
+                "FormatBinary" or "Binary" => Convert.ToDecimal(value, culture).FormatSize(),
+                _ => field.DataType switch
+                {
+                    DataType.Int8 => ((sbyte)value).ToString(field.DisplayFormat, culture),
+                    DataType.Int16 => ((short)value).ToString(field.DisplayFormat, culture),
+                    DataType.Int32 => ((int)value).ToString(field.DisplayFormat, culture),
+                    DataType.Int64 => ((long)value).ToString(field.DisplayFormat, culture),
+                    DataType.UInt8 => ((byte)value).ToString(field.DisplayFormat, culture),
+                    DataType.UInt16 => ((ushort)value).ToString(field.DisplayFormat, culture),
+                    DataType.UInt32 => ((uint)value).ToString(field.DisplayFormat, culture),
+                    DataType.UInt64 => ((ulong)value).ToString(field.DisplayFormat, culture),
+                    DataType.Binary => Base64.NoPadding.Encode((byte[])value),
+                    DataType.DateTime => ((DateTime)value).ToString(field.DisplayFormat, culture),
+                    DataType.Single => ((float)value).ToString(field.DisplayFormat, culture),
+                    DataType.Double => ((double)value).ToString(field.DisplayFormat, culture),
+                    DataType.Decimal => ((decimal)value).ToString(field.DisplayFormat, culture),
+                    _ => value == null ? string.Empty : value.ToString()
+                }
+            };
         }
 
-        /// <summary>Parses the value.</summary>
-        /// <param name="index">The field index.</param>
-        /// <param name="value">The value.</param>
-        /// <param name="stringMarker">The string marker.</param>
-        /// <param name="provider">The format provider.</param>
-        /// <returns>The value parsed.</returns>
-        public object ParseValue(int index, string value, string stringMarker, IFormatProvider provider = null)
+        /// <summary>Gets the field index of the specified field name.</summary>
+        /// <param name="fieldName">The field name to search for.</param>
+        /// <returns>The field index of the specified field name.</returns>
+        [Obsolete("Use int GetFieldIndex(string fieldName, bool throwException) instead!")]
+        public int GetFieldIndex(string fieldName) => GetFieldIndex(fieldName, false);
+
+        /// <summary>Gets the field index of the specified field name.</summary>
+        /// <param name="fieldName">The field name to search for.</param>
+        /// <param name="throwException">Throw exception if field cannot be found.</param>
+        /// <returns>The field index of the specified field name.</returns>
+        public int GetFieldIndex(string fieldName, bool throwException) => GetFieldIndex(fieldName, 0, throwException);
+
+        /// <summary>Gets the field index of the specified field name.</summary>
+        /// <param name="fieldName">The field name to search for.</param>
+        /// <param name="comparison">Field name comparison</param>
+        /// <param name="throwException">Throw exception if field cannot be found.</param>
+        /// <returns>The field index of the specified field name.</returns>
+        public int GetFieldIndex(string fieldName, StringComparison comparison, bool throwException)
         {
-            var field = properties[index];
-            return field.ParseValue(value, stringMarker, provider);
+            if (comparison == 0)
+            {
+                comparison = StringComparison.Ordinal;
+            }
+
+            //test field name
+            var field = FieldProperties.SingleOrDefault(f => f.Name.Equals(fieldName, comparison));
+            if (field != null)
+            {
+                return field.Index;
+            }
+
+            //test alternate names
+            field = FieldProperties.SingleOrDefault(f => true == f.AlternativeNames?.Any(n => n.Equals(field.Name, comparison)));
+            if (field != null)
+            {
+                return field.Index;
+            }
+
+            return !throwException ? -1 : throw new ArgumentOutOfRangeException(nameof(fieldName), $"FieldName {fieldName} is not present at layout {this}!");
         }
 
-        /// <summary>Enums the value.</summary>
-        /// <param name="index">The field index.</param>
-        /// <param name="value">The value.</param>
-        /// <param name="provider">The format provider.</param>
-        /// <returns>The enum value.</returns>
-        public object EnumValue(int index, long value, IFormatProvider provider = null)
+        /// <summary>Calculates a new <see cref="RowLayout" /> instance by matching the current typed layout to a database layout.</summary>
+        /// <param name="baseTableLayout">Database table layout.</param>
+        /// <param name="flags">Table flags</param>
+        /// <returns>Returns a new <see cref="RowLayout" /> instance</returns>
+        public RowLayout GetMatching(RowLayout baseTableLayout, TableFlags flags)
         {
-            var field = properties[index];
-            return Enum.Parse(field.ValueType, value.ToString(provider), true);
+            if (RowType == null)
+            {
+                throw new InvalidOperationException("GetMatching is only supported on Typed Layouts!");
+            }
+
+            var comparison = flags.GetFieldNameComparison();
+            var result = new List<IFieldProperties>();
+            foreach (var field in this)
+            {
+                var match = baseTableLayout.FirstOrDefault(f => f.Equals(field, comparison));
+                if (match == null)
+                {
+                    throw new InvalidDataException($"Field {field} cannot be found at table {baseTableLayout}");
+                }
+
+                var target = field.Clone();
+                target.Index = match.Index;
+                result.Add(target);
+            }
+
+            if (result.Select(i => i.Index).Distinct().Count() != result.Count)
+            {
+                throw new("Index assignment is not distinct!");
+            }
+
+            return new(Name, result.OrderBy(i => i.Index).ToArray(), RowType);
         }
 
         /// <summary>Gets the name of the field with the given number.</summary>
         /// <param name="index">The field index.</param>
         /// <returns>The name of the field.</returns>
-        public string GetName(int index) => properties[index].Name;
+        public string GetName(int index) => FieldProperties[index].Name;
+
+        /// <summary>Loads the structure fields into a new <see cref="Row" /> instance.</summary>
+        /// <typeparam name="TStruct">Structure type.</typeparam>
+        /// <param name="item">Structure to read.</param>
+        /// <returns>A new row instance.</returns>
+        public Row GetRow<TStruct>(TStruct item)
+            where TStruct : struct =>
+            new(this, GetValues(item), false);
+
+        /// <summary>
+        /// Retrieves a string for the specified value. The string may be parsed back to a value using
+        /// <see cref="ParseValue(int, string, string, IFormatProvider)" />.
+        /// </summary>
+        /// <param name="fieldIndex">The field number.</param>
+        /// <param name="value">The value.</param>
+        /// <param name="stringMarker">The string marker.</param>
+        /// <param name="culture">The culture.</param>
+        /// <returns>A string for the value.</returns>
+        public string GetString(int fieldIndex, object value, string stringMarker, CultureInfo culture = null)
+        {
+            var field = FieldProperties[fieldIndex];
+            return field.GetString(value, stringMarker, culture);
+        }
 
         /// <summary>Gets the value of a field from the specified struct.</summary>
         /// <param name="index">The field index.</param>
@@ -474,27 +692,7 @@ namespace Cave.Data
                 throw new InvalidOperationException("This RowLayout was not created from a typed struct!");
             }
 
-            return properties[index].FieldInfo.GetValue(item);
-        }
-
-        /// <summary>Sets a value at the specified struct.</summary>
-        /// <param name="index">The field index.</param>
-        /// <param name="item">The struct to set the value at.</param>
-        /// <param name="value">The value to set.</param>
-        /// <param name="culture">Culture to use to convert values.</param>
-        public void SetValue(int index, ref object item, object value, CultureInfo culture = null)
-        {
-            if (!IsTyped)
-            {
-                throw new InvalidOperationException("This RowLayout was not created from a typed struct!");
-            }
-
-            if ((value != null) && (value.GetType() != properties[index].ValueType))
-            {
-                value = Convert.ChangeType(value, properties[index].ValueType, culture);
-            }
-
-            properties[index].FieldInfo.SetValue(item, value);
+            return FieldProperties[index].FieldInfo.GetValue(item);
         }
 
         /// <summary>Gets all values of the struct.</summary>
@@ -511,14 +709,13 @@ namespace Cave.Data
 
             if (RowType != typeof(TStruct))
             {
-                throw new InvalidOperationException(
-                    $"This RowLayout {RowType} does not match structure type {typeof(TStruct)}!");
+                throw new InvalidOperationException($"This RowLayout {RowType} does not match structure type {typeof(TStruct)}!");
             }
 
             var result = new object[FieldCount];
             for (var i = 0; i < FieldCount; i++)
             {
-                var value = result[i] = properties[i].FieldInfo.GetValue(item);
+                var value = result[i] = FieldProperties[i].FieldInfo.GetValue(item);
                 if (value is DateTime dt && (dt.Kind == DateTimeKind.Unspecified))
                 {
                     result[i] = new DateTime(dt.Ticks, DateTimeKind.Local);
@@ -528,13 +725,85 @@ namespace Cave.Data
             return result;
         }
 
-        /// <summary>Loads the structure fields into a new <see cref="Row" /> instance.</summary>
-        /// <typeparam name="TStruct">Structure type.</typeparam>
-        /// <param name="item">Structure to read.</param>
-        /// <returns>A new row instance.</returns>
-        public Row GetRow<TStruct>(TStruct item)
-            where TStruct : struct
-            => new Row(this, GetValues(item), false);
+        /// <summary>Checks whether a field with the specified name exists or not.</summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>True is the field exists.</returns>
+        public bool HasField(string fieldName) => GetFieldIndex(fieldName, 0, false) > -1;
+
+        /// <summary>Checks whether a field with the specified name exists or not.</summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="comparison">Field name comparison</param>
+        /// <returns>True is the field exists.</returns>
+        public bool HasField(string fieldName, StringComparison comparison) => GetFieldIndex(fieldName, comparison, false) > -1;
+
+        /// <summary>Parses the value.</summary>
+        /// <param name="index">The field index.</param>
+        /// <param name="value">The value.</param>
+        /// <param name="stringMarker">The string marker.</param>
+        /// <param name="provider">The format provider.</param>
+        /// <returns>The value parsed.</returns>
+        public object ParseValue(int index, string value, string stringMarker, IFormatProvider provider = null)
+        {
+            var field = FieldProperties[index];
+            return field.ParseValue(value, stringMarker, provider);
+        }
+
+        /// <summary>Creates a copy of this layout without the specified field.</summary>
+        /// <param name="fieldName">Name of the field to remove.</param>
+        /// <returns>Returns a new <see cref="RowLayout" /> instance.</returns>
+        public RowLayout Remove(string fieldName)
+        {
+            var index = GetFieldIndex(fieldName, true);
+            var fieldProperties = new List<IFieldProperties>();
+            for (var i = 0; i < FieldCount; i++)
+            {
+                if (i == index)
+                {
+                    continue;
+                }
+
+                fieldProperties.Add(FieldProperties[i]);
+            }
+
+            return new(Name, fieldProperties.ToArray(), RowType);
+        }
+
+        /// <summary>Saves the layout to the specified writer.</summary>
+        /// <param name="writer">The writer.</param>
+        public void Save(DataWriter writer)
+        {
+            if (writer == null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            writer.Write7BitEncoded32(FieldCount);
+            writer.WritePrefixed(Name);
+            for (var i = 0; i < FieldCount; i++)
+            {
+                Save(writer, FieldProperties[i]);
+            }
+        }
+
+        /// <summary>Sets a value at the specified struct.</summary>
+        /// <param name="index">The field index.</param>
+        /// <param name="item">The struct to set the value at.</param>
+        /// <param name="value">The value to set.</param>
+        /// <param name="culture">Culture to use to convert values.</param>
+        public void SetValue(int index, ref object item, object value, CultureInfo culture = null)
+        {
+            if (!IsTyped)
+            {
+                throw new InvalidOperationException("This RowLayout was not created from a typed struct!");
+            }
+
+            if ((value != null) && (value.GetType() != FieldProperties[index].ValueType))
+            {
+                value = Convert.ChangeType(value, FieldProperties[index].ValueType, culture);
+            }
+
+            FieldProperties[index].FieldInfo.SetValue(item, value);
+        }
 
         /// <summary>Sets all values of the struct.</summary>
         /// <param name="item">The struct to set the values at.</param>
@@ -555,223 +824,20 @@ namespace Cave.Data
             for (var i = 0; i < FieldCount; i++)
             {
                 var value = values[i];
-                var field = properties[i];
+                var field = FieldProperties[i];
                 if ((value != null) && (value.GetType() != field.ValueType))
                 {
-                    switch (field.DataType)
+                    value = field.DataType switch
                     {
-                        case DataType.User:
-                            value = properties[i].ParseValue(value.ToString());
-                            break;
-                        case DataType.Enum:
-                            value = Enum.Parse(field.ValueType, value.ToString(), true);
-                            break;
-                        default:
-                            value = Convert.ChangeType(values[i], properties[i].ValueType, culture);
-                            break;
-                    }
+                        DataType.User => FieldProperties[i].ParseValue(value.ToString()),
+                        DataType.Enum => Enum.Parse(field.ValueType, value.ToString(), true),
+                        _ => Convert.ChangeType(values[i], FieldProperties[i].ValueType, culture)
+                    };
                 }
 
-                properties[i].FieldInfo.SetValue(item, value);
+                FieldProperties[i].FieldInfo.SetValue(item, value);
             }
         }
-
-        /// <summary>Checks whether a field with the specified name exists or not.</summary>
-        /// <param name="fieldName">The field name.</param>
-        /// <returns>True is the field exists.</returns>
-        public bool HasField(string fieldName) => GetFieldIndex(fieldName, false) > -1;
-
-        /// <summary>Gets the field index of the specified field name.</summary>
-        /// <param name="fieldName">The field name to search for.</param>
-        /// <returns>The field index of the specified field name.</returns>
-        [Obsolete("Use int GetFieldIndex(string fieldName, bool throwException) instead!")]
-        public int GetFieldIndex(string fieldName) => GetFieldIndex(fieldName, false);
-
-        /// <summary>Gets the field index of the specified field name.</summary>
-        /// <param name="fieldName">The field name to search for.</param>
-        /// <param name="throwException">Throw exception if field cannot be found.</param>
-        /// <returns>The field index of the specified field name.</returns>
-        public int GetFieldIndex(string fieldName, bool throwException)
-        {
-            for (var i = 0; i < FieldCount; i++)
-            {
-                if (properties[i].Name.Equals(fieldName, StringComparison.Ordinal))
-                {
-                    return i;
-                }
-            }
-
-            for (var i = 0; i < FieldCount; i++)
-            {
-                var names = properties[i].AlternativeNames?.Split(" ,;".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-                if ((names != null) && names.Any(n => n == fieldName))
-                {
-                    return i;
-                }
-            }
-
-            return !throwException ? -1 : throw new ArgumentOutOfRangeException(nameof(fieldName), $"FieldName {fieldName} is not present at layout {this}!");
-        }
-
-        /// <summary>Creates a copy of this layout without the specified field.</summary>
-        /// <param name="fieldName">Name of the field to remove.</param>
-        /// <returns>Returns a new <see cref="RowLayout" /> instance.</returns>
-        public RowLayout Remove(string fieldName)
-        {
-            var index = GetFieldIndex(fieldName, true);
-            var fieldProperties = new List<IFieldProperties>();
-            for (var i = 0; i < FieldCount; i++)
-            {
-                if (i == index)
-                {
-                    continue;
-                }
-
-                fieldProperties.Add(properties[i]);
-            }
-
-            return new RowLayout(Name, fieldProperties.ToArray(), RowType);
-        }
-
-        /// <inheritdoc />
-        public override bool Equals(object obj) => obj is RowLayout layout && Equals(layout);
-
-        /// <inheritdoc />
-        public override int GetHashCode()
-        {
-            var result = IsTyped ? 0x00001234 : 0x12345678;
-            for (var i = 0; i < FieldCount; i++)
-            {
-                result ^= properties[i].GetHashCode() ^ i;
-            }
-
-            return result;
-        }
-
-        /// <summary>Saves the layout to the specified writer.</summary>
-        /// <param name="writer">The writer.</param>
-        public void Save(DataWriter writer)
-        {
-            if (writer == null)
-            {
-                throw new ArgumentNullException(nameof(writer));
-            }
-
-            writer.Write7BitEncoded32(FieldCount);
-            writer.WritePrefixed(Name);
-            for (var i = 0; i < FieldCount; i++)
-            {
-                Save(writer, properties[i]);
-            }
-        }
-
-        /// <summary>Saves the fieldproperties to the specified writer.</summary>
-        /// <param name="writer">The writer.</param>
-        /// <param name="field">Field properties to save.</param>
-        static void Save(DataWriter writer, IFieldProperties field)
-        {
-            if (writer == null)
-            {
-                throw new ArgumentNullException(nameof(writer));
-            }
-
-            writer.Write7BitEncoded32((int) field.DataType);
-            writer.Write7BitEncoded32((int) field.TypeAtDatabase);
-            writer.Write7BitEncoded32((int) field.Flags);
-            writer.WritePrefixed(field.Name);
-            writer.WritePrefixed(field.NameAtDatabase);
-            var typeName =
-                field.ValueType.AssemblyQualifiedName.Substring(0, field.ValueType.AssemblyQualifiedName.IndexOf(','));
-            writer.WritePrefixed(typeName);
-            if (field.DataType == DataType.DateTime)
-            {
-                writer.Write7BitEncoded32((int) field.DateTimeKind);
-                writer.Write7BitEncoded32((int) field.DateTimeType);
-            }
-
-            if ((field.DataType == DataType.String) || (field.DataType == DataType.User))
-            {
-                writer.Write(field.MaximumLength);
-            }
-        }
-
-        #region fields
-
-        /// <summary>Gets the name of the layout.</summary>
-        public readonly string Name;
-
-        /// <summary>The row type.</summary>
-        public readonly Type RowType;
-
-        /// <summary>Gets the fieldcount.</summary>
-        public readonly int FieldCount;
-
-        static readonly Dictionary<string, RowLayout> LayoutCache = new Dictionary<string, RowLayout>();
-        readonly IList<IFieldProperties> properties;
-
-        #endregion
-
-        #region constructor
-
-        /// <summary>Initializes a new instance of the <see cref="RowLayout" /> class.</summary>
-        public RowLayout()
-        {
-            properties = new IFieldProperties[0];
-            Name = "Undefined";
-        }
-
-        /// <summary>Initializes a new instance of the <see cref="RowLayout" /> class.</summary>
-        /// <param name="name">The Name of the Layout.</param>
-        /// <param name="fields">The fieldproperties to use.</param>
-        /// <param name="rowtype">Dotnet row type.</param>
-        internal RowLayout(string name, IFieldProperties[] fields, Type rowtype)
-        {
-            if (string.IsNullOrEmpty(name))
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
-            if (name.HasInvalidChars(ASCII.Strings.SafeName))
-            {
-                throw new ArgumentException("Invalid characters at table name!");
-            }
-
-            FieldCount = fields.Length;
-            properties = fields;
-            Name = name;
-            RowType = rowtype;
-        }
-
-        #endregion
-
-        #region properties
-
-        /// <summary>Gets or sets a value indicating whether caching for known typed layouts is disabled or not.</summary>
-        public static bool DisableLayoutCache { get; set; }
-
-        /// <summary>Gets a value indicating whether the layout was created from a typed struct or not.</summary>
-        public bool IsTyped => RowType != null;
-
-        /// <summary>Gets the fields marked with the <see cref="FieldFlags.ID" />.</summary>
-        public IEnumerable<IFieldProperties> Identifier => properties.Where(p => p.Flags.HasFlag(FieldFlags.ID));
-
-        /// <summary>Gets the field properties.</summary>
-        /// <value>A new readonly collection instance containing all field properties.</value>
-        public IList<IFieldProperties> Fields => new ReadOnlyCollection<IFieldProperties>(properties);
-
-        #endregion
-
-        #region indexer
-
-        /// <summary>Gets the field properties of the field with the specified index.</summary>
-        /// <param name="index">Field index.</param>
-        /// <returns>The <see cref="FieldProperties" /> instance.</returns>
-        public IFieldProperties this[int index] => properties[index];
-
-        /// <summary>Gets the field properties of the field with the specified name.</summary>
-        /// <param name="fieldName">Field name.</param>
-        /// <returns>The <see cref="FieldProperties" /> instance.</returns>
-        public IFieldProperties this[string fieldName] => properties[GetFieldIndex(fieldName, true)];
 
         #endregion
     }

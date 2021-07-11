@@ -10,8 +10,24 @@ namespace Cave.Data
     /// <typeparam name="TStruct">Row structure type.</typeparam>
     public class RowCache<TKey, TStruct> : IRowCache where TKey : IComparable<TKey> where TStruct : struct
     {
-        Dictionary<TKey, TStruct?> cache = new Dictionary<TKey, TStruct?>();
-        ITable<TKey, TStruct> table;
+        #region Private Fields
+
+        readonly Dictionary<TKey, TStruct?> Cache = new Dictionary<TKey, TStruct?>();
+        readonly ITable<TKey, TStruct> Table;
+
+        #endregion Private Fields
+
+        #region Public Constructors
+
+        /// <summary>
+        /// Creates a new row cache using the specified table.
+        /// </summary>
+        /// <param name="table">Table to read rows from.</param>
+        public RowCache(ITable table) => this.Table = new Table<TKey, TStruct>(table);
+
+        #endregion Public Constructors
+
+        #region Public Properties
 
         /// <inheritdoc/>
         public long HitCount { get; set; }
@@ -22,19 +38,19 @@ namespace Cave.Data
         /// <inheritdoc/>
         public long NotFoundCount { get; set; }
 
-        /// <summary>
-        /// Creates a new row cache using the specified table.
-        /// </summary>
-        /// <param name="table">Table to read rows from.</param>
-        public RowCache(ITable table) => this.table = new Table<TKey, TStruct>(table);
+        #endregion Public Properties
+
+        #region Public Methods
 
         /// <inheritdoc/>
         public void Clear()
         {
             lock (this)
             {
-                cache.Clear();
-            };
+                Cache.Clear();
+            }
+
+            ;
         }
 
         /// <summary>
@@ -46,22 +62,26 @@ namespace Cave.Data
         {
             lock (this)
             {
-                if (cache.TryGetValue(id, out var result))
+                if (Cache.TryGetValue(id, out var result))
                 {
                     HitCount++;
                     return result;
                 }
+
                 MissCount++;
-                if (table.TryGetStruct(id, out var value))
+                if (Table.TryGetStruct(id, out var value))
                 {
-                    return cache[id] = value;
+                    return Cache[id] = value;
                 }
             }
+
             NotFoundCount++;
-            return cache[id] = null;
+            return Cache[id] = null;
         }
 
-        /// <summary>Tries to get the row with the specified identifier.</summary>
+        /// <summary>
+        /// Tries to get the row with the specified identifier.
+        /// </summary>
         /// <param name="id">The identifier value.</param>
         /// <param name="row">Returns the result row.</param>
         /// <returns>Returns true on success, false otherwise.</returns>
@@ -71,5 +91,7 @@ namespace Cave.Data
             row = result ?? default;
             return result.HasValue;
         }
+
+        #endregion Public Methods
     }
 }

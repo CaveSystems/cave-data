@@ -7,10 +7,12 @@ namespace Cave.Data
     /// <summary>Provides an abstract base class for file storage containing multiple databases.</summary>
     public abstract class FileStorage : Storage, IDisposable
     {
+        #region Constructors
+
         #region constructors
 
         /// <summary>Initializes a new instance of the <see cref="FileStorage" /> class.
-        ///     <para>Following formats are supported:<br /> file://server/relativepath<br /> file:absolutepath.<br /></para>
+        /// <para>Following formats are supported:<br /> file://server/relativepath<br /> file:absolutepath.<br /></para>
         /// </summary>
         /// <param name="connectionString">ConnectionString of the storage.</param>
         /// <param name="options">The options.</param>
@@ -48,6 +50,17 @@ namespace Cave.Data
 
         #endregion
 
+        #endregion
+
+        #region Properties
+
+        /// <summary>Gets the base path used for the file storage.</summary>
+        public string Folder { get; private set; }
+
+        #endregion
+
+        #region Overrides
+
         /// <inheritdoc />
         public override IList<string> DatabaseNames
         {
@@ -68,11 +81,10 @@ namespace Cave.Data
             }
         }
 
-        /// <summary>Gets the base path used for the file storage.</summary>
-        public string Folder { get; private set; }
-
         /// <inheritdoc />
         public override string ToString() => $"file://{Folder}";
+
+        #endregion
 
         #region IStorage functions
 
@@ -136,10 +148,7 @@ namespace Cave.Data
         }
 
         /// <summary>Releases unmanaged and - optionally - managed resources.</summary>
-        /// <param name="disposing">
-        ///     <c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only
-        ///     unmanaged resources.
-        /// </param>
+        /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing) => Close();
 
         #endregion

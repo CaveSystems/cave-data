@@ -7,7 +7,17 @@ namespace Cave.Data
     /// <summary>Provides a memory based database.</summary>
     public sealed class MemoryDatabase : Database
     {
+        #region Static
+
+        /// <summary>Gets the default memory database.</summary>
+        /// <value>The default memory database.</value>
+        public static MemoryDatabase Default { get; } = new MemoryDatabase();
+
+        #endregion
+
         Dictionary<string, ITable> tables = new Dictionary<string, ITable>();
+
+        #region Constructors
 
         /// <summary>Initializes a new instance of the <see cref="MemoryDatabase" /> class.</summary>
         /// <param name="storage">The storage engine.</param>
@@ -23,18 +33,21 @@ namespace Cave.Data
         {
         }
 
-        /// <summary>Gets the default memory database.</summary>
-        /// <value>The default memory database.</value>
-        public static MemoryDatabase Default { get; } = new MemoryDatabase();
+        #endregion
+
+        #region Overrides
 
         /// <inheritdoc />
-        public override bool IsSecure => true;
+        public override void Close()
+        {
+            if (IsClosed)
+            {
+                throw new ObjectDisposedException(Name);
+            }
 
-        /// <inheritdoc />
-        public override bool IsClosed => tables == null;
-
-        /// <inheritdoc />
-        public override ITable GetTable(string tableName, TableFlags flags = default) => tables[tableName];
+            tables.Clear();
+            tables = null;
+        }
 
         /// <inheritdoc />
         public override ITable CreateTable(RowLayout layout, TableFlags flags = default)
@@ -64,18 +77,17 @@ namespace Cave.Data
         }
 
         /// <inheritdoc />
-        public override void Close()
-        {
-            if (IsClosed)
-            {
-                throw new ObjectDisposedException(Name);
-            }
-
-            tables.Clear();
-            tables = null;
-        }
+        public override ITable GetTable(string tableName, TableFlags flags = default) => tables[tableName];
 
         /// <inheritdoc />
         protected override string[] GetTableNames() => !IsClosed ? tables.Keys.ToArray() : throw new ObjectDisposedException(Name);
+
+        /// <inheritdoc />
+        public override bool IsClosed => tables == null;
+
+        /// <inheritdoc />
+        public override bool IsSecure => true;
+
+        #endregion
     }
 }

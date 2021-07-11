@@ -8,8 +8,7 @@ namespace Cave.Data.Mysql
     /// <summary>Provides a mysql table implementation.</summary>
     public class MySqlTable : SqlTable
     {
-        /// <summary>Initializes a new instance of the <see cref="MySqlTable" /> class.</summary>
-        protected MySqlTable() { }
+        #region Static
 
         /// <summary>Connects to the specified database and tablename.</summary>
         /// <param name="database">Database to connect to.</param>
@@ -23,26 +22,53 @@ namespace Cave.Data.Mysql
             return table;
         }
 
-        /// <summary>Runs the repair table command.</summary>
-        /// <returns>Result strings.</returns>
-        public string[] Repair() => MysqlInternalCommand($"REPAIR TABLE {FQTN} EXTENDED");
+        #endregion
+
+        #region Constructors
+
+        /// <summary>Initializes a new instance of the <see cref="MySqlTable" /> class.</summary>
+        protected MySqlTable() { }
+
+        #endregion
+
+        #region Overrides
+
+        /// <inheritdoc />
+        protected override void CreateLastInsertedRowCommand(SqlCommandBuilder commandBuilder, Row row)
+        {
+            if (commandBuilder == null)
+            {
+                throw new ArgumentNullException(nameof(commandBuilder));
+            }
+
+            if (row == null)
+            {
+                throw new ArgumentNullException(nameof(row));
+            }
+
+            var idField = Layout.Identifier.Single();
+            commandBuilder.AppendLine($"SELECT * FROM {FQTN} WHERE {Storage.EscapeFieldName(idField)} = LAST_INSERT_ID();");
+        }
+
+        #endregion
+
+        #region Members
 
         /// <summary>Runs the optimize table command.</summary>
         /// <returns>Result strings.</returns>
         public string[] Optimize() => MysqlInternalCommand($"OPTIMIZE TABLE {FQTN}");
 
-        /// <inheritdoc />
-        protected override void CreateLastInsertedRowCommand(SqlCommandBuilder commandBuilder, Row row)
-        {
-            if (commandBuilder == null) throw new ArgumentNullException(nameof(commandBuilder));
-            if (row == null) throw new ArgumentNullException(nameof(row));
-            var idField = Layout.Identifier.Single();
-            commandBuilder.AppendLine($"SELECT * FROM {FQTN} WHERE {Storage.EscapeFieldName(idField)} = LAST_INSERT_ID();");
-        }
+        /// <summary>Runs the repair table command.</summary>
+        /// <returns>Result strings.</returns>
+        public string[] Repair() => MysqlInternalCommand($"REPAIR TABLE {FQTN} EXTENDED");
 
         string[] MysqlInternalCommand(string cmd)
         {
-            if (cmd == null) throw new ArgumentNullException(nameof(cmd));
+            if (cmd == null)
+            {
+                throw new ArgumentNullException(nameof(cmd));
+            }
+
             var results = new List<string>();
             var rows = Storage.Query(database: Database.Name, table: Name, cmd: cmd);
             foreach (var row in rows)
@@ -56,5 +82,7 @@ namespace Cave.Data.Mysql
 
             return results.ToArray();
         }
+
+        #endregion
     }
 }

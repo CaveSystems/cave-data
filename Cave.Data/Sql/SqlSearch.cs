@@ -7,69 +7,49 @@ using Cave.Collections.Generic;
 namespace Cave.Data.Sql
 {
     /// <summary>
-    ///     Provides a class used during custom searches to keep up with all parameters to be added during sql command
-    ///     generation.
+    /// Provides a class used during custom searches to keep up with all parameters to be added during sql command generation.
     /// </summary>
     public sealed class SqlSearch
     {
-        readonly IndexedSet<string> fieldNames = new IndexedSet<string>();
-        readonly RowLayout layout;
-        readonly List<SqlParam> parameters = new List<SqlParam>();
-        readonly SqlStorage storage;
-        readonly string text;
+        #region Private Fields
 
-        /// <summary>Initializes a new instance of the <see cref="SqlSearch" /> class.</summary>
-        /// <param name="storage">Storage engine used.</param>
-        /// <param name="layout">Layout of the table.</param>
-        /// <param name="search">Search to perform.</param>
-        public SqlSearch(SqlStorage storage, RowLayout layout, Search search)
+        readonly IndexedSet<string> FieldNameSet = new IndexedSet<string>();
+        RowLayout Layout => Table.Layout;
+        readonly List<SqlParam> ParameterList = new List<SqlParam>();
+        SqlStorage Storage => Table.Database.Storage as SqlStorage;
+        readonly string Text;
+        readonly SqlTable Table;
+
+        #endregion Private Fields
+
+        #region Private Methods
+
+        /// <summary>
+        /// Adds a new parameter.
+        /// </summary>
+        /// <param name="databaseValue">The databaseValue of the parameter.</param>
+        /// <returns>A new <see cref="SqlParam"/> instance.</returns>
+        SqlParam AddParameter(object databaseValue)
         {
-            if (search == null) throw new ArgumentNullException(nameof(search));
-            this.storage = storage ?? throw new ArgumentNullException(nameof(storage));
-            this.layout = layout ?? throw new ArgumentNullException(nameof(layout));
-            Parameters = new ReadOnlyCollection<SqlParam>(parameters);
-            FieldNames = new ReadOnlyCollection<string>(fieldNames);
-            var sb = new StringBuilder();
-            Flatten(sb, search);
-            text = sb.ToString();
+            var name = Storage.SupportsNamedParameters ? $"{Storage.ParameterPrefix}{Parameters.Count + 1}" : Storage.ParameterPrefix;
+            var parameter = new SqlParam(name, databaseValue);
+            ParameterList.Add(parameter);
+            return parameter;
         }
-
-        /// <summary>Gets the field names.</summary>
-        public IList<string> FieldNames { get; }
-
-        /// <summary>Gets the parameters.</summary>
-        public IList<SqlParam> Parameters { get; }
-
-        /// <summary>Checks whether all fields used at options are present and adds them if not.</summary>
-        /// <param name="option">Options to check.</param>
-        public void CheckFieldsPresent(ResultOption option)
-        {
-            if (option == null) throw new ArgumentNullException(nameof(option));
-            foreach (var fieldName in option.FieldNames)
-            {
-                if (!fieldNames.Contains(fieldName))
-                {
-                    fieldNames.Add(fieldName);
-                }
-            }
-        }
-
-        /// <summary>Gets the query text as string.</summary>
-        /// <returns>A the database specific search string.</returns>
-        public override string ToString() => text;
 
         void Flatten(StringBuilder sb, Search search)
         {
-            search.LoadLayout(layout);
+            search.LoadLayout(Layout, Table.GetFieldNameComparison());
             switch (search.Mode)
             {
                 case SearchMode.None:
-                    sb.Append("1=1");
-                    return;
+                sb.Append("1=1");
+                return;
+
                 case SearchMode.In:
                 {
-                    fieldNames.Include(search.FieldName);
-                    var fieldName = storage.EscapeFieldName(search.FieldProperties);
+                    FieldNameSet.Include(search.FieldName);
+                    var fieldName = Storage.EscapeFieldName(search.FieldProperties);
                     sb.Append(fieldName);
                     sb.Append(' ');
                     if (search.Inverted)
@@ -79,14 +59,14 @@ namespace Cave.Data.Sql
 
                     sb.Append("IN (");
                     var i = 0;
-                    foreach (var value in (Set<object>) search.FieldValue)
+                    foreach (var value in (Set<object>)search.FieldValue)
                     {
                         if (i++ > 0)
                         {
                             sb.Append(',');
                         }
 
-                        var dbValue = storage.GetDatabaseValue(search.FieldProperties, value);
+                        var dbValue = Storage.GetDatabaseValue(search.FieldProperties, value);
                         var parameter = AddParameter(dbValue);
                         sb.Append(parameter.Name);
                     }
@@ -96,8 +76,8 @@ namespace Cave.Data.Sql
                 }
                 case SearchMode.Equals:
                 {
-                    fieldNames.Include(search.FieldName);
-                    var fieldName = storage.EscapeFieldName(search.FieldProperties);
+                    FieldNameSet.Include(search.FieldName);
+                    var fieldName = Storage.EscapeFieldName(search.FieldProperties);
 
                     // is value null -> yes return "name IS [NOT] NULL"
                     if (search.FieldValue == null)
@@ -107,7 +87,7 @@ namespace Cave.Data.Sql
                     else
                     {
                         // no add parameter and return querytext
-                        var dbValue = storage.GetDatabaseValue(search.FieldProperties, search.FieldValue);
+                        var dbValue = Storage.GetDatabaseValue(search.FieldProperties, search.FieldValue);
                         var parameter = AddParameter(dbValue);
                         sb.Append($"{fieldName} {(search.Inverted ? "<>" : "=")} {parameter.Name}");
                     }
@@ -116,8 +96,8 @@ namespace Cave.Data.Sql
                 }
                 case SearchMode.Like:
                 {
-                    fieldNames.Include(search.FieldName);
-                    var fieldName = storage.EscapeFieldName(search.FieldProperties);
+                    FieldNameSet.Include(search.FieldName);
+                    var fieldName = Storage.EscapeFieldName(search.FieldProperties);
 
                     // is value null -> yes return "name IS [NOT] NULL"
                     if (search.FieldValue == null)
@@ -127,7 +107,7 @@ namespace Cave.Data.Sql
                     else
                     {
                         // no add parameter and return querytext
-                        var dbValue = storage.GetDatabaseValue(search.FieldProperties, search.FieldValue);
+                        var dbValue = Storage.GetDatabaseValue(search.FieldProperties, search.FieldValue);
                         var parameter = AddParameter(dbValue);
                         sb.Append($"{fieldName} {(search.Inverted ? "NOT " : string.Empty)}LIKE {parameter.Name}");
                     }
@@ -136,36 +116,36 @@ namespace Cave.Data.Sql
                 }
                 case SearchMode.Greater:
                 {
-                    fieldNames.Include(search.FieldName);
-                    var fieldName = storage.EscapeFieldName(search.FieldProperties);
-                    var dbValue = storage.GetDatabaseValue(search.FieldProperties, search.FieldValue);
+                    FieldNameSet.Include(search.FieldName);
+                    var fieldName = Storage.EscapeFieldName(search.FieldProperties);
+                    var dbValue = Storage.GetDatabaseValue(search.FieldProperties, search.FieldValue);
                     var parameter = AddParameter(dbValue);
                     sb.Append(search.Inverted ? $"{fieldName}<={parameter.Name}" : $"{fieldName}>{parameter.Name}");
                     break;
                 }
                 case SearchMode.GreaterOrEqual:
                 {
-                    fieldNames.Include(search.FieldName);
-                    var fieldName = storage.EscapeFieldName(search.FieldProperties);
-                    var dbValue = storage.GetDatabaseValue(search.FieldProperties, search.FieldValue);
+                    FieldNameSet.Include(search.FieldName);
+                    var fieldName = Storage.EscapeFieldName(search.FieldProperties);
+                    var dbValue = Storage.GetDatabaseValue(search.FieldProperties, search.FieldValue);
                     var parameter = AddParameter(dbValue);
                     sb.Append(search.Inverted ? $"{fieldName}<{parameter.Name}" : $"{fieldName}>={parameter.Name}");
                     break;
                 }
                 case SearchMode.Smaller:
                 {
-                    fieldNames.Include(search.FieldName);
-                    var name = storage.EscapeFieldName(search.FieldProperties);
-                    var dbValue = storage.GetDatabaseValue(search.FieldProperties, search.FieldValue);
+                    FieldNameSet.Include(search.FieldName);
+                    var name = Storage.EscapeFieldName(search.FieldProperties);
+                    var dbValue = Storage.GetDatabaseValue(search.FieldProperties, search.FieldValue);
                     var parameter = AddParameter(dbValue);
                     sb.Append(search.Inverted ? $"{name}>={parameter.Name}" : $"{name}<{parameter.Name}");
                     break;
                 }
                 case SearchMode.SmallerOrEqual:
                 {
-                    fieldNames.Include(search.FieldName);
-                    var name = storage.EscapeFieldName(search.FieldProperties);
-                    var dbValue = storage.GetDatabaseValue(search.FieldProperties, search.FieldValue);
+                    FieldNameSet.Include(search.FieldName);
+                    var name = Storage.EscapeFieldName(search.FieldProperties);
+                    var dbValue = Storage.GetDatabaseValue(search.FieldProperties, search.FieldValue);
                     var parameter = AddParameter(dbValue);
                     sb.Append(search.Inverted ? $"{name}>{parameter.Name}" : $"{name}<={parameter.Name}");
                     break;
@@ -202,15 +182,74 @@ namespace Cave.Data.Sql
             }
         }
 
-        /// <summary>Adds a new parameter.</summary>
-        /// <param name="databaseValue">The databaseValue of the parameter.</param>
-        /// <returns>A new <see cref="SqlParam" /> instance.</returns>
-        SqlParam AddParameter(object databaseValue)
+        #endregion Private Methods
+
+        #region Public Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SqlSearch"/> class.
+        /// </summary>
+        /// <param name="table">Table the search is performed on.</param>
+        /// <param name="search">Search to perform.</param>
+        internal SqlSearch(SqlTable table, Search search)
         {
-            var name = storage.SupportsNamedParameters ? $"{storage.ParameterPrefix}{Parameters.Count + 1}" : storage.ParameterPrefix;
-            var parameter = new SqlParam(name, databaseValue);
-            parameters.Add(parameter);
-            return parameter;
+            if (search == null)
+            {
+                throw new ArgumentNullException(nameof(search));
+            }
+
+            this.Table = table;
+            Parameters = new ReadOnlyCollection<SqlParam>(ParameterList);
+            FieldNames = new ReadOnlyCollection<string>(FieldNameSet);
+            var sb = new StringBuilder();
+            Flatten(sb, search);
+            Text = sb.ToString();
         }
+
+        #endregion Public Constructors
+
+        #region Public Properties
+
+        /// <summary>
+        /// Gets the field names.
+        /// </summary>
+        public IList<string> FieldNames { get; }
+
+        /// <summary>
+        /// Gets the parameters.
+        /// </summary>
+        public IList<SqlParam> Parameters { get; }
+
+        #endregion Public Properties
+
+        #region Public Methods
+
+        /// <summary>
+        /// Checks whether all fields used at options are present and adds them if not.
+        /// </summary>
+        /// <param name="option">Options to check.</param>
+        public void CheckFieldsPresent(ResultOption option)
+        {
+            if (option == null)
+            {
+                throw new ArgumentNullException(nameof(option));
+            }
+
+            foreach (var fieldName in option.FieldNames)
+            {
+                if (!FieldNameSet.Contains(fieldName))
+                {
+                    FieldNameSet.Add(fieldName);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the query text as string.
+        /// </summary>
+        /// <returns>A the database specific search string.</returns>
+        public override string ToString() => Text;
+
+        #endregion Public Methods
     }
 }

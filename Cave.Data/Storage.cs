@@ -9,15 +9,22 @@ namespace Cave.Data
     /// <summary>Provides access to databaseName storage engines.</summary>
     public abstract class Storage : IStorage
     {
+        #region Static
+
         /// <summary>Epoch DateTime in Ticks.</summary>
         public const long EpochTicks = 621355968000000000;
 
+        /// <summary>Allow to load assemblies (unsafe) if desired ado connection type cannot be found in application domain.</summary>
+        public static bool AllowAssemblyLoad { get; set; }
+
+        /// <summary>Gets or sets the date time format for big int date time values.</summary>
+        public static string BigIntDateTimeFormat { get; set; } = "yyyyMMddHHmmssfff";
+
+        #endregion
+
         bool closed;
 
-        /// <summary>
-        /// Gets or sets the storage culture.
-        /// </summary>
-        public CultureInfo Culture { get; set; }
+        #region Constructors
 
         /// <summary>Initializes a new instance of the <see cref="Storage" /> class.</summary>
         /// <param name="connectionString">ConnectionString of the storage.</param>
@@ -33,8 +40,14 @@ namespace Cave.Data
             }
         }
 
-        /// <summary>Gets or sets the date time format for big int date time values.</summary>
-        public static string BigIntDateTimeFormat { get; set; } = "yyyyMMddHHmmssfff";
+        #endregion
+
+        #region Properties
+
+        /// <summary>Gets or sets the storage culture.</summary>
+        public CultureInfo Culture { get; set; }
+
+        #endregion
 
         #region IStorage Member
 
@@ -106,37 +119,39 @@ namespace Cave.Data
         }
 
         /// <inheritdoc />
-        public virtual void CheckLayout(RowLayout expected, RowLayout current)
+        public virtual void CheckLayout(RowLayout databaseLayout, RowLayout localLayout, TableFlags flags)
         {
-            if (expected == null)
+            if (databaseLayout == null)
             {
-                throw new ArgumentNullException(nameof(expected));
+                throw new ArgumentNullException(nameof(databaseLayout));
             }
 
-            if (current == null)
+            if (localLayout == null)
             {
-                throw new ArgumentNullException(nameof(current));
+                throw new ArgumentNullException(nameof(localLayout));
             }
 
-            if (expected.FieldCount != current.FieldCount)
+            if (flags == 0)
             {
-                throw new InvalidDataException(
-                    $"Field.Count of table {current.Name} != {expected.Name} differs (found {current.FieldCount} expected {expected.FieldCount})!");
+                RowLayout.CheckLayout(localLayout, databaseLayout);
+                return;
             }
 
-            for (var i = 0; i < expected.FieldCount; i++)
+            var ignoreMissingFields = flags.HasFlag(TableFlags.IgnoreMissingFields);
+            if (!ignoreMissingFields && (databaseLayout.FieldCount != localLayout.FieldCount))
             {
-                var expectedField = GetDatabaseFieldProperties(expected[i]);
-                var currentField = GetDatabaseFieldProperties(current[i]);
-                if (!expectedField.Equals(currentField))
-                {
-                    throw new InvalidDataException($"FieldProperties of table {current.Name} != {expected.Name} differ! (found {currentField} expected {expectedField})!");
-                }
+                throw new InvalidDataException($"Field.Count of table {localLayout.Name} != {databaseLayout.Name} differs (found {localLayout.FieldCount} databaseLayout {databaseLayout.FieldCount})!");
+            }
 
-                if (currentField.Flags != expectedField.Flags)
-                {
-                    Trace.TraceWarning($"Field.Flags of table {current.Name} != {expected.Name} differ! (found {currentField} expected {expectedField})!");
-                }
+            if (databaseLayout.IsTyped)
+            {
+                throw new InvalidOperationException("Database Layout cannot be typed!");
+            }
+
+            var layout = localLayout.GetMatching(databaseLayout, flags);
+            if (layout.FieldCount < localLayout.FieldCount)
+            {
+                throw new InvalidOperationException("Local Layout contains fields not present at database!");
             }
         }
 

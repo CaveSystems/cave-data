@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Cave.Data
@@ -9,6 +8,8 @@ namespace Cave.Data
     /// <summary>Provides a base class implementing the <see cref="IDatabase" /> interface.</summary>
     public abstract class Database : IDatabase
     {
+        #region Constructors
+
         /// <summary>Initializes a new instance of the <see cref="Database" /> class.</summary>
         /// <param name="storage">The storage engine.</param>
         /// <param name="name">The name of the database.</param>
@@ -18,17 +19,37 @@ namespace Cave.Data
             Storage = storage ?? throw new ArgumentNullException(nameof(storage));
         }
 
+        #endregion
+
+        #region Properties
+
         /// <summary>Gets or sets the tableName name cache time.</summary>
         public TimeSpan TableNameCacheTime { get; set; }
 
+        #endregion
+
+        #region Overrides
+
         /// <inheritdoc />
         public override string ToString() => Storage.ConnectionString.ChangePath(Name).ToString(ConnectionStringPart.NoCredentials);
+
+        #endregion
+
+        #region Members
+
+        /// <summary>Gets the tableName names present at the database.</summary>
+        /// <returns>Returns a list of tableName names.</returns>
+        protected abstract string[] GetTableNames();
 
         /// <summary>Logs the tableName layout.</summary>
         /// <param name="layout">The layout.</param>
         protected void LogCreateTable(RowLayout layout)
         {
-            if (layout == null) throw new ArgumentNullException(nameof(layout));
+            if (layout == null)
+            {
+                throw new ArgumentNullException(nameof(layout));
+            }
+
             Trace.TraceInformation("Creating tableName <cyan>{0}.{1}<default> with <cyan>{2}<default> fields.", Name, layout.Name, layout.FieldCount);
             if (Storage.LogVerboseMessages)
             {
@@ -39,9 +60,7 @@ namespace Cave.Data
             }
         }
 
-        /// <summary>Gets the tableName names present at the database.</summary>
-        /// <returns>Returns a list of tableName names.</returns>
-        protected abstract string[] GetTableNames();
+        #endregion
 
         #region IDatabase properties
 

@@ -5,24 +5,7 @@ namespace Cave.Data
     /// <summary>Proivides transactions for database rows.</summary>
     public sealed class Transaction
     {
-        Transaction(TransactionType type, Row row)
-        {
-            Type = type;
-            Row = row;
-        }
-
-        /// <summary>Gets the <see cref="TransactionType" />.</summary>
-        public TransactionType Type { get; }
-
-        /// <summary>
-        ///     Gets the full row data (only set on <see cref="TransactionType.Updated" /> and
-        ///     <see cref="TransactionType.Inserted" />).
-        /// </summary>
-        public Row Row { get; }
-
-        /// <summary>Gets the created date time.</summary>
-        /// <value>The created date time.</value>
-        public DateTime Created { get; } = DateTime.UtcNow;
+        #region Static
 
         /// <summary>Creates a new "deleted row" transaction.</summary>
         /// <param name="row">Row data.</param>
@@ -44,11 +27,41 @@ namespace Cave.Data
         /// <returns>A new transaction.</returns>
         public static Transaction Updated(Row row) => new Transaction(TransactionType.Updated, row);
 
+        #endregion
+
+        #region Constructors
+
+        Transaction(TransactionType type, Row row)
+        {
+            Type = type;
+            Row = row;
+        }
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>Gets the created date time.</summary>
+        /// <value>The created date time.</value>
+        public DateTime Created { get; } = DateTime.UtcNow;
+
+        /// <summary>Gets the full row data (only set on <see cref="TransactionType.Updated" /> and <see cref="TransactionType.Inserted" />).</summary>
+        public Row Row { get; }
+
+        /// <summary>Gets the <see cref="TransactionType" />.</summary>
+        public TransactionType Type { get; }
+
+        #endregion
+
+        #region Overrides
+
+        /// <inheritdoc />
+        public override int GetHashCode() => Type.GetHashCode() ^ Row.GetHashCode();
+
         /// <summary>Provides a string for this instance.</summary>
         /// <returns>{Type} {Row}.</returns>
         public override string ToString() => $"{Type} {Row}";
 
-        /// <inheritdoc />
-        public override int GetHashCode() => Type.GetHashCode() ^ Row.GetHashCode();
+        #endregion
     }
 }

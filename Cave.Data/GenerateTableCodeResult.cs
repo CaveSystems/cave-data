@@ -5,17 +5,13 @@ namespace Cave.Data
     /// <summary>Provides the code generated as result of a ITable.GenerateX() function.</summary>
     public struct GenerateTableCodeResult : IEquatable<GenerateTableCodeResult>
     {
-        /// <summary>
-        /// The equality operator == returns true if its operands are equal, false otherwise.
-        /// </summary>
+        /// <summary>The equality operator == returns true if its operands are equal, false otherwise.</summary>
         /// <param name="left">First operand.</param>
         /// <param name="right">Second operand.</param>
         /// <returns>true if its operands are equal, false otherwise.</returns>
         public static bool operator ==(GenerateTableCodeResult left, GenerateTableCodeResult right) => Equals(left, right);
 
-        /// <summary>
-        /// The inequality operator != returns true if its operands are not equal, false otherwise.
-        /// </summary>
+        /// <summary>The inequality operator != returns true if its operands are not equal, false otherwise.</summary>
         /// <param name="left">First operand.</param>
         /// <param name="right">Second operand.</param>
         /// <returns>true if its operands are not equal, false otherwise.</returns>
@@ -37,7 +33,9 @@ namespace Cave.Data
         public string ClassName { get; internal set; }
 
         /// <inheritdoc />
-        public bool Equals(GenerateTableCodeResult other) => DatabaseName == other.DatabaseName && TableName == other.TableName && Code == other.Code && FileName == other.FileName && ClassName == other.ClassName;
+        public bool Equals(GenerateTableCodeResult other) =>
+            (DatabaseName == other.DatabaseName) && (TableName == other.TableName) && (Code == other.Code) &&
+            (FileName == other.FileName) && (ClassName == other.ClassName);
 
         /// <inheritdoc />
         public override bool Equals(object obj) => obj is GenerateTableCodeResult other && Equals(other);

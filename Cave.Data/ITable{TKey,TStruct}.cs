@@ -10,15 +10,16 @@ namespace Cave.Data
         where TKey : IComparable<TKey>
         where TStruct : struct
     {
+        #region Properties
+
         /// <summary>Gets the row with the specified ID.</summary>
         /// <param name="id">The identifier.</param>
         /// <returns>The row found.</returns>
         TStruct this[TKey id] { get; }
 
-        /// <summary>Checks a given ID for existance.</summary>
-        /// <param name="id">The dataset ID to look for.</param>
-        /// <returns>Returns whether the dataset exists or not.</returns>
-        bool Exist(TKey id);
+        #endregion
+
+        #region Members
 
         /// <summary>Removes a row from the table.</summary>
         /// <param name="id">The dataset ID to remove.</param>
@@ -27,6 +28,17 @@ namespace Cave.Data
         /// <summary>Removes rows from the table using a transaction.</summary>
         /// <param name="ids">The dataset IDs to remove.</param>
         void Delete(IEnumerable<TKey> ids);
+
+        /// <summary>Checks a given ID for existance.</summary>
+        /// <param name="id">The dataset ID to look for.</param>
+        /// <returns>Returns whether the dataset exists or not.</returns>
+        bool Exist(TKey id);
+
+        /// <summary>Gets a dictionary with all datasets.</summary>
+        /// <param name="search">The search to run.</param>
+        /// <param name="resultOption">Options for the search and the result set.</param>
+        /// <returns>A readonly dictionary.</returns>
+        IDictionary<TKey, TStruct> GetDictionary(Search search = null, ResultOption resultOption = null);
 
         /// <summary>Gets a row from the table.</summary>
         /// <param name="id">The ID of the row to be fetched.</param>

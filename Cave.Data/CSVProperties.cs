@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Cave.IO;
 
@@ -48,10 +47,7 @@ namespace Cave.Data
 
         #endregion
 
-        /// <summary>
-        ///     Gets <see cref="CsvProperties" /> with default settings: Encoding=UTF8, Compression=None, Separator=';',
-        ///     StringMarker='"'.
-        /// </summary>
+        /// <summary>Gets <see cref="CsvProperties" /> with default settings: Encoding=UTF8, Compression=None, Separator=';', StringMarker='"'.</summary>
         public static CsvProperties Default { get; } = new CsvProperties
         {
             Format = CultureInfo.InvariantCulture,
@@ -64,8 +60,8 @@ namespace Cave.Data
         };
 
         /// <summary>
-        ///     Gets <see cref="CsvProperties" /> with default settings for Microsoft Excel: Encoding=Current System Default,
-        ///     Compression=None, Separator='Tab', StringMarker='"'.
+        /// Gets <see cref="CsvProperties" /> with default settings for Microsoft Excel: Encoding=Current System Default, Compression=None,
+        /// Separator='Tab', StringMarker='"'.
         /// </summary>
         public static CsvProperties Excel { get; } = new CsvProperties
         {

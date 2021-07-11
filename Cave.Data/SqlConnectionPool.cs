@@ -9,112 +9,20 @@ namespace Cave.Data
 {
     class SqlConnectionPool
     {
-        readonly LinkedList<SqlConnection> queue = new LinkedList<SqlConnection>();
-        readonly SqlStorage storage;
-        readonly Set<SqlConnection> used = new Set<SqlConnection>();
+        #region Private Fields
+
+        readonly LinkedList<SqlConnection> Queue = new LinkedList<SqlConnection>();
+        readonly SqlStorage Storage;
+        readonly Set<SqlConnection> Used = new Set<SqlConnection>();
         TimeSpan? timeout = TimeSpan.FromMinutes(5);
 
-        /// <summary>Initializes a new instance of the <see cref="SqlConnectionPool" /> class.</summary>
-        /// <param name="storage">The storage.</param>
-        public SqlConnectionPool(SqlStorage storage) => this.storage = storage;
+        #endregion Private Fields
 
-        /// <summary>Gets or sets the connection close timeout.</summary>
-        /// <value>The connection close timeout.</value>
-        public TimeSpan ConnectionCloseTimeout { get => timeout.Value; set => timeout = value; }
-
-        public override string ToString()
-        {
-            lock (this)
-            {
-                return $"SqlConnectionPool {storage} queue:{queue.Count} used:{used.Count}";
-            }
-        }
-
-        /// <summary>Clears the whole connection pool (forced, including connections in use).</summary>
-        public void Clear()
-        {
-            lock (this)
-            {
-                foreach (var connection in used)
-                {
-                    Trace.TraceInformation($"Closing connection {connection} (pool clearing)");
-                    connection.Close();
-                }
-
-                foreach (var connection in queue)
-                {
-                    Trace.TraceInformation($"Closing connection {connection} (pool clearing)");
-                    connection.Close();
-                }
-
-                queue.Clear();
-                used.Clear();
-            }
-        }
-
-        /// <summary>Gets the connection.</summary>
-        /// <param name="databaseName">Name of the database.</param>
-        /// <returns>A new or free <see cref="SqlConnection" /> instance.</returns>
-        public SqlConnection GetConnection(string databaseName)
-        {
-            lock (this)
-            {
-                var connection = GetQueuedConnection(databaseName);
-                if (connection == null)
-                {
-                    Trace.TraceInformation("Creating new connection for Database {0} (Idle:{1} Used:{2})", databaseName, queue.Count, used.Count);
-                    var iDbConnection = storage.CreateNewConnection(databaseName);
-                    connection = new SqlConnection(databaseName, iDbConnection);
-                    used.Add(connection);
-                    Trace.TraceInformation($"Created new connection for Database {databaseName} (Idle:{queue.Count} Used:{used.Count})");
-                }
-                else
-                {
-                    if (connection.Database != databaseName)
-                    {
-                        connection.ChangeDatabase(databaseName);
-                    }
-                }
-
-                return connection;
-            }
-        }
-
-        /// <summary>Returns a connection to the connection pool for reuse.</summary>
-        /// <param name="connection">The connection to return to the queue.</param>
-        /// <param name="close">Force close of the connection.</param>
-        public void ReturnConnection(ref SqlConnection connection, bool close = false)
-        {
-            if (connection == null)
-            {
-                throw new ArgumentNullException(nameof(connection));
-            }
-
-            lock (this)
-            {
-                if (used.Contains(connection))
-                {
-                    used.Remove(connection);
-                    if (!close && (connection.State == ConnectionState.Open))
-                    {
-                        queue.AddFirst(connection);
-                        connection = null;
-                        return;
-                    }
-                }
-            }
-
-            Trace.TraceInformation($"Closing connection {connection} (sql error)");
-            connection.Close();
-            connection = null;
-        }
-
-        /// <summary>Closes this instance.</summary>
-        public void Close() => Clear();
+        #region Private Methods
 
         SqlConnection GetQueuedConnection(string database)
         {
-            var nextNode = queue.First;
+            var nextNode = Queue.First;
             LinkedListNode<SqlConnection> selectedNode = null;
             while (nextNode != null)
             {
@@ -125,14 +33,14 @@ namespace Cave.Data
                 // remove dead and old connections
                 if ((currentNode.Value.State != ConnectionState.Open) || (DateTime.UtcNow > (currentNode.Value.LastUsed + timeout.Value)))
                 {
-                    Trace.TraceInformation($"Closing connection {currentNode.Value} (livetime exceeded) (Idle:{queue.Count} Used:{used.Count})");
+                    Trace.TraceInformation($"Closing connection {currentNode.Value} (livetime exceeded) (Idle:{Queue.Count} Used:{Used.Count})");
                     currentNode.Value.Dispose();
-                    queue.Remove(currentNode);
+                    Queue.Remove(currentNode);
                     continue;
                 }
 
                 // allow only connection with matching db name ?
-                if (!storage.DBConnectionCanChangeDataBase)
+                if (!Storage.DBConnectionCanChangeDataBase)
                 {
                     // check if database name matches
                     if (currentNode.Value.Database != database)
@@ -160,13 +68,137 @@ namespace Cave.Data
                 }
 
                 // we got a matching connection, remove node
-                queue.Remove(selectedNode);
-                used.Add(selectedNode.Value);
+                Queue.Remove(selectedNode);
+                Used.Add(selectedNode.Value);
                 return selectedNode.Value;
             }
 
             // nothing found
             return null;
         }
+
+        #endregion Private Methods
+
+        #region Public Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SqlConnectionPool"/> class.
+        /// </summary>
+        /// <param name="storage">The storage.</param>
+        public SqlConnectionPool(SqlStorage storage) => this.Storage = storage;
+
+        #endregion Public Constructors
+
+        #region Public Properties
+
+        /// <summary>
+        /// Gets or sets the connection close timeout.
+        /// </summary>
+        /// <value>The connection close timeout.</value>
+        public TimeSpan ConnectionCloseTimeout { get => timeout.Value; set => timeout = value; }
+
+        #endregion Public Properties
+
+        #region Public Methods
+
+        /// <summary>
+        /// Clears the whole connection pool (forced, including connections in use).
+        /// </summary>
+        public void Clear()
+        {
+            lock (this)
+            {
+                foreach (var connection in Used)
+                {
+                    Trace.TraceInformation($"Closing connection {connection} (pool clearing)");
+                    connection.Close();
+                }
+
+                foreach (var connection in Queue)
+                {
+                    Trace.TraceInformation($"Closing connection {connection} (pool clearing)");
+                    connection.Close();
+                }
+
+                Queue.Clear();
+                Used.Clear();
+            }
+        }
+
+        /// <summary>
+        /// Closes this instance.
+        /// </summary>
+        public void Close() => Clear();
+
+        /// <summary>
+        /// Gets the connection.
+        /// </summary>
+        /// <param name="databaseName">Name of the database.</param>
+        /// <returns>A new or free <see cref="SqlConnection"/> instance.</returns>
+        public SqlConnection GetConnection(string databaseName)
+        {
+            lock (this)
+            {
+                var connection = GetQueuedConnection(databaseName);
+                if (connection == null)
+                {
+                    Trace.TraceInformation("Creating new connection for Database {0} (Idle:{1} Used:{2})", databaseName, Queue.Count, Used.Count);
+                    var iDbConnection = Storage.CreateNewConnection(databaseName);
+                    connection = new SqlConnection(databaseName, iDbConnection);
+                    Used.Add(connection);
+                    Trace.TraceInformation($"Created new connection for Database {databaseName} (Idle:{Queue.Count} Used:{Used.Count})");
+                }
+                else
+                {
+                    if (connection.Database != databaseName)
+                    {
+                        connection.ChangeDatabase(databaseName);
+                    }
+                }
+
+                return connection;
+            }
+        }
+
+        /// <summary>
+        /// Returns a connection to the connection pool for reuse.
+        /// </summary>
+        /// <param name="connection">The connection to return to the queue.</param>
+        /// <param name="close">Force close of the connection.</param>
+        public void ReturnConnection(ref SqlConnection connection, bool close = false)
+        {
+            if (connection == null)
+            {
+                throw new ArgumentNullException(nameof(connection));
+            }
+
+            lock (this)
+            {
+                if (Used.Contains(connection))
+                {
+                    Used.Remove(connection);
+                    if (!close && (connection.State == ConnectionState.Open))
+                    {
+                        Queue.AddFirst(connection);
+                        connection = null;
+                        return;
+                    }
+                }
+            }
+
+            Trace.TraceInformation($"Closing connection {connection} (sql error)");
+            connection.Close();
+            connection = null;
+        }
+
+        public override string ToString()
+        {
+            lock (this)
+            {
+                return $"SqlConnectionPool {Storage} queue:{Queue.Count} used:{Used.Count}";
+            }
+        }
+
+        #endregion Public Methods
     }
 }

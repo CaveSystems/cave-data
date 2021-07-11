@@ -6,90 +6,60 @@ namespace Cave.Data
 {
     sealed class TableSorter : IComparer<Row>
     {
-        readonly IComparer comparer;
-        readonly bool descending;
-        readonly IFieldProperties field;
+        #region Private Fields
+
+        readonly IComparer Comparer;
+        readonly bool Descending;
+        readonly IFieldProperties Field;
+
+        #endregion Private Fields
+
+        #region Public Constructors
 
         public TableSorter(IFieldProperties field, ResultOptionMode mode)
         {
-            this.field = field ?? throw new ArgumentNullException(nameof(field));
-            switch (field.DataType)
+            this.Field = field ?? throw new ArgumentNullException(nameof(field));
+            Comparer = field.DataType switch
             {
-                default:
-                case DataType.Binary: throw new NotSupportedException();
-                case DataType.Bool:
-                    comparer = Comparer<bool>.Default;
-                    break;
-                case DataType.Int8:
-                    comparer = Comparer<sbyte>.Default;
-                    break;
-                case DataType.Int16:
-                    comparer = Comparer<short>.Default;
-                    break;
-                case DataType.Int32:
-                    comparer = Comparer<int>.Default;
-                    break;
-                case DataType.Int64:
-                    comparer = Comparer<long>.Default;
-                    break;
-                case DataType.UInt8:
-                    comparer = Comparer<byte>.Default;
-                    break;
-                case DataType.UInt16:
-                    comparer = Comparer<ushort>.Default;
-                    break;
-                case DataType.UInt32:
-                    comparer = Comparer<uint>.Default;
-                    break;
-                case DataType.UInt64:
-                    comparer = Comparer<ulong>.Default;
-                    break;
-                case DataType.Char:
-                    comparer = Comparer<char>.Default;
-                    break;
-                case DataType.DateTime:
-                    comparer = Comparer<DateTime>.Default;
-                    break;
-                case DataType.Decimal:
-                    comparer = Comparer<decimal>.Default;
-                    break;
-                case DataType.Double:
-                    comparer = Comparer<double>.Default;
-                    break;
-                case DataType.Enum:
-                    comparer = Comparer.Default;
-                    break;
-                case DataType.Single:
-                    comparer = Comparer<float>.Default;
-                    break;
-                case DataType.String:
-                    comparer = Comparer<string>.Default;
-                    break;
-                case DataType.TimeSpan:
-                    comparer = Comparer<TimeSpan>.Default;
-                    break;
-                case DataType.User:
-                    comparer = Comparer<string>.Default;
-                    break;
-            }
-
-            switch (mode)
+                DataType.Bool => Comparer<bool>.Default,
+                DataType.Int8 => Comparer<sbyte>.Default,
+                DataType.Int16 => Comparer<short>.Default,
+                DataType.Int32 => Comparer<int>.Default,
+                DataType.Int64 => Comparer<long>.Default,
+                DataType.UInt8 => Comparer<byte>.Default,
+                DataType.UInt16 => Comparer<ushort>.Default,
+                DataType.UInt32 => Comparer<uint>.Default,
+                DataType.UInt64 => Comparer<ulong>.Default,
+                DataType.Char => Comparer<char>.Default,
+                DataType.DateTime => Comparer<DateTime>.Default,
+                DataType.Decimal => Comparer<decimal>.Default,
+                DataType.Double => Comparer<double>.Default,
+                DataType.Enum => System.Collections.Comparer.Default,
+                DataType.Single => Comparer<float>.Default,
+                DataType.String => Comparer<string>.Default,
+                DataType.TimeSpan => Comparer<TimeSpan>.Default,
+                DataType.User => Comparer<string>.Default,
+                _ => throw new NotSupportedException(),
+            };
+            Descending = mode switch
             {
-                case ResultOptionMode.SortAsc:
-                    descending = false;
-                    break;
-                case ResultOptionMode.SortDesc:
-                    descending = true;
-                    break;
-                default: throw new ArgumentOutOfRangeException(nameof(mode));
-            }
+                ResultOptionMode.SortAsc => false,
+                ResultOptionMode.SortDesc => true,
+                _ => throw new ArgumentOutOfRangeException(nameof(mode)),
+            };
         }
+
+        #endregion Public Constructors
+
+        #region Public Methods
 
         public int Compare(Row row1, Row row2)
         {
-            var val1 = row1[field.Index];
-            var val2 = row2[field.Index];
-            return descending ? comparer.Compare(val2, val1) : comparer.Compare(val1, val2);
+            var val1 = row1[Field.Index];
+            var val2 = row2[Field.Index];
+            return Descending ? Comparer.Compare(val2, val1) : Comparer.Compare(val1, val2);
         }
+
+        #endregion Public Methods
     }
 }

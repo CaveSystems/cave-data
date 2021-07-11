@@ -8,6 +8,8 @@ namespace Cave.Data.SQLite
     /// <summary>Provides a sqlite databaseName implementation.</summary>
     public sealed class SQLiteDatabase : SqlDatabase
     {
+        #region Constructors
+
         /// <summary>Initializes a new instance of the <see cref="SQLiteDatabase" /> class.</summary>
         /// <param name="storage">The storage engine.</param>
         /// <param name="name">The name of the databaseName.</param>
@@ -29,16 +31,14 @@ namespace Cave.Data.SQLite
                 field.Validate();
             }
 
-            var expected = RowLayout.CreateUntyped(name, fields.ToArray());
+            var table = RowLayout.CreateUntyped(name, fields.ToArray());
             var schema = SqlStorage.QuerySchema(Name, "sqlite_master");
-            SqlStorage.CheckLayout(expected, schema);
+            SqlStorage.CheckLayout(schema, table, 0);
         }
 
-        /// <inheritdoc />
-        public override bool IsSecure => true;
+        #endregion
 
-        /// <inheritdoc />
-        public override ITable GetTable(string tableName, TableFlags flags) => SQLiteTable.Connect(this, flags, tableName);
+        #region Overrides
 
         /// <inheritdoc />
         public override ITable CreateTable(RowLayout layout, TableFlags flags)
@@ -125,6 +125,9 @@ namespace Cave.Data.SQLite
         }
 
         /// <inheritdoc />
+        public override ITable GetTable(string tableName, TableFlags flags) => SQLiteTable.Connect(this, flags, tableName);
+
+        /// <inheritdoc />
         protected override string[] GetTableNames()
         {
             var result = new List<string>();
@@ -137,5 +140,10 @@ namespace Cave.Data.SQLite
 
             return result.ToArray();
         }
+
+        /// <inheritdoc />
+        public override bool IsSecure => true;
+
+        #endregion
     }
 }

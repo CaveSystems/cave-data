@@ -6,41 +6,39 @@ namespace Cave.Data
     /// <summary>Provides a synchronized wrapper for table instances.</summary>
     public class SynchronizedTable : ITable
     {
+        #region Constructors
+
         /// <summary>Initializes a new instance of the <see cref="SynchronizedTable" /> class.</summary>
         /// <param name="table">The table to synchronize.</param>
         public SynchronizedTable(ITable table) =>
             BaseTable = !(table is SynchronizedTable) ? table : throw new ArgumentException("Table is already synchronized!");
 
+        #endregion
+
+        #region Properties
+
         /// <summary>Gets the base table used.</summary>
         public ITable BaseTable { get; }
 
-        /// <inheritdoc />
-        public TableFlags Flags => BaseTable.Flags;
+        #endregion
+
+        #region ITable Members
 
         /// <inheritdoc />
-        public int SequenceNumber => BaseTable.SequenceNumber;
-
-        /// <inheritdoc />
-        public IStorage Storage => BaseTable.Storage;
-
-        /// <inheritdoc />
-        public IDatabase Database => BaseTable.Database;
-
-        /// <inheritdoc />
-        public string Name => BaseTable.Name;
-
-        /// <inheritdoc />
-        public RowLayout Layout => BaseTable.Layout;
-
-        /// <inheritdoc />
-        public long RowCount
+        public void Clear()
         {
-            get
+            lock (BaseTable)
             {
-                lock (BaseTable)
-                {
-                    return BaseTable.RowCount;
-                }
+                BaseTable.Clear();
+            }
+        }
+
+        /// <inheritdoc />
+        public int Commit(IEnumerable<Transaction> transactions, TransactionFlags flags = default)
+        {
+            lock (BaseTable)
+            {
+                return BaseTable.Commit(transactions, flags);
             }
         }
 
@@ -54,15 +52,6 @@ namespace Cave.Data
         }
 
         /// <inheritdoc />
-        public virtual void UseLayout(RowLayout layout)
-        {
-            lock (BaseTable)
-            {
-                BaseTable.UseLayout(layout);
-            }
-        }
-
-        /// <inheritdoc />
         public long Count(Search search = null, ResultOption resultOption = null)
         {
             lock (BaseTable)
@@ -72,29 +61,33 @@ namespace Cave.Data
         }
 
         /// <inheritdoc />
-        public void Clear()
+        public IDatabase Database => BaseTable.Database;
+
+        /// <inheritdoc />
+        public void Delete(Row row)
         {
             lock (BaseTable)
             {
-                BaseTable.Clear();
+                BaseTable.Delete(row);
             }
         }
 
         /// <inheritdoc />
-        public Row GetRowAt(int index)
+        public void Delete(IEnumerable<Row> rows)
         {
             lock (BaseTable)
             {
-                return BaseTable.GetRowAt(index);
+                BaseTable.Delete(rows);
             }
         }
 
         /// <inheritdoc />
-        public void SetValue(string fieldName, object value)
+        public IList<TValue> Distinct<TValue>(string fieldName, Search search = null)
+            where TValue : struct, IComparable
         {
             lock (BaseTable)
             {
-                BaseTable.SetValue(fieldName, value);
+                return BaseTable.Distinct<TValue>(fieldName, search);
             }
         }
 
@@ -117,85 +110,7 @@ namespace Cave.Data
         }
 
         /// <inheritdoc />
-        public Row Insert(Row row)
-        {
-            lock (BaseTable)
-            {
-                return BaseTable.Insert(row);
-            }
-        }
-
-        /// <inheritdoc />
-        public void Insert(IEnumerable<Row> rows)
-        {
-            lock (BaseTable)
-            {
-                BaseTable.Insert(rows);
-            }
-        }
-
-        /// <inheritdoc />
-        public void Update(Row row)
-        {
-            lock (BaseTable)
-            {
-                BaseTable.Update(row);
-            }
-        }
-
-        /// <inheritdoc />
-        public void Update(IEnumerable<Row> rows)
-        {
-            lock (BaseTable)
-            {
-                BaseTable.Update(rows);
-            }
-        }
-
-        /// <inheritdoc />
-        public void Delete(Row row)
-        {
-            lock (BaseTable)
-            {
-                BaseTable.Delete(row);
-            }
-        }
-
-        /// <inheritdoc />
-        public void Delete(IEnumerable<Row> rows)
-        {
-            lock (BaseTable)
-            {
-                BaseTable.Delete(rows);
-            }
-        }
-
-        /// <inheritdoc />
-        public int TryDelete(Search search)
-        {
-            lock (BaseTable)
-            {
-                return BaseTable.TryDelete(search);
-            }
-        }
-
-        /// <inheritdoc />
-        public void Replace(Row row)
-        {
-            lock (BaseTable)
-            {
-                BaseTable.Replace(row);
-            }
-        }
-
-        /// <inheritdoc />
-        public void Replace(IEnumerable<Row> rows)
-        {
-            lock (BaseTable)
-            {
-                BaseTable.Replace(rows);
-            }
-        }
+        public TableFlags Flags => BaseTable.Flags;
 
         /// <inheritdoc />
         public Row GetRow(Search search = null, ResultOption resultOption = null)
@@ -203,6 +118,15 @@ namespace Cave.Data
             lock (BaseTable)
             {
                 return BaseTable.GetRow(search, resultOption);
+            }
+        }
+
+        /// <inheritdoc />
+        public Row GetRowAt(int index)
+        {
+            lock (BaseTable)
+            {
+                return BaseTable.GetRowAt(index);
             }
         }
 
@@ -225,13 +149,35 @@ namespace Cave.Data
         }
 
         /// <inheritdoc />
-        public double Sum(string fieldName, Search search = null)
+        public IList<TValue> GetValues<TValue>(string fieldName, Search search = null)
+            where TValue : struct, IComparable
         {
             lock (BaseTable)
             {
-                return BaseTable.Sum(fieldName, search);
+                return BaseTable.GetValues<TValue>(fieldName, search);
             }
         }
+
+        /// <inheritdoc />
+        public Row Insert(Row row)
+        {
+            lock (BaseTable)
+            {
+                return BaseTable.Insert(row);
+            }
+        }
+
+        /// <inheritdoc />
+        public void Insert(IEnumerable<Row> rows)
+        {
+            lock (BaseTable)
+            {
+                BaseTable.Insert(rows);
+            }
+        }
+
+        /// <inheritdoc />
+        public RowLayout Layout => BaseTable.Layout;
 
         /// <inheritdoc />
         public TValue? Maximum<TValue>(string fieldName, Search search = null)
@@ -254,32 +200,98 @@ namespace Cave.Data
         }
 
         /// <inheritdoc />
-        public IList<TValue> Distinct<TValue>(string fieldName, Search search = null)
-            where TValue : struct, IComparable
+        public string Name => BaseTable.Name;
+
+        /// <inheritdoc />
+        public void Replace(Row row)
         {
             lock (BaseTable)
             {
-                return BaseTable.Distinct<TValue>(fieldName, search);
+                BaseTable.Replace(row);
             }
         }
 
         /// <inheritdoc />
-        public IList<TValue> GetValues<TValue>(string fieldName, Search search = null)
-            where TValue : struct, IComparable
+        public void Replace(IEnumerable<Row> rows)
         {
             lock (BaseTable)
             {
-                return BaseTable.GetValues<TValue>(fieldName, search);
+                BaseTable.Replace(rows);
             }
         }
 
         /// <inheritdoc />
-        public int Commit(IEnumerable<Transaction> transactions, TransactionFlags flags = default)
+        public long RowCount
+        {
+            get
+            {
+                lock (BaseTable)
+                {
+                    return BaseTable.RowCount;
+                }
+            }
+        }
+
+        /// <inheritdoc />
+        public int SequenceNumber => BaseTable.SequenceNumber;
+
+        /// <inheritdoc />
+        public void SetValue(string fieldName, object value)
         {
             lock (BaseTable)
             {
-                return BaseTable.Commit(transactions, flags);
+                BaseTable.SetValue(fieldName, value);
             }
         }
+
+        /// <inheritdoc />
+        public IStorage Storage => BaseTable.Storage;
+
+        /// <inheritdoc />
+        public double Sum(string fieldName, Search search = null)
+        {
+            lock (BaseTable)
+            {
+                return BaseTable.Sum(fieldName, search);
+            }
+        }
+
+        /// <inheritdoc />
+        public int TryDelete(Search search)
+        {
+            lock (BaseTable)
+            {
+                return BaseTable.TryDelete(search);
+            }
+        }
+
+        /// <inheritdoc />
+        public void Update(Row row)
+        {
+            lock (BaseTable)
+            {
+                BaseTable.Update(row);
+            }
+        }
+
+        /// <inheritdoc />
+        public void Update(IEnumerable<Row> rows)
+        {
+            lock (BaseTable)
+            {
+                BaseTable.Update(rows);
+            }
+        }
+
+        /// <inheritdoc />
+        public virtual void UseLayout(RowLayout layout)
+        {
+            lock (BaseTable)
+            {
+                BaseTable.UseLayout(layout);
+            }
+        }
+
+        #endregion
     }
 }

@@ -1,28 +1,26 @@
 ﻿namespace Cave.Data
 {
-    /// <summary>
-    /// Provides an interface for row caches.
-    /// </summary>
+    /// <summary>Provides an interface for row caches.</summary>
     public interface IRowCache
     {
-        /// <summary>
-        /// Gets the number of cache hits.
-        /// </summary>
+        #region Properties
+
+        /// <summary>Gets the number of cache hits.</summary>
         long HitCount { get; }
 
-        /// <summary>
-        /// Gets the number of cache misses.
-        /// </summary>
+        /// <summary>Gets the number of cache misses.</summary>
         long MissCount { get; }
 
-        /// <summary>
-        /// Gets the number of row not found at table results.
-        /// </summary>
+        /// <summary>Gets the number of row not found at table results.</summary>
         long NotFoundCount { get; }
 
-        /// <summary>
-        /// Clears the cache and all counters.
-        /// </summary>
+        #endregion
+
+        #region Members
+
+        /// <summary>Clears the cache and all counters.</summary>
         void Clear();
+
+        #endregion
     }
 }

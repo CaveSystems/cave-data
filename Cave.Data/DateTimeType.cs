@@ -14,8 +14,8 @@ namespace Cave.Data
 
         /// <summary>Use dotnet ticks.</summary>
         /// <remarks>
-        ///     A single tick represents one hundred nanoseconds or one ten-millionth of a second. There are 10,000 ticks in a
-        ///     millisecond, or 10 million ticks in a second.
+        /// A single tick represents one hundred nanoseconds or one ten-millionth of a second. There are 10,000 ticks in a millisecond, or 10
+        /// million ticks in a second.
         /// </remarks>
         BigIntTicks = 3,
 

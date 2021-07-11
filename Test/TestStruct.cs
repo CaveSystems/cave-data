@@ -6,6 +6,8 @@ using Cave.Collections;
 using Cave.Data;
 using Cave.IO;
 
+#pragma warning disable CS0618
+
 namespace Test.Cave
 {
     public enum TestEnum
@@ -20,22 +22,27 @@ namespace Test.Cave
     {
         [Field(Flags = FieldFlags.AutoIncrement | FieldFlags.ID)]
         public long ID;
+
         [Field]
         public string Content;
+
         [Field]
         public DateTime DateTime;
+
         [Field]
         public string Name;
+
         [Field]
         public string Source;
+
         [Field]
         public TestEnum Level;
+
         [Field]
         public int Integer;
 
         public override string ToString() => $"{ID} {Content} {DateTime} {Name} {Source} {Level} {Integer}";
     }
-
 
     [Table("TestStructBug")]
     struct TestStructBug
@@ -44,18 +51,18 @@ namespace Test.Cave
 
         public static TestStructBug Create(int i)
         {
-            var t = new TestStructBug()
+            var t = new TestStructBug
             {
-                IDField = (ulong)(i * i),
+                IDField = (ulong) (i * i),
                 AutoIncUniqueIndexedField = i * i * i,
-                AutoIncIndexField = (byte)(i & 0xFF),
+                AutoIncIndexField = (byte) (i & 0xFF),
                 BuggyField = i.ToString(),
-                IndexedField = (uint)i,
+                IndexedField = (uint) i,
                 NoField = i.ToString(),
                 SomeEnum = EnumValues[i % EnumValues.Length],
-                UniqueIndexedField = (sbyte)(-i / 10),
-                UniqueField = (short)i,
-                AutoIncField = (ushort)i,
+                UniqueIndexedField = (sbyte) (-i / 10),
+                UniqueField = (short) i,
+                AutoIncField = (ushort) i
             };
             return t;
         }
@@ -104,24 +111,24 @@ namespace Test.Cave
     {
         public static TestStructClean Create(int i)
         {
-            var t = new TestStructClean()
+            var t = new TestStructClean
             {
-                Arr = BitConverterLE.Instance.GetBytes((long)i),
-                B = (byte)(i & 0xFF),
-                SB = (sbyte)(-i / 10),
-                US = (ushort)i,
-                C = (char)i,
+                Arr = BitConverterLE.Instance.GetBytes((long) i),
+                B = (byte) (i & 0xFF),
+                SB = (sbyte) (-i / 10),
+                US = (ushort) i,
+                C = (char) i,
                 I = i,
                 F = (500 - i) * 0.5f,
                 D = (500 - i) * 0.5d,
                 Date = new DateTime(1 + Math.Abs(i), 12, 31, 23, 59, 48, i % 1000, DateTimeKind.Local),
                 Time = TimeSpan.FromSeconds(i),
-                S = (short)(i - 500),
-                UI = (uint)i,
+                S = (short) (i - 500),
+                UI = (uint) i,
                 Text = i.ToString(),
                 Dec = 0.005m * (i - 500),
-                Uri = new Uri("http://localhost/" + i.ToString()),
-                ConStr = "http://localhost/" + i.ToString(),
+                Uri = new Uri("http://localhost/" + i),
+                ConStr = "http://localhost/" + i
             };
             return t;
         }
@@ -184,7 +191,7 @@ namespace Test.Cave
                 return false;
             }
 
-            var other = (TestStructClean)obj;
+            var other = (TestStructClean) obj;
             return
                 DefaultComparer.Equals(Arr, other.Arr) &&
                 Equals(B, other.B) &&

@@ -1,136 +1,22 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
 
 namespace Cave.Data
 {
-    /// <summary>Provides static functions for struct field reflections.</summary>
+    /// <summary>
+    /// Provides static functions for struct field reflections.
+    /// </summary>
     public static class Fields
     {
-        /// <summary>Checks whether a field has the <see cref="FieldAttribute" /> and returns the name of the field.</summary>
-        /// <param name="member">The field / property info.</param>
-        /// <returns>The name specified with the field attribute or null.</returns>
-        public static string GetName(MemberInfo member)
-        {
-            if (member == null)
-            {
-                throw new ArgumentNullException(nameof(member));
-            }
+        #region Static
 
-            foreach (var attribute in member.GetCustomAttributes(true))
-            {
-                if (attribute is FieldAttribute fieldAttribute)
-                {
-                    return !string.IsNullOrEmpty(fieldAttribute.Name) ? fieldAttribute.Name : member.Name;
-                }
-            }
-
-            return null;
-        }
-
-        /// <summary>Checks whether a field has the <see cref="FieldAttribute" /> and returns the length of the field.</summary>
-        /// <param name="member">The field / property info.</param>
-        /// <returns>The length specified with the field attribute or 0.</returns>
-        public static uint GetLength(MemberInfo member)
-        {
-            if (member == null)
-            {
-                throw new ArgumentNullException(nameof(member));
-            }
-
-            foreach (var attribute in member.GetCustomAttributes(true))
-            {
-                if (attribute is FieldAttribute fieldAttribute)
-                {
-                    return fieldAttribute.Length;
-                }
-            }
-
-            return 0;
-        }
-
-        /// <summary>Checks whether a field has the <see cref="FieldAttribute" /> and returns the flags of the field.</summary>
-        /// <param name="member">The field / property info.</param>
-        /// <returns>The flags specified with the field attribute or <see cref="FieldFlags.None" />.</returns>
-        public static FieldFlags GetFlags(MemberInfo member)
-        {
-            if (member == null)
-            {
-                throw new ArgumentNullException(nameof(member));
-            }
-
-            foreach (var attribute in member.GetCustomAttributes(true))
-            {
-                if (attribute is FieldAttribute fieldAttribute)
-                {
-                    return fieldAttribute.Flags;
-                }
-            }
-
-            return FieldFlags.None;
-        }
-
-        /// <summary>Gets the description of a field. If the attribute is not present null is returned.</summary>
-        /// <param name="member">The field / property info.</param>
-        /// <returns>The description specified with the field attribute or null.</returns>
-        public static string GetDescription(MemberInfo member)
-        {
-            if (member == null)
-            {
-                throw new ArgumentNullException(nameof(member));
-            }
-
-            foreach (var attribute in member.GetCustomAttributes(false))
-            {
-                if (attribute is DescriptionAttribute descriptionAttribute)
-                {
-                    return descriptionAttribute.Description;
-                }
-            }
-
-            return null;
-        }
-
-        /// <summary>Gets the description of a specified enum or field.</summary>
-        /// <param name="value">The enum or field value.</param>
-        /// <returns>The description if present or null otherwise.</returns>
-        /// <exception cref="ArgumentNullException">Value.</exception>
-        /// <exception cref="ArgumentException">Enum value is not defined!.</exception>
-        public static string GetDescription(object value)
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
-
-            var type = value.GetType();
-            if (type.IsEnum)
-            {
-                if (!Enum.IsDefined(type, value))
-                {
-                    return null;
-                }
-
-                var name = Enum.GetName(value.GetType(), value);
-                return GetDescription(type.GetField(name));
-            }
-
-            foreach (var attribute in type.GetCustomAttributes(false))
-            {
-                if (attribute is DescriptionAttribute descriptionAttribute)
-                {
-                    return descriptionAttribute.Description;
-                }
-            }
-
-            return null;
-        }
-
-        /// <summary>Converts a (primitive) value to the desired type.</summary>
+        /// <summary>
+        /// Converts a (primitive) value to the desired type.
+        /// </summary>
         /// <param name="toType">Type to convert to.</param>
         /// <param name="value">Value to convert.</param>
         /// <param name="cultureInfo">The culture to use during formatting.</param>
@@ -147,14 +33,18 @@ namespace Cave.Data
             }
         }
 
-        /// <summary>Converts a value to the desired field value.</summary>
+        /// <summary>
+        /// Converts a value to the desired field value.
+        /// </summary>
         /// <typeparam name="T">The field type.</typeparam>
         /// <param name="value">The value.</param>
         /// <param name="provider">The format provider to use during formatting.</param>
         /// <returns>An object converted to the specified type.</returns>
-        public static T ConvertValue<T>(object value, IFormatProvider provider = null) => (T) ConvertValue(typeof(T), value, provider);
+        public static T ConvertValue<T>(object value, IFormatProvider provider = null) => (T)ConvertValue(typeof(T), value, provider);
 
-        /// <summary>Converts a value to the desired field value.</summary>
+        /// <summary>
+        /// Converts a value to the desired field value.
+        /// </summary>
         /// <param name="fieldType">The field type.</param>
         /// <param name="value">The value.</param>
         /// <param name="provider">The format provider to use during formatting.</param>
@@ -198,13 +88,14 @@ namespace Cave.Data
                     case "ON":
                     case "YES":
                     case "1":
-                        return true;
+                    return true;
+
                     case "":
                     case "FALSE":
                     case "OFF":
                     case "NO":
                     case "0":
-                        return false;
+                    return false;
                 }
             }
 
@@ -224,7 +115,7 @@ namespace Cave.Data
             }
 
             // convert to string
-            if (!(value is string str))
+            if (value is not string str)
             {
                 // try to find public ToString(IFormatProvider) method in class
                 var method = value.GetType().GetMethod("ToString", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(IFormatProvider) },
@@ -233,7 +124,7 @@ namespace Cave.Data
                 {
                     try
                     {
-                        str = (string) method.Invoke(value, new object[] { provider });
+                        str = (string)method.Invoke(value, new object[] { provider });
                     }
                     catch (TargetInvocationException ex)
                     {
@@ -279,12 +170,12 @@ namespace Cave.Data
 
                     if (str.EndsWith("ms", StringComparison.Ordinal))
                     {
-                        return new TimeSpan((long) Math.Round(double.Parse(str.SubstringEnd(2), provider) * TimeSpan.TicksPerMillisecond));
+                        return new TimeSpan((long)Math.Round(double.Parse(str.SubstringEnd(2), provider) * TimeSpan.TicksPerMillisecond));
                     }
 
                     return str.EndsWith("s", StringComparison.Ordinal)
-                        ? new TimeSpan((long) Math.Round(double.Parse(str.SubstringEnd(1), provider) * TimeSpan.TicksPerSecond))
-                        : (object) new TimeSpan(long.Parse(str, provider));
+                        ? new TimeSpan((long)Math.Round(double.Parse(str.SubstringEnd(1), provider) * TimeSpan.TicksPerSecond))
+                        : (object)new TimeSpan(long.Parse(str, provider));
                 }
                 catch (Exception ex)
                 {
@@ -332,8 +223,318 @@ namespace Cave.Data
             }
         }
 
+        /// <summary>
+        /// Gets the description of a field. If the attribute is not present null is returned.
+        /// </summary>
+        /// <param name="member">The field / property info.</param>
+        /// <returns>The description specified with the field attribute or null.</returns>
+        public static string GetDescription(MemberInfo member)
+        {
+            if (member == null)
+            {
+                throw new ArgumentNullException(nameof(member));
+            }
 
-        /// <summary>Sets all field values of a struct/class object.</summary>
+            foreach (var attribute in member.GetCustomAttributes(false))
+            {
+                if (attribute is DescriptionAttribute descriptionAttribute)
+                {
+                    return descriptionAttribute.Description;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Gets the description of a specified enum or field.
+        /// </summary>
+        /// <param name="value">The enum or field value.</param>
+        /// <returns>The description if present or null otherwise.</returns>
+        /// <exception cref="ArgumentNullException">Value.</exception>
+        /// <exception cref="ArgumentException">Enum value is not defined!.</exception>
+        public static string GetDescription(object value)
+        {
+            if (value == null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+
+            var type = value.GetType();
+            if (type.IsEnum)
+            {
+                if (!Enum.IsDefined(type, value))
+                {
+                    return null;
+                }
+
+                var name = Enum.GetName(value.GetType(), value);
+                return GetDescription(type.GetField(name));
+            }
+
+            foreach (var attribute in type.GetCustomAttributes(false))
+            {
+                if (attribute is DescriptionAttribute descriptionAttribute)
+                {
+                    return descriptionAttribute.Description;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Checks whether a field has the <see cref="FieldAttribute"/> and returns the flags of the field.
+        /// </summary>
+        /// <param name="member">The field / property info.</param>
+        /// <returns>The flags specified with the field attribute or <see cref="FieldFlags.None"/>.</returns>
+        public static FieldFlags GetFlags(MemberInfo member)
+        {
+            if (member == null)
+            {
+                throw new ArgumentNullException(nameof(member));
+            }
+
+            foreach (var attribute in member.GetCustomAttributes(true))
+            {
+                if (attribute is FieldAttribute fieldAttribute)
+                {
+                    return fieldAttribute.Flags;
+                }
+            }
+
+            return FieldFlags.None;
+        }
+
+        /// <summary>
+        /// Checks whether a field has the <see cref="FieldAttribute"/> and returns the length of the field.
+        /// </summary>
+        /// <param name="member">The field / property info.</param>
+        /// <returns>The length specified with the field attribute or 0.</returns>
+        public static uint GetLength(MemberInfo member)
+        {
+            if (member == null)
+            {
+                throw new ArgumentNullException(nameof(member));
+            }
+
+            foreach (var attribute in member.GetCustomAttributes(true))
+            {
+                if (attribute is FieldAttribute fieldAttribute)
+                {
+                    return fieldAttribute.Length;
+                }
+            }
+
+            return 0;
+        }
+
+        /// <summary>
+        /// Checks whether a field has the <see cref="FieldAttribute"/> and returns the name of the field.
+        /// </summary>
+        /// <param name="member">The field / property info.</param>
+        /// <returns>The name specified with the field attribute or null.</returns>
+        public static string GetName(MemberInfo member)
+        {
+            if (member == null)
+            {
+                throw new ArgumentNullException(nameof(member));
+            }
+
+            foreach (var attribute in member.GetCustomAttributes(true))
+            {
+                if (attribute is FieldAttribute fieldAttribute)
+                {
+                    return !string.IsNullOrEmpty(fieldAttribute.Name) ? fieldAttribute.Name : member.Name;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Gets a string for the specified field value.
+        /// </summary>
+        /// <remarks>The result of this function can be used by <see cref="ConvertValue(Type, object, IFormatProvider)"/>.</remarks>
+        /// <param name="value">The value.</param>
+        /// <param name="datatype">The datatype.</param>
+        /// <param name="dateTimeKind">The date time kind (optional).</param>
+        /// <param name="dateTimeType">The date time type (optional).</param>
+        /// <param name="stringMarker">The string marker.</param>
+        /// <param name="provider">The format provider.</param>
+        /// <returns>Returns a string describing the value.</returns>
+        public static string GetString(object value, DataType datatype, DateTimeKind dateTimeKind = default, DateTimeType dateTimeType = default,
+            string stringMarker = null, IFormatProvider provider = null)
+        {
+            if (provider == null)
+            {
+                provider = CultureInfo.InvariantCulture;
+            }
+
+            if (stringMarker == null)
+            {
+                stringMarker = string.Empty;
+            }
+
+            if (value == null)
+            {
+                return "null";
+            }
+
+            switch (datatype)
+            {
+                case DataType.DateTime:
+                {
+                    var dt = (DateTime)value;
+                    switch (dateTimeKind)
+                    {
+                        case DateTimeKind.Utc:
+                        dt = dt.ToUniversalTime();
+                        break;
+
+                        case DateTimeKind.Local:
+                        dt = dt.ToLocalTime();
+                        break;
+                    }
+
+                    return dateTimeType switch
+                    {
+                        DateTimeType.BigIntHumanReadable => dt.ToString(Storage.BigIntDateTimeFormat, provider).TrimStart('0'),
+                        DateTimeType.Native => dt.ToString(StringExtensions.InterOpDateTimeFormat, provider).Box(stringMarker),
+                        DateTimeType.BigIntTicks => dt.Ticks.ToString(provider),
+                        DateTimeType.DecimalSeconds => (dt.Ticks / (decimal)TimeSpan.TicksPerSecond).ToString(provider),
+                        DateTimeType.DoubleSeconds => (dt.Ticks / (double)TimeSpan.TicksPerSecond).ToString(provider),
+                        DateTimeType.DoubleEpoch => ((dt.Ticks - Storage.EpochTicks) / (double)TimeSpan.TicksPerSecond).ToString(provider),
+                        _ => throw new NotSupportedException($"DateTimeType {dateTimeType} is not supported"),
+                    };
+                }
+                case DataType.Binary:
+                {
+                    var data = (byte[])value;
+                    return (data.Length == 0 ? string.Empty : Base64.NoPadding.Encode(data)).Box(stringMarker);
+                }
+                case DataType.Bool:
+                {
+                    return (bool)value ? "true" : "false";
+                }
+                case DataType.TimeSpan:
+                {
+                    var ts = (TimeSpan)value;
+                    switch (dateTimeType)
+                    {
+                        default: throw new NotSupportedException($"DateTimeType {dateTimeType} is not supported.");
+                        case DateTimeType.BigIntHumanReadable:
+                        return new DateTime(ts.Ticks).ToString(Storage.BigIntDateTimeFormat, provider);
+
+                        case DateTimeType.Undefined:
+                        case DateTimeType.Native:
+                        {
+                            var text = ts.ToString();
+                            if (stringMarker != null)
+                            {
+                                text = text.Box(stringMarker);
+                            }
+
+                            return text;
+                        }
+                        case DateTimeType.BigIntTicks:
+                        return ts.Ticks.ToString(provider);
+
+                        case DateTimeType.DecimalSeconds:
+                        return $"{(ts.Ticks / (decimal)TimeSpan.TicksPerSecond).ToString(provider)}";
+
+                        case DateTimeType.DoubleSeconds:
+                        return ts.TotalSeconds.ToString("R", provider);
+                    }
+                }
+                case DataType.Single:
+                {
+                    var f = (float)value;
+                    return float.IsNaN(f) || float.IsInfinity(f)
+                        ? throw new InvalidDataException($"Cannot serialize float with value {f}!")
+                        : f.ToString(provider);
+                }
+                case DataType.Double:
+                {
+                    var d = (double)value;
+                    if (double.IsNaN(d) || double.IsInfinity(d))
+                    {
+                        throw new InvalidDataException($"Cannot serialize double with value {d}!");
+                    }
+
+                    return d.ToString(provider);
+                }
+                case DataType.Decimal: return ((decimal)value).ToString(provider);
+                case DataType.Int8: return ((sbyte)value).ToString(provider);
+                case DataType.Int16: return ((short)value).ToString(provider);
+                case DataType.Int32: return ((int)value).ToString(provider);
+                case DataType.Int64: return ((long)value).ToString(provider);
+                case DataType.UInt8: return ((byte)value).ToString(provider);
+                case DataType.UInt16: return ((ushort)value).ToString(provider);
+                case DataType.UInt32: return ((uint)value).ToString(provider);
+                case DataType.UInt64: return ((ulong)value).ToString(provider);
+                case DataType.Enum: return value.ToString().Box(stringMarker);
+                case DataType.Char: return value.ToString().Box(stringMarker);
+                case DataType.String:
+                case DataType.User:
+                default: break;
+            }
+
+            var s = value is IConvertible convertible ? convertible.ToString(provider) : value.ToString();
+            return s.EscapeUtf8().Box(stringMarker);
+        }
+
+        /// <summary>
+        /// Gets an array containing all values of the specified fields.
+        /// </summary>
+        /// <param name="fields">The fields to read.</param>
+        /// <param name="structure">The structure to read fields from.</param>
+        /// <returns>An array containing all values.</returns>
+        public static object[] GetValues(IList<FieldInfo> fields, object structure)
+        {
+            if (fields == null)
+            {
+                throw new ArgumentNullException(nameof(fields));
+            }
+
+            var result = new object[fields.Count];
+            for (var i = 0; i < fields.Count; i++)
+            {
+                result[i] = fields[i].GetValue(structure);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Gets an array containing all values of the specified fields.
+        /// </summary>
+        /// <param name="properties">The properties to read.</param>
+        /// <param name="obj">The object to read properties from.</param>
+        /// <returns>An array containing all values.</returns>
+        public static object[] GetValues(IList<PropertyInfo> properties, object obj)
+        {
+            if (properties == null)
+            {
+                throw new ArgumentNullException(nameof(properties));
+            }
+
+            var result = new object[properties.Count];
+            for (var i = 0; i < properties.Count; i++)
+            {
+#if NET20 || NET35 || NET40
+                result[i] = properties[i].GetValue(obj, null);
+#else
+                result[i] = properties[i].GetValue(obj);
+#endif
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Sets all field values of a struct/class object.
+        /// </summary>
         /// <param name="obj">structure object.</param>
         /// <param name="fields">fields to be set.</param>
         /// <param name="values">values to set.</param>
@@ -368,174 +569,6 @@ namespace Cave.Data
             }
         }
 
-        /// <summary>Gets an array containing all values of the specified fields.</summary>
-        /// <param name="fields">The fields to read.</param>
-        /// <param name="structure">The structure to read fields from.</param>
-        /// <returns>An array containing all values.</returns>
-        public static object[] GetValues(IList<FieldInfo> fields, object structure)
-        {
-            if (fields == null)
-            {
-                throw new ArgumentNullException(nameof(fields));
-            }
-
-            var result = new object[fields.Count];
-            for (var i = 0; i < fields.Count; i++)
-            {
-                result[i] = fields[i].GetValue(structure);
-            }
-
-            return result;
-        }
-
-        /// <summary>Gets an array containing all values of the specified fields.</summary>
-        /// <param name="properties">The properties to read.</param>
-        /// <param name="obj">The object to read properties from.</param>
-        /// <returns>An array containing all values.</returns>
-        public static object[] GetValues(IList<PropertyInfo> properties, object obj)
-        {
-            if (properties == null)
-            {
-                throw new ArgumentNullException(nameof(properties));
-            }
-
-            var result = new object[properties.Count];
-            for (var i = 0; i < properties.Count; i++)
-            {
-#if NET20 || NET35 || NET40
-                result[i] = properties[i].GetValue(obj, null);
-#else
-                result[i] = properties[i].GetValue(obj);
-#endif
-            }
-
-            return result;
-        }
-
-        /// <summary>Gets a string for the specified field value.</summary>
-        /// <remarks>The result of this function can be used by <see cref="ConvertValue(Type, object, IFormatProvider)" />.</remarks>
-        /// <param name="value">The value.</param>
-        /// <param name="datatype">The datatype.</param>
-        /// <param name="dateTimeKind">The date time kind (optional).</param>
-        /// <param name="dateTimeType">The date time type (optional).</param>
-        /// <param name="stringMarker">The string marker.</param>
-        /// <param name="provider">The format provider.</param>
-        /// <returns>Returns a string describing the value.</returns>
-        public static string GetString(object value, DataType datatype, DateTimeKind dateTimeKind = default, DateTimeType dateTimeType = default,
-            string stringMarker = null, IFormatProvider provider = null)
-        {
-            if (provider == null)
-            {
-                provider = CultureInfo.InvariantCulture;
-            }
-
-            if (stringMarker == null)
-            {
-                stringMarker = string.Empty;
-            }
-
-            if (value == null)
-            {
-                return "null";
-            }
-
-            switch (datatype)
-            {
-                case DataType.DateTime:
-                {
-                    var dt = (DateTime) value;
-                    switch (dateTimeKind)
-                    {
-                        case DateTimeKind.Utc:
-                            dt = dt.ToUniversalTime();
-                            break;
-                        case DateTimeKind.Local:
-                            dt = dt.ToLocalTime();
-                            break;
-                    }
-
-                    switch (dateTimeType)
-                    {
-                        default: throw new NotSupportedException($"DateTimeType {dateTimeType} is not supported");
-                        case DateTimeType.BigIntHumanReadable: return dt.ToString(Storage.BigIntDateTimeFormat, provider).TrimStart('0');
-                        case DateTimeType.Native: return dt.ToString(StringExtensions.InterOpDateTimeFormat, provider).Box(stringMarker);
-                        case DateTimeType.BigIntTicks: return dt.Ticks.ToString(provider);
-                        case DateTimeType.DecimalSeconds: return (dt.Ticks / (decimal) TimeSpan.TicksPerSecond).ToString(provider);
-                        case DateTimeType.DoubleSeconds: return (dt.Ticks / (double) TimeSpan.TicksPerSecond).ToString(provider);
-                        case DateTimeType.DoubleEpoch: return ((dt.Ticks - Storage.EpochTicks) / (double) TimeSpan.TicksPerSecond).ToString(provider);
-                    }
-                }
-                case DataType.Binary:
-                {
-                    var data = (byte[]) value;
-                    return (data.Length == 0 ? string.Empty : Base64.NoPadding.Encode(data)).Box(stringMarker);
-                }
-                case DataType.Bool:
-                {
-                    return (bool) value ? "true" : "false";
-                }
-                case DataType.TimeSpan:
-                {
-                    var ts = (TimeSpan) value;
-                    switch (dateTimeType)
-                    {
-                        default: throw new NotSupportedException($"DateTimeType {dateTimeType} is not supported.");
-                        case DateTimeType.BigIntHumanReadable:
-                            return new DateTime(ts.Ticks).ToString(Storage.BigIntDateTimeFormat, provider);
-                        case DateTimeType.Undefined:
-                        case DateTimeType.Native:
-                        {
-                            var text = ts.ToString();
-                            if (stringMarker != null)
-                            {
-                                text = text.Box(stringMarker);
-                            }
-
-                            return text;
-                        }
-                        case DateTimeType.BigIntTicks:
-                            return ts.Ticks.ToString(provider);
-                        case DateTimeType.DecimalSeconds:
-                            return $"{(ts.Ticks / (decimal) TimeSpan.TicksPerSecond).ToString(provider)}";
-                        case DateTimeType.DoubleSeconds:
-                            return ts.TotalSeconds.ToString("R", provider);
-                    }
-                }
-                case DataType.Single:
-                {
-                    var f = (float) value;
-                    return float.IsNaN(f) || float.IsInfinity(f)
-                        ? throw new InvalidDataException($"Cannot serialize float with value {f}!")
-                        : f.ToString(provider);
-                }
-                case DataType.Double:
-                {
-                    var d = (double) value;
-                    if (double.IsNaN(d) || double.IsInfinity(d))
-                    {
-                        throw new InvalidDataException($"Cannot serialize double with value {d}!");
-                    }
-
-                    return d.ToString(provider);
-                }
-                case DataType.Decimal: return ((decimal) value).ToString(provider);
-                case DataType.Int8: return ((sbyte) value).ToString(provider);
-                case DataType.Int16: return ((short) value).ToString(provider);
-                case DataType.Int32: return ((int) value).ToString(provider);
-                case DataType.Int64: return ((long) value).ToString(provider);
-                case DataType.UInt8: return ((byte) value).ToString(provider);
-                case DataType.UInt16: return ((ushort) value).ToString(provider);
-                case DataType.UInt32: return ((uint) value).ToString(provider);
-                case DataType.UInt64: return ((ulong) value).ToString(provider);
-                case DataType.Enum: return value.ToString().Box(stringMarker);
-                case DataType.Char: return value.ToString().Box(stringMarker);
-                case DataType.String:
-                case DataType.User:
-                default: break;
-            }
-
-            var s = value is IConvertible convertible ? convertible.ToString(provider) : value.ToString();
-            return s.EscapeUtf8().Box(stringMarker);
-        }
+        #endregion Static
     }
 }

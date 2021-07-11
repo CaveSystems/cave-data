@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Cave.Data
 {
@@ -7,19 +6,7 @@ namespace Cave.Data
     [AttributeUsage(AttributeTargets.Struct)]
     public sealed class TableAttribute : Attribute
     {
-        /// <summary>Initializes a new instance of the <see cref="TableAttribute" /> class.</summary>
-        public TableAttribute() { }
-
-        /// <summary>Initializes a new instance of the <see cref="TableAttribute" /> class.</summary>
-        /// <param name="name">Name for the table.</param>
-        public TableAttribute(string name) => Name = name;
-
-
-        /// <summary>Gets or sets the field name at the database.</summary>
-        public string Name { get; set; }
-
-        /// <summary>Gets or sets the <see cref="NamingStrategy" /> used for this table (name and fields).</summary>
-        public NamingStrategy NamingStrategy { get; set; }
+        #region Static
 
         /// <summary>Gets the name set within a TableAttribute for the specified type.</summary>
         /// <param name="type">Type to search for attributes.</param>
@@ -41,5 +28,28 @@ namespace Cave.Data
 
             return new TableAttribute { Name = type.Name };
         }
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>Initializes a new instance of the <see cref="TableAttribute" /> class.</summary>
+        public TableAttribute() { }
+
+        /// <summary>Initializes a new instance of the <see cref="TableAttribute" /> class.</summary>
+        /// <param name="name">Name for the table.</param>
+        public TableAttribute(string name) => Name = name;
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>Gets or sets the field name at the database.</summary>
+        public string Name { get; set; }
+
+        /// <summary>Gets or sets the <see cref="NamingStrategy" /> used for this table (name and fields).</summary>
+        public NamingStrategy NamingStrategy { get; set; }
+
+        #endregion
     }
 }

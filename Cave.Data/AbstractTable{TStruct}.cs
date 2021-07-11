@@ -9,6 +9,8 @@ namespace Cave.Data
     public abstract class AbstractTable<TStruct> : ITable<TStruct>, ITable
         where TStruct : struct
     {
+        #region Properties
+
         #region protected properties
 
         /// <summary>Gets the base table used by this instance.</summary>
@@ -16,11 +18,17 @@ namespace Cave.Data
 
         #endregion
 
+        #endregion
+
+        #region ITable<TStruct> Members
+
         /// <inheritdoc />
         public virtual TableFlags Flags => BaseTable.Flags;
 
         /// <inheritdoc />
         public abstract RowLayout Layout { get; }
+
+        #endregion
 
         #region ITable properties
 
@@ -108,27 +116,26 @@ namespace Cave.Data
 
         /// <inheritdoc />
         public TValue? Maximum<TValue>(string fieldName, Search search = null)
-            where TValue : struct, IComparable
-            => BaseTable.Maximum<TValue>(fieldName, search);
+            where TValue : struct, IComparable =>
+            BaseTable.Maximum<TValue>(fieldName, search);
 
         /// <inheritdoc />
         public TValue? Minimum<TValue>(string fieldName, Search search = null)
-            where TValue : struct, IComparable
-            => BaseTable.Minimum<TValue>(fieldName, search);
+            where TValue : struct, IComparable =>
+            BaseTable.Minimum<TValue>(fieldName, search);
 
         /// <inheritdoc />
         public IList<TValue> GetValues<TValue>(string fieldName, Search search = null)
-            where TValue : struct, IComparable
-            => BaseTable.GetValues<TValue>(fieldName, search);
+            where TValue : struct, IComparable =>
+            BaseTable.GetValues<TValue>(fieldName, search);
 
         /// <inheritdoc />
         public IList<TValue> Distinct<TValue>(string fieldName, Search search = null)
-            where TValue : struct, IComparable
-            => BaseTable.Distinct<TValue>(fieldName, search);
+            where TValue : struct, IComparable =>
+            BaseTable.Distinct<TValue>(fieldName, search);
 
         /// <inheritdoc />
-        public int Commit(IEnumerable<Transaction> transactions, TransactionFlags flags = default)
-            => BaseTable.Commit(transactions, flags);
+        public int Commit(IEnumerable<Transaction> transactions, TransactionFlags flags = default) => BaseTable.Commit(transactions, flags);
 
         #endregion
 
@@ -188,12 +195,11 @@ namespace Cave.Data
         public TStruct GetStruct(Search search = null, ResultOption resultOption = null) => GetRow(search, resultOption).GetStruct<TStruct>(Layout);
 
         /// <inheritdoc />
-        public IList<TStruct> GetStructs(Search search = null, ResultOption resultOption = null)
-            => GetRows(search, resultOption).Select(r => r.GetStruct<TStruct>(Layout)).ToList();
+        public IList<TStruct> GetStructs(Search search = null, ResultOption resultOption = null) =>
+            GetRows(search, resultOption).Select(r => r.GetStruct<TStruct>(Layout)).ToList();
 
         /// <inheritdoc />
-        public IList<TStruct> GetStructs(IEnumerable<TStruct> rows)
-            => GetRows(rows).Select(r => r.GetStruct<TStruct>(Layout)).ToList();
+        public IList<TStruct> GetStructs(IEnumerable<TStruct> rows) => GetRows(rows).Select(r => r.GetStruct<TStruct>(Layout)).ToList();
 
         /// <inheritdoc />
         public TStruct GetStructAt(int index) => GetRowAt(index).GetStruct<TStruct>(Layout);

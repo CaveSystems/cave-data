@@ -11,6 +11,33 @@ namespace Cave.Data
     /// <typeparam name="TTarget">Result and cache item type.</typeparam>
     public class RowCache<TKey, TStruct, TTarget> : IRowCache where TKey : IComparable<TKey> where TStruct : struct where TTarget : class
     {
+        #region Private Fields
+
+        readonly Dictionary<TKey, TTarget> Cache = new Dictionary<TKey, TTarget>();
+
+        readonly RowCacheConvertFunction ConverterFunction;
+
+        readonly ITable<TKey, TStruct> Table;
+
+        #endregion Private Fields
+
+        #region Public Constructors
+
+        /// <summary>
+        /// Creates a new row cache using the specified table.
+        /// </summary>
+        /// <param name="table">Table to read rows from.</param>
+        /// <param name="func">Function to convert from <typeparamref name="TStruct"/> to <typeparamref name="TTarget"/>.</param>
+        public RowCache(ITable table, RowCacheConvertFunction func)
+        {
+            this.Table = new Table<TKey, TStruct>(table);
+            this.ConverterFunction = func ?? throw new ArgumentNullException(nameof(func));
+        }
+
+        #endregion Public Constructors
+
+        #region Public Delegates
+
         /// <summary>
         /// Converts a <typeparamref name="TStruct"/> row instance to the result <typeparamref name="TTarget"/> value.
         /// </summary>
@@ -19,9 +46,9 @@ namespace Cave.Data
         /// <returns>Returns a new <typeparamref name="TTarget"/> instance or null.</returns>
         public delegate TTarget RowCacheConvertFunction(TKey id, TStruct? row);
 
-        Dictionary<TKey, TTarget> cache = new Dictionary<TKey, TTarget>();
-        ITable<TKey, TStruct> table;
-        RowCacheConvertFunction func;
+        #endregion Public Delegates
+
+        #region Public Properties
 
         /// <inheritdoc/>
         public long HitCount { get; set; }
@@ -32,16 +59,9 @@ namespace Cave.Data
         /// <inheritdoc/>
         public long NotFoundCount { get; set; }
 
-        /// <summary>
-        /// Creates a new row cache using the specified table.
-        /// </summary>
-        /// <param name="table">Table to read rows from.</param>
-        /// <param name="func">Function to convert from <typeparamref name="TStruct"/> to <typeparamref name="TTarget"/>.</param>
-        public RowCache(ITable table, RowCacheConvertFunction func)
-        {
-            this.table = new Table<TKey, TStruct>(table);
-            this.func = func ?? throw new ArgumentNullException(nameof(func));
-        }
+        #endregion Public Properties
+
+        #region Public Methods
 
         /// <inheritdoc/>
         public void Clear()
@@ -51,33 +71,10 @@ namespace Cave.Data
                 HitCount = 0;
                 MissCount = 0;
                 NotFoundCount = 0;
-                cache.Clear();
-            };
-        }
-
-        /// <summary>Tries to get the value with the specified identifier.</summary>
-        /// <param name="id">The identifier value.</param>
-        /// <param name="value">Returns the result value.</param>
-        /// <returns>Returns true on success, false otherwise.</returns>
-        public bool TryGetValue(TKey id, out TTarget value)
-        {
-            lock (this)
-            {
-                if (cache.TryGetValue(id, out value))
-                {
-                    HitCount++;
-                    return true;
-                }
-                MissCount++;
-                if (table.TryGetStruct(id, out var row))
-                {
-                    value = cache[id] = func(id, row);
-                    return true;
-                }
+                Cache.Clear();
             }
-            NotFoundCount++;
-            value = cache[id] = func(id, null);
-            return false;
+
+            ;
         }
 
         /// <summary>
@@ -90,5 +87,36 @@ namespace Cave.Data
             TryGetValue(id, out var value);
             return value;
         }
+
+        /// <summary>
+        /// Tries to get the value with the specified identifier.
+        /// </summary>
+        /// <param name="id">The identifier value.</param>
+        /// <param name="value">Returns the result value.</param>
+        /// <returns>Returns true on success, false otherwise.</returns>
+        public bool TryGetValue(TKey id, out TTarget value)
+        {
+            lock (this)
+            {
+                if (Cache.TryGetValue(id, out value))
+                {
+                    HitCount++;
+                    return true;
+                }
+
+                MissCount++;
+                if (Table.TryGetStruct(id, out var row))
+                {
+                    value = Cache[id] = ConverterFunction(id, row);
+                    return true;
+                }
+            }
+
+            NotFoundCount++;
+            value = Cache[id] = ConverterFunction(id, null);
+            return false;
+        }
+
+        #endregion Public Methods
     }
 }

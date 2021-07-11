@@ -1,16 +1,39 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Text;
 using Cave.Data.Sql;
 using Cave.IO;
 
 namespace Cave.Data.Microsoft
 {
-    /// <summary>Provides a MsSql database implementation.</summary>
+    /// <summary>
+    /// Provides a MsSql database implementation.
+    /// </summary>
     public sealed class MsSqlDatabase : SqlDatabase
     {
-        /// <summary>Initializes a new instance of the <see cref="MsSqlDatabase" /> class.</summary>
+        #region Protected Methods
+
+        /// <inheritdoc/>
+        protected override string[] GetTableNames()
+        {
+            var result = new List<string>();
+            var rows = SqlStorage.Query("EXEC stables @table_owner='dbo',@table_qualifier='" + Name + "';");
+            foreach (var row in rows)
+            {
+                var tableName = (string)row[2];
+                result.Add(tableName);
+            }
+
+            return result.ToArray();
+        }
+
+        #endregion Protected Methods
+
+        #region Public Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MsSqlDatabase"/> class.
+        /// </summary>
         /// <param name="storage">the MsSql storage engine.</param>
         /// <param name="name">the name of the database.</param>
         public MsSqlDatabase(MsSqlStorage storage, string name)
@@ -18,7 +41,11 @@ namespace Cave.Data.Microsoft
         {
         }
 
-        /// <inheritdoc />
+        #endregion Public Constructors
+
+        #region Public Properties
+
+        /// <inheritdoc/>
         public override bool IsSecure
         {
             get
@@ -28,7 +55,7 @@ namespace Cave.Data.Microsoft
                 try
                 {
                     var value = SqlStorage.QueryValue("SELECT encrypt_option FROM sys.dm_exec_connections WHERE session_id = @@SPID");
-                    return bool.Parse((string) value);
+                    return bool.Parse((string)value);
                 }
                 catch (Exception ex)
                 {
@@ -42,10 +69,11 @@ namespace Cave.Data.Microsoft
             }
         }
 
-        /// <inheritdoc />
-        public override ITable GetTable(string tableName, TableFlags flags) => MsSqlTable.Connect(this, flags, tableName);
+        #endregion Public Properties
 
-        /// <inheritdoc />
+        #region Public Methods
+
+        /// <inheritdoc/>
         public override ITable CreateTable(RowLayout layout, TableFlags flags)
         {
             if (layout == null)
@@ -78,126 +106,149 @@ namespace Cave.Data.Microsoft
                 switch (fieldProperties.DataType)
                 {
                     case DataType.Binary:
-                        queryText.Append("VARBINARY(MAX)");
-                        break;
+                    queryText.Append("VARBINARY(MAX)");
+                    break;
+
                     case DataType.Bool:
-                        queryText.Append("BIT");
-                        break;
+                    queryText.Append("BIT");
+                    break;
+
                     case DataType.DateTime:
-                        switch (fieldProperties.DateTimeType)
-                        {
-                            case DateTimeType.Undefined:
-                            case DateTimeType.Native:
-                                queryText.Append("DATETIME");
-                                break;
-                            case DateTimeType.DoubleSeconds:
-                            case DateTimeType.DoubleEpoch:
-                                queryText.Append("FLOAT(53)");
-                                break;
-                            case DateTimeType.DecimalSeconds:
-                                queryText.Append("NUMERIC(28,8)");
-                                break;
-                            case DateTimeType.BigIntHumanReadable:
-                            case DateTimeType.BigIntTicks:
-                                queryText.Append("BIGINT");
-                                break;
-                            default: throw new NotImplementedException();
-                        }
+                    switch (fieldProperties.DateTimeType)
+                    {
+                        case DateTimeType.Undefined:
+                        case DateTimeType.Native:
+                        queryText.Append("DATETIME");
+                        break;
 
-                        break;
-                    case DataType.TimeSpan:
-                        switch (fieldProperties.DateTimeType)
-                        {
-                            case DateTimeType.Undefined:
-                            case DateTimeType.Native:
-                                queryText.Append("TIMESPAN");
-                                break;
-                            case DateTimeType.DoubleEpoch:
-                            case DateTimeType.DoubleSeconds:
-                                queryText.Append("FLOAT(53)");
-                                break;
-                            case DateTimeType.DecimalSeconds:
-                                queryText.Append("NUMERIC(28,8)");
-                                break;
-                            case DateTimeType.BigIntHumanReadable:
-                            case DateTimeType.BigIntTicks:
-                                queryText.Append("BIGINT");
-                                break;
-                            default: throw new NotImplementedException();
-                        }
-
-                        break;
-                    case DataType.Int8:
-                        queryText.Append("SMALLINT");
-                        break;
-                    case DataType.Int16:
-                        queryText.Append("SMALLINT");
-                        break;
-                    case DataType.Int32:
-                        queryText.Append("INTEGER");
-                        break;
-                    case DataType.Int64:
-                        queryText.Append("BIGINT");
-                        break;
-                    case DataType.Single:
-                        queryText.Append("REAL");
-                        break;
-                    case DataType.Double:
+                        case DateTimeType.DoubleSeconds:
+                        case DateTimeType.DoubleEpoch:
                         queryText.Append("FLOAT(53)");
                         break;
-                    case DataType.Enum:
+
+                        case DateTimeType.DecimalSeconds:
+                        queryText.Append("NUMERIC(28,8)");
+                        break;
+
+                        case DateTimeType.BigIntHumanReadable:
+                        case DateTimeType.BigIntTicks:
                         queryText.Append("BIGINT");
                         break;
+
+                        default: throw new NotImplementedException();
+                    }
+
+                    break;
+
+                    case DataType.TimeSpan:
+                    switch (fieldProperties.DateTimeType)
+                    {
+                        case DateTimeType.Undefined:
+                        case DateTimeType.Native:
+                        queryText.Append("TIMESPAN");
+                        break;
+
+                        case DateTimeType.DoubleEpoch:
+                        case DateTimeType.DoubleSeconds:
+                        queryText.Append("FLOAT(53)");
+                        break;
+
+                        case DateTimeType.DecimalSeconds:
+                        queryText.Append("NUMERIC(28,8)");
+                        break;
+
+                        case DateTimeType.BigIntHumanReadable:
+                        case DateTimeType.BigIntTicks:
+                        queryText.Append("BIGINT");
+                        break;
+
+                        default: throw new NotImplementedException();
+                    }
+
+                    break;
+
+                    case DataType.Int8:
+                    queryText.Append("SMALLINT");
+                    break;
+
+                    case DataType.Int16:
+                    queryText.Append("SMALLINT");
+                    break;
+
+                    case DataType.Int32:
+                    queryText.Append("INTEGER");
+                    break;
+
+                    case DataType.Int64:
+                    queryText.Append("BIGINT");
+                    break;
+
+                    case DataType.Single:
+                    queryText.Append("REAL");
+                    break;
+
+                    case DataType.Double:
+                    queryText.Append("FLOAT(53)");
+                    break;
+
+                    case DataType.Enum:
+                    queryText.Append("BIGINT");
+                    break;
+
                     case DataType.User:
                     case DataType.String:
-                        switch (fieldProperties.StringEncoding)
+                    switch (fieldProperties.StringEncoding)
+                    {
+                        case StringEncoding.ASCII:
+                        if ((fieldProperties.MaximumLength > 0) && (fieldProperties.MaximumLength <= 255))
                         {
-                            case StringEncoding.ASCII:
-                                if ((fieldProperties.MaximumLength > 0) && (fieldProperties.MaximumLength <= 255))
-                                {
-                                    queryText.Append($"VARCHAR({fieldProperties.MaximumLength})");
-                                }
-                                else
-                                {
-                                    queryText.Append("VARCHAR(MAX)");
-                                }
-
-                                break;
-                            case StringEncoding.UTF16:
-                            case StringEncoding.UTF8:
-                                if ((fieldProperties.MaximumLength > 0) && (fieldProperties.MaximumLength <= 255))
-                                {
-                                    queryText.Append($"NVARCHAR({fieldProperties.MaximumLength})");
-                                }
-                                else
-                                {
-                                    queryText.Append("NVARCHAR(MAX)");
-                                }
-
-                                break;
-                            default: throw new NotSupportedException($"MSSQL Server does not support {fieldProperties.StringEncoding}!");
-                        }
-
-                        break;
-                    case DataType.Decimal:
-                        if (fieldProperties.MaximumLength > 0)
-                        {
-                            var precision = (int)fieldProperties.MaximumLength;
-                            var scale = (int)((fieldProperties.MaximumLength - precision) * 100);
-                            if (scale >= precision)
-                            {
-                                throw new ArgumentOutOfRangeException(
-                                    $"Field {fieldProperties.Name} has an invalid MaximumLength of {precision},{scale}. Correct values range from s,p = 1,0 to 28,27 with 0 < s < p!");
-                            }
-
-                            queryText.Append($"NUMERIC({precision},{scale})");
+                            queryText.Append($"VARCHAR({fieldProperties.MaximumLength})");
                         }
                         else
                         {
-                            queryText.Append("NUMERIC(28,8)");
+                            queryText.Append("VARCHAR(MAX)");
                         }
 
                         break;
+
+                        case StringEncoding.UTF16:
+                        case StringEncoding.UTF8:
+                        if ((fieldProperties.MaximumLength > 0) && (fieldProperties.MaximumLength <= 255))
+                        {
+                            queryText.Append($"NVARCHAR({fieldProperties.MaximumLength})");
+                        }
+                        else
+                        {
+                            queryText.Append("NVARCHAR(MAX)");
+                        }
+
+                        break;
+
+                        default: throw new NotSupportedException($"MSSQL Server does not support {fieldProperties.StringEncoding}!");
+                    }
+
+                    break;
+
+                    case DataType.Decimal:
+                    if (fieldProperties.MaximumLength > 0)
+                    {
+                        var precision = (int)fieldProperties.MaximumLength;
+                        var scale = (int)((fieldProperties.MaximumLength - precision) * 100);
+                        if (scale >= precision)
+                        {
+                            throw new ArgumentOutOfRangeException(
+                                $"Field {fieldProperties.Name} has an invalid MaximumLength of {precision},{scale}. Correct values range from s,p = 1,0 to 28,27 with 0 < s < p!");
+                        }
+
+                        queryText.Append($"NUMERIC({precision},{scale})");
+                    }
+                    else
+                    {
+                        queryText.Append("NUMERIC(28,8)");
+                    }
+
+                    break;
+
                     default: throw new NotImplementedException($"Unknown DataType {fieldProperties.DataType}!");
                 }
 
@@ -232,15 +283,17 @@ namespace Cave.Data.Microsoft
                         case DataType.UInt64:
                         case DataType.Single:
                         case DataType.TimeSpan:
-                            break;
-                        case DataType.String:
-                            if (fieldProperties.MaximumLength <= 0)
-                            {
-                                throw new NotSupportedException(
-                                    $"Unique string fields without length are not supported! Please define Field.MaxLength at tableName {layout.Name} field {fieldProperties.Name}");
-                            }
+                        break;
 
-                            break;
+                        case DataType.String:
+                        if (fieldProperties.MaximumLength <= 0)
+                        {
+                            throw new NotSupportedException(
+                                $"Unique string fields without length are not supported! Please define Field.MaxLength at tableName {layout.Name} field {fieldProperties.Name}");
+                        }
+
+                        break;
+
                         default: throw new NotSupportedException($"Uniqueness for tableName {layout.Name} field {fieldProperties.Name} is not supported!");
                     }
                 }
@@ -277,18 +330,9 @@ namespace Cave.Data.Microsoft
             return GetTable(layout);
         }
 
-        /// <inheritdoc />
-        protected override string[] GetTableNames()
-        {
-            var result = new List<string>();
-            var rows = SqlStorage.Query("EXEC stables @table_owner='dbo',@table_qualifier='" + Name + "';");
-            foreach (var row in rows)
-            {
-                var tableName = (string) row[2];
-                result.Add(tableName);
-            }
+        /// <inheritdoc/>
+        public override ITable GetTable(string tableName, TableFlags flags) => MsSqlTable.Connect(this, flags, tableName);
 
-            return result.ToArray();
-        }
+        #endregion Public Methods
     }
 }

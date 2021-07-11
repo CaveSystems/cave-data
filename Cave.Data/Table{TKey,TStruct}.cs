@@ -13,38 +13,42 @@ namespace Cave.Data
         where TKey : IComparable<TKey>
         where TStruct : struct
     {
+        #region Constructors
+
         /// <summary>Initializes a new instance of the <see cref="Table{TKey, TStruct}" /> class.</summary>
         /// <param name="table">The table instance to wrap.</param>
         public Table(ITable table)
         {
             BaseTable = table ?? throw new ArgumentNullException(nameof(table));
-            var layout = RowLayout.CreateTyped(typeof(TStruct));
+
             if (table.Flags.HasFlag(TableFlags.IgnoreMissingFields))
             {
+                var comparison = table.GetFieldNameComparison();
                 var result = new List<IFieldProperties>();
+                var layout = RowLayout.CreateTyped(typeof(TStruct));
                 foreach (var field in layout)
                 {
-                    var match = table.Layout.FirstOrDefault(f => f.Equals(field));
+                    var match = BaseTable.Layout.FirstOrDefault(f => f.Equals(field, comparison));
                     if (match == null)
                     {
-                        throw new InvalidDataException($"Field {field} cannot be found at table {table}");
+                        throw new InvalidDataException($"Field {field} cannot be found at table {BaseTable}");
                     }
 
-                    var target = match.Clone();
-                    target.FieldInfo = field.FieldInfo;
+                    var target = field.Clone();
+                    target.Index = match.Index;
                     result.Add(target);
                 }
 
-                layout = new RowLayout(table.Name, result.ToArray(), typeof(TStruct));
+                if (result.Select(i => i.Index).Distinct().Count() != result.Count) throw new Exception("Index assignment is not distinct!");
+                Layout = new(table.Name, result.OrderBy(i => i.Index).ToArray(), typeof(TStruct));
             }
             else
             {
-                RowLayout.CheckLayout(layout, table.Layout);
+                Layout = RowLayout.CreateTyped(typeof(TStruct));
+                RowLayout.CheckLayout(Layout, BaseTable.Layout);
             }
 
-            Layout = layout;
-            var keyField = layout.Identifier.Single();
-
+            var keyField = Layout.Identifier.Single();
             var dbValue = (IConvertible) Activator.CreateInstance(keyField.ValueType);
             var converted = (IConvertible) dbValue.ToType(typeof(TKey), CultureInfo.InvariantCulture);
             var test = (IConvertible) converted.ToType(keyField.ValueType, CultureInfo.InvariantCulture);
@@ -54,23 +58,33 @@ namespace Cave.Data
             }
 
             KeyField = keyField;
-            table.UseLayout(layout);
+            table.UseLayout(Layout);
         }
 
-        /// <inheritdoc />
-        public override RowLayout Layout { get; }
+        #endregion
+
+        #region Overrides
 
         /// <inheritdoc />
         protected override ITable BaseTable { get; }
 
         /// <inheritdoc />
-        protected override IFieldProperties KeyField { get; }
+        public override void Connect(IDatabase database, TableFlags flags, RowLayout layout) => BaseTable.Connect(database, flags, layout);
 
         /// <inheritdoc />
-        public override void Connect(IDatabase database, TableFlags flags, RowLayout layout) => BaseTable.Connect(database, flags, layout);
+        public override RowLayout Layout { get; }
 
         /// <summary>Not supported.</summary>
         /// <param name="layout">Unused parameter.</param>
         public override void UseLayout(RowLayout layout) => throw new NotSupportedException();
+
+        #endregion
+
+        #region Overrides
+
+        /// <inheritdoc />
+        protected override IFieldProperties KeyField { get; }
+
+        #endregion
     }
 }
