@@ -61,6 +61,20 @@ namespace Cave.Data
             return new Table<TStruct>(table);
         }
 
+        /// <summary>Opens or creates the table with the specified type.</summary>
+        /// <typeparam name="TStruct">Row structure type.</typeparam>
+        /// <param name="database">The database instance.</param>
+        /// <param name="table">The table to load.</param>
+        /// <param name="flags">Flags for table loading.</param>
+        /// <param name="excludedFields">Fields at <typeparamref name="TStruct" /> to be excluded.</param>
+        public static void GetTable<TStruct>(this IDatabase database, out ITable<TStruct> table, TableFlags flags = default,
+            params string[] excludedFields)
+            where TStruct : struct
+        {
+            if (database == null) throw new ArgumentNullException(nameof(database));
+            table = GetTable<TStruct>(database, null, flags, excludedFields);
+        }
+
         /// <summary>Creates a new table with the specified layout.</summary>
         /// <typeparam name="TKey">Key identifier type.</typeparam>
         /// <typeparam name="TStruct">Row structure type.</typeparam>
@@ -120,6 +134,22 @@ namespace Cave.Data
 
             var table = database.GetTable(layout, flags);
             return new Table<TKey, TStruct>(table);
+        }
+
+        /// <summary>Opens or creates the table with the specified type.</summary>
+        /// <typeparam name="TKey">Key identifier type.</typeparam>
+        /// <typeparam name="TStruct">Row structure type.</typeparam>
+        /// <param name="database">The database instance.</param>
+        /// <param name="table">The table to load.</param>
+        /// <param name="flags">Flags for table loading.</param>
+        /// <param name="excludedFields">Fields at <typeparamref name="TStruct" /> to be excluded.</param>
+        public static void GetTable<TKey, TStruct>(this IDatabase database, out ITable<TKey, TStruct> table, TableFlags flags = default,
+            params string[] excludedFields)
+            where TKey : IComparable<TKey>
+            where TStruct : struct
+        {
+            if (database == null) throw new ArgumentNullException(nameof(database));
+            table = GetTable<TKey, TStruct>(database, null, flags, excludedFields);
         }
 
         /// <summary>Provides a csharp interface generator.</summary>
