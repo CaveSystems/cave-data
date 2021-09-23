@@ -759,7 +759,30 @@ namespace Cave.Data
                 throw new ArgumentNullException(nameof(table));
             }
 
-            // TODO, implement this without exceptions: needed at Table, SqlTable, MemoryTable
+            try
+            {
+                table.Insert(row);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceWarning($"Exception during TryInsert(): {ex}");
+                return false;
+            }
+        }
+
+        /// <summary>Tries to insert the specified dataset (id has to be set).</summary>
+        /// <param name="table">The table.</param>
+        /// <param name="row">The row.</param>
+        /// <returns>Returns true if the dataset was inserted, false otherwise.</returns>
+        public static bool TryInsert<TStruct>(this ITable<TStruct> table, TStruct row)
+            where TStruct : struct
+        {
+            if (table == null)
+            {
+                throw new ArgumentNullException(nameof(table));
+            }
+
             try
             {
                 table.Insert(row);
@@ -783,7 +806,30 @@ namespace Cave.Data
                 throw new ArgumentNullException(nameof(table));
             }
 
-            // TODO, implement this without exceptions: needed at Table, SqlTable, MemoryTable
+            try
+            {
+                table.Update(row);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceWarning($"Exception during TryUpdate(): {ex}");
+                return false;
+            }
+        }
+
+        /// <summary>Tries to insert the specified dataset (id has to be set).</summary>
+        /// <param name="table">The table.</param>
+        /// <param name="row">The row.</param>
+        /// <returns>Returns true if the dataset was inserted, false otherwise.</returns>
+        public static bool TryUpdate<TStruct>(this ITable<TStruct> table, TStruct row)
+             where TStruct : struct
+        {
+            if (table == null)
+            {
+                throw new ArgumentNullException(nameof(table));
+            }
+
             try
             {
                 table.Update(row);
