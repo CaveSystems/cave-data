@@ -113,6 +113,10 @@ namespace Cave.Data
             code.AppendLine($"\t\t\t\tdatabase = storage.GetDatabase(\"{database.Name}\", createIfNotExists);");
             code.AppendLine("\t\t\t}");
             code.AppendLine("\t\t}");
+            code.AppendLine();
+            code.AppendLine("\t\t/// <summary>Gets or sets the function used to retrieve tables from the database.</summary>");
+            code.AppendLine("\t\tpublic static Func<string, ITable> GetTable { get; set; } = (tableName) => Database.GetTable(tableName, DefaultTableFlags);");
+
             Header = code.ToString();
             code = new StringBuilder();
             code.AppendLine("\t}");
@@ -187,7 +191,7 @@ namespace Cave.Data
             {
                 result.AppendLine();
                 result.AppendLine($"\t\t/// <summary>Gets a new <see cref=\"ITable{{{table.ClassName}}}\"/> instance for accessing the <c>{table.TableName}</c> table.</summary>");
-                result.AppendLine($"\t\tpublic static ITable<{table.ClassName}> {table.GetterName} => new Table<{table.ClassName}>(database.GetTable(\"{table.TableName}\", DefaultTableFlags));");
+                result.AppendLine($"\t\tpublic static ITable<{table.ClassName}> {table.GetterName} => new Table<{table.ClassName}>(GetTable({table.TableName}));");
             }
 
             result.Append(Footer);
