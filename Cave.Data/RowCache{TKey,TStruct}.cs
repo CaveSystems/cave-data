@@ -12,7 +12,7 @@ namespace Cave.Data
     {
         #region Private Fields
 
-        readonly Dictionary<TKey, TStruct?> Cache = new Dictionary<TKey, TStruct?>();
+        readonly Dictionary<TKey, TStruct?> Cache = new();
         readonly ITable<TKey, TStruct> Table;
 
         #endregion Private Fields

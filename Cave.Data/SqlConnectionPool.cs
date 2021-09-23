@@ -11,9 +11,9 @@ namespace Cave.Data
     {
         #region Private Fields
 
-        readonly LinkedList<SqlConnection> Queue = new LinkedList<SqlConnection>();
+        readonly LinkedList<SqlConnection> Queue = new();
         readonly SqlStorage Storage;
-        readonly Set<SqlConnection> Used = new Set<SqlConnection>();
+        readonly Set<SqlConnection> Used = new();
         TimeSpan? timeout = TimeSpan.FromMinutes(5);
 
         #endregion Private Fields

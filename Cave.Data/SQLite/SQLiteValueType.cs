@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 namespace Cave.Data.SQLite
 {
     /// <summary>Provides the available SQLite value types.</summary>
-    [SuppressMessage("Naming", "CA1720")]
     public enum SQLiteValueType
     {
         /// <summary>undefined type value - do not use</summary>

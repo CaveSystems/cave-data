@@ -15,7 +15,7 @@ namespace Cave.Data
 
         #endregion
 
-        Dictionary<string, ITable> tables = new Dictionary<string, ITable>();
+        Dictionary<string, ITable> tables = new();
 
         #region Constructors
 

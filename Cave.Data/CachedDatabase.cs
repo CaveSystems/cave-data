@@ -12,7 +12,7 @@ namespace Cave.Data
         #region Private Fields
 
         readonly IDatabase Database;
-        Dictionary<string, ITable> tables = new Dictionary<string, ITable>();
+        Dictionary<string, ITable> tables = new();
 
         #endregion Private Fields
 

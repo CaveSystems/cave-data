@@ -61,7 +61,7 @@ namespace Cave.Data.SQLite
         {
             get
             {
-                return (Data[1]) switch
+                return Data[1] switch
                 {
                     "dir" => SubversionEntryType.Directory,
                     "file" => SubversionEntryType.File,

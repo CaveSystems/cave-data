@@ -72,7 +72,7 @@ namespace Cave.Data
         public virtual TimeSpan DateTimePrecision => TimeSpan.FromMilliseconds(0);
 
         /// <inheritdoc />
-        public virtual TimeSpan TimeSpanPrecision => new TimeSpan(0);
+        public virtual TimeSpan TimeSpanPrecision => new(0);
 
         /// <inheritdoc />
         public bool LogVerboseMessages { get; set; }

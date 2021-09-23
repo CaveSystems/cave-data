@@ -13,7 +13,7 @@ namespace Cave.Data
     {
         #region Private Fields
 
-        readonly Dictionary<TKey, TTarget> Cache = new Dictionary<TKey, TTarget>();
+        readonly Dictionary<TKey, TTarget> Cache = new();
 
         readonly RowCacheConvertFunction ConverterFunction;
 

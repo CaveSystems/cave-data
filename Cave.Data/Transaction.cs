@@ -10,22 +10,22 @@ namespace Cave.Data
         /// <summary>Creates a new "deleted row" transaction.</summary>
         /// <param name="row">Row data.</param>
         /// <returns>A new transaction.</returns>
-        public static Transaction Delete(Row row) => new Transaction(TransactionType.Deleted, row);
+        public static Transaction Delete(Row row) => new(TransactionType.Deleted, row);
 
         /// <summary>Creates a new "inserted row" transaction using the specified ID of the inserted row.</summary>
         /// <param name="row">Row data.</param>
         /// <returns>A new transaction.</returns>
-        public static Transaction Insert(Row row) => new Transaction(TransactionType.Inserted, row);
+        public static Transaction Insert(Row row) => new(TransactionType.Inserted, row);
 
         /// <summary>Creates a new "inserted row" transaction.</summary>
         /// <param name="row">Row data.</param>
         /// <returns>A new transaction.</returns>
-        public static Transaction Replace(Row row) => new Transaction(TransactionType.Replaced, row);
+        public static Transaction Replace(Row row) => new(TransactionType.Replaced, row);
 
         /// <summary>Creates a new "updated row" transaction.</summary>
         /// <param name="row">Row data.</param>
         /// <returns>A new transaction.</returns>
-        public static Transaction Updated(Row row) => new Transaction(TransactionType.Updated, row);
+        public static Transaction Updated(Row row) => new(TransactionType.Updated, row);
 
         #endregion
 

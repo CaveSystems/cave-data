@@ -59,7 +59,7 @@ namespace Cave.Data.Sql
         /// Implicit conversion from string (command text) to a <see cref="SqlCmd"/> instance.
         /// </summary>
         /// <param name="command">Command text.</param>
-        public static implicit operator SqlCmd(string command) => new SqlCmd(command);
+        public static implicit operator SqlCmd(string command) => new(command);
 
         /// <summary>
         /// Implicit conversion from <see cref="SqlCmd"/> instance to string (command text).

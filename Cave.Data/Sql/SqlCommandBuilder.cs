@@ -12,11 +12,11 @@ namespace Cave.Data.Sql
     {
         #region Private Fields
 
-        readonly List<SqlParam> ParameterList = new List<SqlParam>();
+        readonly List<SqlParam> ParameterList = new();
 
         readonly SqlStorage Storage;
 
-        readonly StringBuilder StringBuilder = new StringBuilder();
+        readonly StringBuilder StringBuilder = new();
 
         #endregion Private Fields
 

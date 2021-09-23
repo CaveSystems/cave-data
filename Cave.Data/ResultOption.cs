@@ -89,7 +89,7 @@ namespace Cave.Data
         /// </summary>
         /// <param name="field">Field to group.</param>
         /// <returns>A new <see cref="ResultOption"/> instance.</returns>
-        public static ResultOption Group(string field) => new ResultOption(ResultOptionMode.Group, field);
+        public static ResultOption Group(string field) => new(ResultOptionMode.Group, field);
 
         /// <summary>
         /// Limit the number of result sets.
@@ -125,7 +125,7 @@ namespace Cave.Data
         /// <param name="left">The first item.</param>
         /// <param name="right">The second item.</param>
         /// <returns>The result of the operator.</returns>
-        public static ResultOption operator +(ResultOption left, ResultOption right) => new ResultOption(left.Concat(right));
+        public static ResultOption operator +(ResultOption left, ResultOption right) => new(left.Concat(right));
 
         /// <summary>
         /// Implements the operator ==.
@@ -148,7 +148,7 @@ namespace Cave.Data
         /// </summary>
         /// <param name="field">The field to sort.</param>
         /// <returns>A new <see cref="ResultOption"/> instance.</returns>
-        public static ResultOption SortAscending(string field) => new ResultOption(ResultOptionMode.SortAsc, field);
+        public static ResultOption SortAscending(string field) => new(ResultOptionMode.SortAsc, field);
 
         /// <summary>
         /// Sort ascending by the specified fieldname.
@@ -174,7 +174,7 @@ namespace Cave.Data
         /// </summary>
         /// <param name="field">The field to sort.</param>
         /// <returns>A new <see cref="ResultOption"/> instance.</returns>
-        public static ResultOption SortDescending(string field) => new ResultOption(ResultOptionMode.SortDesc, field);
+        public static ResultOption SortDescending(string field) => new(ResultOptionMode.SortDesc, field);
 
         /// <summary>
         /// Sort descending by the specified fieldname.

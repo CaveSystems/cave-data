@@ -68,7 +68,7 @@ namespace Cave.Data
         /// <param name="name">The field name.</param>
         /// <param name="value">The value to check against.</param>
         /// <returns>A new search instance.</returns>
-        public static Search FieldEquals(string name, object value) => new Search(SearchMode.Equals, false, name, value);
+        public static Search FieldEquals(string name, object value) => new(SearchMode.Equals, false, name, value);
 
         /// <summary>
         /// Creates a field greater value search.
@@ -76,7 +76,7 @@ namespace Cave.Data
         /// <param name="name">The field name.</param>
         /// <param name="value">The value to check against.</param>
         /// <returns>A new search instance.</returns>
-        public static Search FieldGreater(string name, object value) => new Search(SearchMode.Greater, false, name, value);
+        public static Search FieldGreater(string name, object value) => new(SearchMode.Greater, false, name, value);
 
         /// <summary>
         /// Creates a field greater or equal value search.
@@ -84,7 +84,7 @@ namespace Cave.Data
         /// <param name="name">The field name.</param>
         /// <param name="value">The value to check against.</param>
         /// <returns>A new search instance.</returns>
-        public static Search FieldGreaterOrEqual(string name, object value) => new Search(SearchMode.GreaterOrEqual, false, name, value);
+        public static Search FieldGreaterOrEqual(string name, object value) => new(SearchMode.GreaterOrEqual, false, name, value);
 
         /// <summary>
         /// Creates a field in value search.
@@ -136,7 +136,7 @@ namespace Cave.Data
         /// <param name="name">The field name.</param>
         /// <param name="value">The value to check against.</param>
         /// <returns>A new search instance.</returns>
-        public static Search FieldLike(string name, object value) => new Search(SearchMode.Like, false, name, value);
+        public static Search FieldLike(string name, object value) => new(SearchMode.Like, false, name, value);
 
         /// <summary>
         /// Creates a field not equals value search.
@@ -144,7 +144,7 @@ namespace Cave.Data
         /// <param name="name">The field name.</param>
         /// <param name="value">The value to check against.</param>
         /// <returns>A new search instance.</returns>
-        public static Search FieldNotEquals(string name, object value) => new Search(SearchMode.Equals, true, name, value);
+        public static Search FieldNotEquals(string name, object value) => new(SearchMode.Equals, true, name, value);
 
         /// <summary>
         /// Creates a field not like value search.
@@ -152,7 +152,7 @@ namespace Cave.Data
         /// <param name="name">The field name.</param>
         /// <param name="value">The value to check against.</param>
         /// <returns>A new search instance.</returns>
-        public static Search FieldNotLike(string name, object value) => new Search(SearchMode.Like, true, name, value);
+        public static Search FieldNotLike(string name, object value) => new(SearchMode.Like, true, name, value);
 
         /// <summary>
         /// Creates a field smaller value search.
@@ -160,7 +160,7 @@ namespace Cave.Data
         /// <param name="name">The field name.</param>
         /// <param name="value">The value to check against.</param>
         /// <returns>A new search instance.</returns>
-        public static Search FieldSmaller(string name, object value) => new Search(SearchMode.Smaller, false, name, value);
+        public static Search FieldSmaller(string name, object value) => new(SearchMode.Smaller, false, name, value);
 
         /// <summary>
         /// Creates a field smaller or equal value search.
@@ -168,7 +168,7 @@ namespace Cave.Data
         /// <param name="name">The field name.</param>
         /// <param name="value">The value to check against.</param>
         /// <returns>A new search instance.</returns>
-        public static Search FieldSmallerOrEqual(string name, object value) => new Search(SearchMode.SmallerOrEqual, false, name, value);
+        public static Search FieldSmallerOrEqual(string name, object value) => new(SearchMode.SmallerOrEqual, false, name, value);
 
         /// <summary>
         /// Creates a search for matching specified fields of a row.

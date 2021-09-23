@@ -57,7 +57,7 @@ namespace Cave.Data
 
         readonly string Footer;
         readonly string Header;
-        readonly Set<TableInfo> Tables = new Set<TableInfo>();
+        readonly Set<TableInfo> Tables = new();
 
         #region Constructors
 

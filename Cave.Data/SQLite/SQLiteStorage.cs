@@ -128,7 +128,7 @@ namespace Cave.Data.SQLite
         /// <exception cref="ArgumentNullException">FieldType.</exception>
         public static DataType GetDatabaseDataType(DataType dataType)
         {
-            return (GetValueType(dataType)) switch
+            return GetValueType(dataType) switch
             {
                 SQLiteValueType.BLOB => DataType.Binary,
                 SQLiteValueType.INTEGER => DataType.Int64,

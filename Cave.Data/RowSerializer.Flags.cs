@@ -10,7 +10,6 @@ namespace Cave.Data
 
         /// <summary>Settings used during de/serialization.</summary>
         [Flags]
-        [SuppressMessage("Naming", "CA1711")]
         public enum Flags
         {
             /// <summary>No flags</summary>

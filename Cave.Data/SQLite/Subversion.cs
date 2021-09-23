@@ -34,7 +34,7 @@ namespace Cave.Data.SQLite
 
         static string[] ReadEntries(string path)
         {
-            return (GetVersion(path)) switch
+            return GetVersion(path) switch
             {
                 8 or 9 or 10 => File.ReadAllLines(Path.Combine(GetRootPath(path), "entries")),
                 _ => throw new NotSupportedException(),
@@ -88,7 +88,7 @@ namespace Cave.Data.SQLite
             if (File.Exists(entriesFile))
             {
                 var svnEntries = File.ReadAllLines(entriesFile);
-                return (svnEntries[0]) switch
+                return svnEntries[0] switch
                 {
                     "8" or "9" or "10" or "12" => int.Parse(svnEntries[0], null),
                     _ => throw new InvalidDataException($"Unknown svn version {svnEntries[0]}!"),

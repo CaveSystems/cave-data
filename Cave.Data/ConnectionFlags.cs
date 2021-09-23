@@ -5,7 +5,6 @@ namespace Cave.Data
 {
     /// <summary>Database connection flags.</summary>
     [Flags]
-    [SuppressMessage("Naming", "CA1711")]
     public enum ConnectionFlags
     {
         /// <summary>No options</summary>

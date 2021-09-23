@@ -4,11 +4,24 @@ using System.Collections.Generic;
 namespace Cave.Data
 {
     /// <summary>
-    /// Provides a class caching all results fetched from another table during usage.
-    /// This class can be used to replace any other <see cref="ITable"/> instance to build up a row cache on the fly during normal usage.
+    /// Provides a class caching all results fetched from another table during usage. This class can be used to replace any other <see cref="ITable"/> instance
+    /// to build up a row cache on the fly during normal usage.
     /// </summary>
     public class RowCacheBuilder : ITable
     {
+        #region Public Constructors
+
+        /// <inheritdoc/>
+        public RowCacheBuilder(ITable table)
+        {
+            Table = table;
+            Cache = MemoryTable.Create(table.Layout);
+        }
+
+        #endregion Public Constructors
+
+        #region Public Properties
+
         /// <summary>
         /// The backing table containing the cached rows.
         /// </summary>
@@ -18,28 +31,6 @@ namespace Cave.Data
         /// Table to run queries on.
         /// </summary>
         public ITable Table { get; }
-
-        /// <summary>
-        /// Creates a <see cref="RowCache{TKey, TStruct}"/> using <see cref="Table"/>.
-        /// </summary>
-        /// <typeparam name="TKey">Key identifier type.</typeparam>
-        /// <typeparam name="TStruct">Row structure type.</typeparam>
-        /// <returns>Returns a new instance using <see cref="Table"/> as datasource.</returns>
-        public RowCache<TKey, TStruct> GetRowCache<TKey, TStruct>()
-            where TKey : IComparable<TKey> where TStruct : struct
-            => new RowCache<TKey, TStruct>(Table);
-
-        /// <summary>
-        /// Creates a <see cref="RowCache{TKey, TStruct, TTarget}"/> using <see cref="Table"/>.
-        /// </summary>
-        /// <typeparam name="TKey">Key identifier type.</typeparam>
-        /// <typeparam name="TStruct">Row structure type.</typeparam>
-        /// <typeparam name="TTarget">Result and cache item type.</typeparam>
-        /// <param name="func">Function to convert from <typeparamref name="TStruct"/> to <typeparamref name="TTarget"/>.</param>
-        /// <returns>Returns a new instance using <see cref="Table"/> as datasource.</returns>
-        public RowCache<TKey, TStruct, TTarget> GetRowCache<TKey, TStruct, TTarget>(RowCache<TKey, TStruct, TTarget>.RowCacheConvertFunction func)
-            where TKey : IComparable<TKey> where TStruct : struct where TTarget : class
-            => new RowCache<TKey, TStruct, TTarget>(Table, func);
 
         /// <inheritdoc/>
         public IDatabase Database => Table.Database;
@@ -62,17 +53,14 @@ namespace Cave.Data
         /// <inheritdoc/>
         public IStorage Storage => Table.Storage;
 
-        /// <inheritdoc/>
-        public RowCacheBuilder(ITable table)
-        {
-            Table = table;
-            Cache = MemoryTable.Create(table.Layout);
-        }
+        #endregion Public Properties
+
+        #region Public Methods
 
         /// <inheritdoc/>
         public void Clear()
         {
-            Table.Clear(); 
+            Table.Clear();
             Cache.Clear();
         }
 
@@ -131,6 +119,28 @@ namespace Cave.Data
             Cache.Replace(row);
             return row;
         }
+
+        /// <summary>
+        /// Creates a <see cref="RowCache{TKey, TStruct}"/> using <see cref="Table"/>.
+        /// </summary>
+        /// <typeparam name="TKey">Key identifier type.</typeparam>
+        /// <typeparam name="TStruct">Row structure type.</typeparam>
+        /// <returns>Returns a new instance using <see cref="Table"/> as datasource.</returns>
+        public RowCache<TKey, TStruct> GetRowCache<TKey, TStruct>()
+            where TKey : IComparable<TKey> where TStruct : struct
+            => new(Table);
+
+        /// <summary>
+        /// Creates a <see cref="RowCache{TKey, TStruct, TTarget}"/> using <see cref="Table"/>.
+        /// </summary>
+        /// <typeparam name="TKey">Key identifier type.</typeparam>
+        /// <typeparam name="TStruct">Row structure type.</typeparam>
+        /// <typeparam name="TTarget">Result and cache item type.</typeparam>
+        /// <param name="func">Function to convert from <typeparamref name="TStruct"/> to <typeparamref name="TTarget"/>.</param>
+        /// <returns>Returns a new instance using <see cref="Table"/> as datasource.</returns>
+        public RowCache<TKey, TStruct, TTarget> GetRowCache<TKey, TStruct, TTarget>(RowCache<TKey, TStruct, TTarget>.RowCacheConvertFunction func)
+            where TKey : IComparable<TKey> where TStruct : struct where TTarget : class
+            => new(Table, func);
 
         /// <inheritdoc/>
         public IList<Row> GetRows()
@@ -227,5 +237,7 @@ namespace Cave.Data
             Table.UseLayout(layout);
             Cache.UseLayout(layout);
         }
+
+        #endregion Public Methods
     }
 }

@@ -118,7 +118,7 @@ namespace Cave
 
         /// <inheritdoc/>
         public FieldProperties Clone() =>
-            new FieldProperties
+            new()
             {
                 Index = Index,
                 ValueType = ValueType,

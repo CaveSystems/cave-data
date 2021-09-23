@@ -5,7 +5,6 @@ namespace Cave.Data
 {
     /// <summary>Table creation / loading flags.</summary>
     [Flags]
-    [SuppressMessage("Naming", "CA1711")]
     public enum TableFlags
     {
         /// <summary>The default mode:<br /> - Do not allow table creation<br /> - Use storage engine defaults<br /></summary>

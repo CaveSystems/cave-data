@@ -13,9 +13,9 @@ namespace Cave.Data.Sql
     {
         #region Private Fields
 
-        readonly IndexedSet<string> FieldNameSet = new IndexedSet<string>();
+        readonly IndexedSet<string> FieldNameSet = new();
         RowLayout Layout => Table.Layout;
-        readonly List<SqlParam> ParameterList = new List<SqlParam>();
+        readonly List<SqlParam> ParameterList = new();
         SqlStorage Storage => Table.Database.Storage as SqlStorage;
         readonly string Text;
         readonly SqlTable Table;

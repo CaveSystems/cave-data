@@ -11,7 +11,7 @@ namespace Cave.Data
     {
         #region Private Fields
 
-        readonly Dictionary<string, IDatabase> Databases = new Dictionary<string, IDatabase>();
+        readonly Dictionary<string, IDatabase> Databases = new();
 
         #endregion Private Fields
 

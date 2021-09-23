@@ -876,7 +876,7 @@ namespace Cave.Data.Sql
         /// <summary>Converts the specified search to a <see cref="SqlSearch" />.</summary>
         /// <param name="search">Search definition.</param>
         /// <returns>Returns a new <see cref="SqlSearch" /> instance.</returns>
-        protected SqlSearch ToSqlSearch(Search search) => new SqlSearch(this, search);
+        protected SqlSearch ToSqlSearch(Search search) => new(this, search);
 
         #endregion
 

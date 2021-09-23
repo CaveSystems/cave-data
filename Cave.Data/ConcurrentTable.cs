@@ -13,7 +13,7 @@ namespace Cave.Data
     {
         #region Private Fields
 
-        readonly object WriteLock = new object();
+        readonly object WriteLock = new();
         int readLock;
 
         #endregion Private Fields

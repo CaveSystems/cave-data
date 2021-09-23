@@ -275,7 +275,6 @@ namespace Cave.Data.Microsoft
         }
 
         /// <inheritdoc/>
-        [SuppressMessage("Globalization", "CA1309")]
         public override bool HasDatabase(string databaseName)
         {
             if (databaseName.HasInvalidChars(ASCII.Strings.SafeName))
