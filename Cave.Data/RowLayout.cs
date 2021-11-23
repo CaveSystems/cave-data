@@ -384,7 +384,7 @@ namespace Cave.Data
 
         #endregion
 
-        /// <summary>Gets the fieldcount.</summary>
+        /// <summary>Gets the field count.</summary>
         public readonly int FieldCount;
 
         readonly IList<IFieldProperties> FieldProperties;
@@ -509,7 +509,7 @@ namespace Cave.Data
 
         #endregion
 
-        #region object Overrides
+        #region Overrides
 
         /// <inheritdoc />
         public override bool Equals(object obj) => obj is RowLayout layout && Equals(layout);
@@ -787,29 +787,32 @@ namespace Cave.Data
 
         /// <summary>Sets a value at the specified struct.</summary>
         /// <param name="index">The field index.</param>
-        /// <param name="item">The struct to set the value at.</param>
+        /// <param name="target">The struct to set the value at.</param>
         /// <param name="value">The value to set.</param>
         /// <param name="culture">Culture to use to convert values.</param>
-        public void SetValue(int index, ref object item, object value, CultureInfo culture = null)
+        [Obsolete("Use overload with IFieldProperties definition!")]
+        public void SetValue(int index, ref object target, object value, CultureInfo culture = null) => SetValue(ref target, FieldProperties[index], value, culture);
+
+        /// <summary>Sets a value at the specified struct.</summary>
+        /// <param name="target">The struct to set the value at.</param>
+        /// <param name="field">Field properties to use</param>
+        /// <param name="value">The value to set.</param>
+        /// <param name="culture">Culture to use to convert values.</param>
+        public void SetValue(ref object target, IFieldProperties field, object value, CultureInfo culture = null)
         {
             if (!IsTyped)
             {
                 throw new InvalidOperationException("This RowLayout was not created from a typed struct!");
             }
 
-            if ((value != null) && (value.GetType() != FieldProperties[index].ValueType))
-            {
-                value = Convert.ChangeType(value, FieldProperties[index].ValueType, culture);
-            }
-
-            FieldProperties[index].FieldInfo.SetValue(item, value);
+            SetValueInternal(ref target, field, value, culture);
         }
 
         /// <summary>Sets all values of the struct.</summary>
-        /// <param name="item">The struct to set the values at.</param>
+        /// <param name="target">The struct to set the values at.</param>
         /// <param name="values">The values to set.</param>
         /// <param name="culture">Culture to use when converting values.</param>
-        public void SetValues(ref object item, object[] values, CultureInfo culture = null)
+        public void SetValues(ref object target, object[] values, CultureInfo culture = null)
         {
             if (values == null)
             {
@@ -823,20 +826,24 @@ namespace Cave.Data
 
             for (var i = 0; i < FieldCount; i++)
             {
-                var value = values[i];
                 var field = FieldProperties[i];
-                if ((value != null) && (value.GetType() != field.ValueType))
-                {
-                    value = field.DataType switch
-                    {
-                        DataType.User => FieldProperties[i].ParseValue(value.ToString()),
-                        DataType.Enum => Enum.Parse(field.ValueType, value.ToString(), true),
-                        _ => Convert.ChangeType(values[i], FieldProperties[i].ValueType, culture)
-                    };
-                }
-
-                FieldProperties[i].FieldInfo.SetValue(item, value);
+                SetValueInternal(ref target, field, values[field.Index], culture);
             }
+        }
+
+        void SetValueInternal(ref object target, IFieldProperties field, object value, CultureInfo culture = null)
+        {
+            if ((value != null) && (value.GetType() != field.ValueType))
+            {
+                value = field.DataType switch
+                {
+                    DataType.User => field.ParseValue(value.ToString()),
+                    DataType.Enum => Enum.Parse(field.ValueType, value.ToString(), true),
+                    _ => Convert.ChangeType(value, field.ValueType, culture)
+                };
+            }
+
+            field.FieldInfo.SetValue(target, value);
         }
 
         #endregion
