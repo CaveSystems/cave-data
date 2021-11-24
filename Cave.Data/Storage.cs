@@ -131,7 +131,7 @@ namespace Cave.Data
                 throw new ArgumentNullException(nameof(localLayout));
             }
 
-            if (flags == 0)
+            if (flags == 0 || !localLayout.IsTyped)
             {
                 RowLayout.CheckLayout(localLayout, databaseLayout);
                 return;
@@ -147,11 +147,13 @@ namespace Cave.Data
             {
                 throw new InvalidOperationException("Database Layout cannot be typed!");
             }
-
-            var layout = localLayout.GetMatching(databaseLayout, flags);
-            if (layout.FieldCount < localLayout.FieldCount)
+            if (!Equals(databaseLayout, localLayout))
             {
-                throw new InvalidOperationException("Local Layout contains fields not present at database!");
+                var layout = localLayout.GetMatching(databaseLayout, flags);
+                if (layout.FieldCount < localLayout.FieldCount)
+                {
+                    throw new InvalidOperationException("Local Layout contains fields not present at database!");
+                }
             }
         }
 

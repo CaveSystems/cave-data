@@ -440,7 +440,7 @@ namespace Cave.Data.Sql
             var commandBuilder = new SqlCommandBuilder(Storage);
             commandBuilder.Append("DELETE FROM ");
             commandBuilder.Append(FQTN);
-            AppendWhereClause(commandBuilder, row);
+            AppendWhereClause(commandBuilder, row, true);
             Storage.Execute(database: Database.Name, table: Name, cmd: commandBuilder);
             IncreaseSequenceNumber();
         }
@@ -979,11 +979,11 @@ namespace Cave.Data.Sql
 
                 if (firstCommand)
                 {
-                    commandBuilder.Append(",");
+                    firstCommand = false;
                 }
                 else
                 {
-                    firstCommand = false;
+                    commandBuilder.Append(",");
                 }
 
                 commandBuilder.Append(Storage.EscapeFieldName(field));
@@ -1007,7 +1007,7 @@ namespace Cave.Data.Sql
                 }
             }
 
-            AppendWhereClause(commandBuilder, row);
+            AppendWhereClause(commandBuilder, row, useParameters);
             commandBuilder.AppendLine(";");
         }
 
@@ -1063,14 +1063,25 @@ namespace Cave.Data.Sql
 
         #region private functions
 
-        void AppendWhereClause(SqlCommandBuilder commandBuilder, Row row)
+        void AppendWhereClause(SqlCommandBuilder commandBuilder, Row row, bool useParameters)
         {
+            var key = " WHERE ";
             foreach (var field in Layout.Identifier)
             {
-                commandBuilder.Append(" WHERE ");
+                commandBuilder.Append(key);
                 commandBuilder.Append(Storage.EscapeFieldName(field));
                 commandBuilder.Append("=");
-                commandBuilder.Append(Storage.GetDatabaseValue(field, row[field.Index]).ToString());
+
+                var value = Storage.GetData baseValue(field, row[field.Index]);
+                if (useParameters)
+                {
+                    commandBuilder.CreateAndAddParameter(value);
+                }
+                else
+                {
+                    commandBuilder.Append(Storage.EscapeFieldValue(field, value));
+                }
+                key = " AND ";
             }
         }
 
@@ -1127,7 +1138,7 @@ namespace Cave.Data.Sql
                         {
                             commandBuilder.Append("DELETE FROM ");
                             commandBuilder.Append(FQTN);
-                            AppendWhereClause(commandBuilder, transaction.Row);
+                            AppendWhereClause(commandBuilder, transaction.Row, useParameters);
                             commandBuilder.AppendLine(";");
                         }
                             break;
