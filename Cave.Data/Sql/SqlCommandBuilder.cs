@@ -37,6 +37,11 @@ namespace Cave.Data.Sql
         #region Public Properties
 
         /// <summary>
+        /// Gets the length of the command text.
+        /// </summary>
+        public int Length => StringBuilder.Length;
+
+        /// <summary>
         /// Gets the parameter count.
         /// </summary>
         public int ParameterCount => ParameterList.Count;
@@ -50,11 +55,6 @@ namespace Cave.Data.Sql
         /// Gets the full command text.
         /// </summary>
         public string Text => StringBuilder.ToString();
-
-        /// <summary>
-        /// Gets the length of the command text.
-        /// </summary>
-        public int Length => StringBuilder.Length;
 
         #endregion Public Properties
 
@@ -81,8 +81,8 @@ namespace Cave.Data.Sql
         /// <summary>
         /// Appends a parameter to the command text and parameter list.
         /// </summary>
-        /// <param name="vdatabaseValuelue">The value at the database.</param>
-        public void CreateAndAddParameter(object vdatabaseValuelue) => StringBuilder.Append(CreateParameter(vdatabaseValuelue).Name);
+        /// <param name="databaseValue">The value at the database.</param>
+        public void CreateAndAddParameter(object databaseValue) => StringBuilder.Append(CreateParameter(databaseValue).Name);
 
         /// <summary>
         /// Appends a parameter to the parameter list.
