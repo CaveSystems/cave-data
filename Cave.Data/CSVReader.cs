@@ -8,11 +8,11 @@ namespace Cave.Data
     /// <summary>
     /// Provides reading of csv files to a struct / class.
     /// </summary>
-    public sealed class CsvReader : IDisposable
+    public class CsvReader : IDisposable
     {
         #region Private Fields
 
-        readonly int[] FieldNumberMatching;
+        readonly int[] fieldNumberMatching;
 
         int currentRowNumber;
 
@@ -216,7 +216,7 @@ namespace Cave.Data
                 {
                     if (fields.Length != Layout.FieldCount)
                     {
-                        FieldNumberMatching = new int[Layout.FieldCount];
+                        fieldNumberMatching = new int[Layout.FieldCount];
                     }
                 }
 
@@ -246,25 +246,25 @@ namespace Cave.Data
                     }
                     else
                     {
-                        if ((FieldNumberMatching == null) && (fieldIndex != i))
+                        if ((fieldNumberMatching == null) && (fieldIndex != i))
                         {
-                            FieldNumberMatching = new int[Layout.FieldCount];
+                            fieldNumberMatching = new int[Layout.FieldCount];
                         }
                     }
                 }
 
-                if (FieldNumberMatching != null)
+                if (fieldNumberMatching != null)
                 {
                     var i = 0;
                     for (; i < count; i++)
                     {
                         var fieldName = fields[i].UnboxText(false);
-                        FieldNumberMatching[i] = Layout.GetFieldIndex(fieldName, false);
+                        fieldNumberMatching[i] = Layout.GetFieldIndex(fieldName, false);
                     }
 
                     for (; i < Layout.FieldCount; i++)
                     {
-                        FieldNumberMatching[i] = -1;
+                        fieldNumberMatching[i] = -1;
                     }
                 }
             }
@@ -329,9 +329,9 @@ namespace Cave.Data
         /// <returns>Returns a new <see cref="Row"/> instance.</returns>
         public static Row ParseRow(CsvProperties properties, RowLayout layout, string data)
         {
-            if (properties == null)
+            if (!properties.Valid)
             {
-                throw new ArgumentNullException(nameof(properties));
+                throw new ArgumentException("CsvProperties invalid!", nameof(properties));
             }
 
             if (layout == null)

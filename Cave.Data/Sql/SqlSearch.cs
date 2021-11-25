@@ -13,12 +13,12 @@ namespace Cave.Data.Sql
     {
         #region Private Fields
 
-        readonly IndexedSet<string> FieldNameSet = new();
-        RowLayout Layout => Table.Layout;
-        readonly List<SqlParam> ParameterList = new();
-        SqlStorage Storage => Table.Database.Storage as SqlStorage;
-        readonly string Text;
-        readonly SqlTable Table;
+        readonly IndexedSet<string> fieldNameSet = new();
+        RowLayout Layout => table.Layout;
+        readonly List<SqlParam> parameterList = new();
+        SqlStorage Storage => table.Database.Storage as SqlStorage;
+        readonly string text;
+        readonly SqlTable table;
 
         #endregion Private Fields
 
@@ -33,13 +33,13 @@ namespace Cave.Data.Sql
         {
             var name = Storage.SupportsNamedParameters ? $"{Storage.ParameterPrefix}{Parameters.Count + 1}" : Storage.ParameterPrefix;
             var parameter = new SqlParam(name, databaseValue);
-            ParameterList.Add(parameter);
+            parameterList.Add(parameter);
             return parameter;
         }
 
         void Flatten(StringBuilder sb, Search search)
         {
-            search.LoadLayout(Layout, Table.GetFieldNameComparison());
+            search.LoadLayout(Layout, table.GetFieldNameComparison());
             switch (search.Mode)
             {
                 case SearchMode.None:
@@ -48,7 +48,7 @@ namespace Cave.Data.Sql
 
                 case SearchMode.In:
                 {
-                    FieldNameSet.Include(search.FieldName);
+                    fieldNameSet.Include(search.FieldName);
                     var fieldName = Storage.EscapeFieldName(search.FieldProperties);
                     sb.Append(fieldName);
                     sb.Append(' ');
@@ -76,7 +76,7 @@ namespace Cave.Data.Sql
                 }
                 case SearchMode.Equals:
                 {
-                    FieldNameSet.Include(search.FieldName);
+                    fieldNameSet.Include(search.FieldName);
                     var fieldName = Storage.EscapeFieldName(search.FieldProperties);
 
                     // is value null -> yes return "name IS [NOT] NULL"
@@ -96,7 +96,7 @@ namespace Cave.Data.Sql
                 }
                 case SearchMode.Like:
                 {
-                    FieldNameSet.Include(search.FieldName);
+                    fieldNameSet.Include(search.FieldName);
                     var fieldName = Storage.EscapeFieldName(search.FieldProperties);
 
                     // is value null -> yes return "name IS [NOT] NULL"
@@ -116,7 +116,7 @@ namespace Cave.Data.Sql
                 }
                 case SearchMode.Greater:
                 {
-                    FieldNameSet.Include(search.FieldName);
+                    fieldNameSet.Include(search.FieldName);
                     var fieldName = Storage.EscapeFieldName(search.FieldProperties);
                     var dbValue = Storage.GetDatabaseValue(search.FieldProperties, search.FieldValue);
                     var parameter = AddParameter(dbValue);
@@ -125,7 +125,7 @@ namespace Cave.Data.Sql
                 }
                 case SearchMode.GreaterOrEqual:
                 {
-                    FieldNameSet.Include(search.FieldName);
+                    fieldNameSet.Include(search.FieldName);
                     var fieldName = Storage.EscapeFieldName(search.FieldProperties);
                     var dbValue = Storage.GetDatabaseValue(search.FieldProperties, search.FieldValue);
                     var parameter = AddParameter(dbValue);
@@ -134,7 +134,7 @@ namespace Cave.Data.Sql
                 }
                 case SearchMode.Smaller:
                 {
-                    FieldNameSet.Include(search.FieldName);
+                    fieldNameSet.Include(search.FieldName);
                     var name = Storage.EscapeFieldName(search.FieldProperties);
                     var dbValue = Storage.GetDatabaseValue(search.FieldProperties, search.FieldValue);
                     var parameter = AddParameter(dbValue);
@@ -143,7 +143,7 @@ namespace Cave.Data.Sql
                 }
                 case SearchMode.SmallerOrEqual:
                 {
-                    FieldNameSet.Include(search.FieldName);
+                    fieldNameSet.Include(search.FieldName);
                     var name = Storage.EscapeFieldName(search.FieldProperties);
                     var dbValue = Storage.GetDatabaseValue(search.FieldProperties, search.FieldValue);
                     var parameter = AddParameter(dbValue);
@@ -198,12 +198,12 @@ namespace Cave.Data.Sql
                 throw new ArgumentNullException(nameof(search));
             }
 
-            this.Table = table;
-            Parameters = new ReadOnlyCollection<SqlParam>(ParameterList);
-            FieldNames = new ReadOnlyCollection<string>(FieldNameSet);
+            this.table = table;
+            Parameters = new ReadOnlyCollection<SqlParam>(parameterList);
+            FieldNames = new ReadOnlyCollection<string>(fieldNameSet);
             var sb = new StringBuilder();
             Flatten(sb, search);
-            Text = sb.ToString();
+            text = sb.ToString();
         }
 
         #endregion Public Constructors
@@ -237,9 +237,9 @@ namespace Cave.Data.Sql
 
             foreach (var fieldName in option.FieldNames)
             {
-                if (!FieldNameSet.Contains(fieldName))
+                if (!fieldNameSet.Contains(fieldName))
                 {
-                    FieldNameSet.Add(fieldName);
+                    fieldNameSet.Add(fieldName);
                 }
             }
         }
@@ -248,7 +248,7 @@ namespace Cave.Data.Sql
         /// Gets the query text as string.
         /// </summary>
         /// <returns>A the database specific search string.</returns>
-        public override string ToString() => Text;
+        public override string ToString() => text;
 
         #endregion Public Methods
     }

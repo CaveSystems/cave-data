@@ -14,7 +14,7 @@ namespace Cave.Data
     {
         #region Private Fields
 
-        readonly RowLayout Layout;
+        readonly RowLayout layout;
 
         DataWriter writer;
 
@@ -107,9 +107,9 @@ namespace Cave.Data
 
             using var buffer = new MemoryStream();
             var w = new DataWriter(buffer);
-            for (var i = 0; i < Layout.FieldCount; i++)
+            for (var i = 0; i < layout.FieldCount; i++)
             {
-                var fieldProperties = Layout[i];
+                var fieldProperties = layout[i];
                 switch (fieldProperties.DataType)
                 {
                     case DataType.Binary:
@@ -323,8 +323,8 @@ namespace Cave.Data
             }
 
             writer = new DataWriter(stream);
-            this.Layout = layout;
-            WriteFieldDefinition(writer, this.Layout, CurrentVersion);
+            this.layout = layout;
+            WriteFieldDefinition(writer, this.layout, CurrentVersion);
         }
 
         #endregion Public Constructors
@@ -384,7 +384,7 @@ namespace Cave.Data
         /// <typeparam name="TStruct">Structure type.</typeparam>
         public void Write<TStruct>(TStruct value)
             where TStruct : struct =>
-            Write(new Row(Layout, Layout.GetValues(value), false));
+            Write(new Row(layout, layout.GetValues(value), false));
 
         /// <summary>
         /// Writes a number of rows to the file.
@@ -401,7 +401,7 @@ namespace Cave.Data
 
             foreach (var dataSet in table)
             {
-                var row = new Row(Layout, Layout.GetValues(dataSet), false);
+                var row = new Row(layout, layout.GetValues(dataSet), false);
                 var data = GetData(row, CurrentVersion);
                 WriteData(data);
             }

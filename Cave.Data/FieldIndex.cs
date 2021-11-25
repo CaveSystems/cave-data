@@ -21,9 +21,9 @@ namespace Cave.Data
         /// <summary>
         /// resolves value to IDs.
         /// </summary>
-        readonly FakeSortedDictionary<object, List<object[]>> Index;
+        readonly FakeSortedDictionary<object, List<object[]>> index;
 
-        readonly object NullValue = new BoxedValue(null);
+        readonly object nullValue = new BoxedValue(null);
 #endif
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace Cave.Data
 #if USE_BOXING
             index = new FakeSortedDictionary<BoxedValue, List<object[]>>();
 #else
-            Index = new FakeSortedDictionary<object, List<object[]>>();
+            index = new FakeSortedDictionary<object, List<object[]>>();
 
 #endif
 
@@ -53,9 +53,9 @@ namespace Cave.Data
 #if USE_BOXING
             BoxedValue obj = new BoxedValue(value);
 #else
-            var obj = value ?? NullValue;
+            var obj = value ?? nullValue;
 #endif
-            return Index.ContainsKey(obj) ? Index[obj].ToArray() : new object[][] { };
+            return index.ContainsKey(obj) ? index[obj].ToArray() : new object[][] { };
         }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace Cave.Data
         /// </summary>
         internal void Clear()
         {
-            Index.Clear();
+            index.Clear();
             Count = 0;
         }
 
@@ -76,15 +76,15 @@ namespace Cave.Data
 #if USE_BOXING
             BoxedValue obj = new BoxedValue(value);
 #else
-            var obj = value ?? NullValue;
+            var obj = value ?? nullValue;
 #endif
-            if (Index.ContainsKey(obj))
+            if (index.ContainsKey(obj))
             {
-                Index[obj].Add(row);
+                index[obj].Add(row);
             }
             else
             {
-                Index[obj] = new List<object[]> { row };
+                index[obj] = new List<object[]> { row };
             }
 
             Count++;
@@ -126,13 +126,13 @@ namespace Cave.Data
 #if USE_BOXING
             BoxedValue obj = new BoxedValue(value);
 #else
-            var obj = value ?? NullValue;
+            var obj = value ?? nullValue;
 #endif
 
             // remove ID from old hash
-            if (!Index.TryGetValue(obj, out var rows))
+            if (!index.TryGetValue(obj, out var rows))
             {
-                throw new ArgumentException($"Value {value} is not present at index (equals check {Index.Join(",")})!");
+                throw new ArgumentException($"Value {value} is not present at index (equals check {index.Join(",")})!");
             }
 
             var i = GetRowIndex(rows, row);
@@ -147,7 +147,7 @@ namespace Cave.Data
             }
             else
             {
-                if (!Index.Remove(obj))
+                if (!index.Remove(obj))
                 {
                     throw new ArgumentException($"Could not remove row {row} value {value}!");
                 }
@@ -171,39 +171,39 @@ namespace Cave.Data
 
         class BoxedValue : IComparable<BoxedValue>, IEquatable<BoxedValue>, IComparable
         {
-            readonly object Value;
+            readonly object value;
 
             #region Constructors
 
-            public BoxedValue(object value) => Value = value;
+            public BoxedValue(object value) => this.value = value;
 
             #endregion Constructors
 
             #region IComparable Members
 
-            public int CompareTo(object obj) => obj is BoxedValue box ? CompareTo(box) : Comparer.Default.Compare(Value, obj);
+            public int CompareTo(object obj) => obj is BoxedValue box ? CompareTo(box) : Comparer.Default.Compare(value, obj);
 
             #endregion IComparable Members
 
             #region IComparable<BoxedValue> Members
 
-            public int CompareTo(BoxedValue other) => Comparer.Default.Compare(Value, other.Value);
+            public int CompareTo(BoxedValue other) => Comparer.Default.Compare(value, other.value);
 
             #endregion IComparable<BoxedValue> Members
 
             #region IEquatable<BoxedValue> Members
 
-            public bool Equals(BoxedValue other) => Equals(other.Value, Value);
+            public bool Equals(BoxedValue other) => Equals(other.value, value);
 
             #endregion IEquatable<BoxedValue> Members
 
             #region Overrides
 
-            public override bool Equals(object obj) => obj is BoxedValue box ? Equals(box) : Equals(obj, Value);
+            public override bool Equals(object obj) => obj is BoxedValue box ? Equals(box) : Equals(obj, value);
 
-            public override int GetHashCode() => Value == null ? 0 : Value.GetHashCode();
+            public override int GetHashCode() => value == null ? 0 : value.GetHashCode();
 
-            public override string ToString() => Value == null ? "<null>" : Value.ToString();
+            public override string ToString() => value == null ? "<null>" : value.ToString();
 
             #endregion Overrides
         }

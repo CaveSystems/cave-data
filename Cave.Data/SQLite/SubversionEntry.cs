@@ -7,7 +7,7 @@ namespace Cave.Data.SQLite
     {
         #region Private Fields
 
-        readonly string[] Data;
+        readonly string[] data;
 
         #endregion Private Fields
 
@@ -21,7 +21,7 @@ namespace Cave.Data.SQLite
         internal SubversionEntry(string[] data, int version)
         {
             Version = version;
-            this.Data = data;
+            this.data = data;
             IsValid = (Version >= 8) || (Version <= 10);
         }
 
@@ -38,7 +38,7 @@ namespace Cave.Data.SQLite
             {
                 return Version switch
                 {
-                    8 or 9 or 10 => Data[5] == "delete",
+                    8 or 9 or 10 => data[5] == "delete",
                     _ => false,
                 };
             }
@@ -52,7 +52,7 @@ namespace Cave.Data.SQLite
         /// <summary>
         /// Gets the name of the <see cref="SubversionEntry"/>.
         /// </summary>
-        public string Name => Data[0];
+        public string Name => data[0];
 
         /// <summary>
         /// Gets the type of the <see cref="SubversionEntry"/>.
@@ -61,7 +61,7 @@ namespace Cave.Data.SQLite
         {
             get
             {
-                return Data[1] switch
+                return data[1] switch
                 {
                     "dir" => SubversionEntryType.Directory,
                     "file" => SubversionEntryType.File,

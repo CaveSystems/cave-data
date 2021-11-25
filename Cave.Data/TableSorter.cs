@@ -8,9 +8,9 @@ namespace Cave.Data
     {
         #region Private Fields
 
-        readonly IComparer Comparer;
-        readonly bool Descending;
-        readonly IFieldProperties Field;
+        readonly IComparer comparer;
+        readonly bool descending;
+        readonly IFieldProperties field;
 
         #endregion Private Fields
 
@@ -18,8 +18,8 @@ namespace Cave.Data
 
         public TableSorter(IFieldProperties field, ResultOptionMode mode)
         {
-            this.Field = field ?? throw new ArgumentNullException(nameof(field));
-            Comparer = field.DataType switch
+            this.field = field ?? throw new ArgumentNullException(nameof(field));
+            comparer = field.DataType switch
             {
                 DataType.Bool => Comparer<bool>.Default,
                 DataType.Int8 => Comparer<sbyte>.Default,
@@ -41,7 +41,7 @@ namespace Cave.Data
                 DataType.User => Comparer<string>.Default,
                 _ => throw new NotSupportedException(),
             };
-            Descending = mode switch
+            descending = mode switch
             {
                 ResultOptionMode.SortAsc => false,
                 ResultOptionMode.SortDesc => true,
@@ -55,9 +55,9 @@ namespace Cave.Data
 
         public int Compare(Row row1, Row row2)
         {
-            var val1 = row1[Field.Index];
-            var val2 = row2[Field.Index];
-            return Descending ? Comparer.Compare(val2, val1) : Comparer.Compare(val1, val2);
+            var val1 = row1[field.Index];
+            var val2 = row2[field.Index];
+            return descending ? comparer.Compare(val2, val1) : comparer.Compare(val1, val2);
         }
 
         #endregion Public Methods

@@ -13,7 +13,7 @@ namespace Cave.Data
     {
         #region Private Fields
 
-        readonly object WriteLock = new();
+        readonly object writeLock = new();
         int readLock;
 
         #endregion Private Fields
@@ -62,7 +62,7 @@ namespace Cave.Data
                 Trace.TraceInformation("WriteLock <cyan>wait (read lock <magenta>{0}<default>)", readLock);
             }
 
-            lock (WriteLock)
+            lock (writeLock)
             {
                 Monitor.Enter(this);
                 if (readLock < 0)

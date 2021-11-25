@@ -11,7 +11,7 @@ namespace Cave.Data
     {
         #region Private Fields
 
-        readonly Dictionary<string, IDatabase> Databases = new();
+        readonly Dictionary<string, IDatabase> databases = new();
 
         #endregion Private Fields
 
@@ -46,7 +46,7 @@ namespace Cave.Data
                     throw new ObjectDisposedException(ToString());
                 }
 
-                return Databases.Keys.ToArray();
+                return databases.Keys.ToArray();
             }
         }
 
@@ -71,7 +71,7 @@ namespace Cave.Data
             }
 
             IDatabase database = new MemoryDatabase(this, databaseName);
-            Databases.Add(databaseName, database);
+            databases.Add(databaseName, database);
             return database;
         }
 
@@ -83,7 +83,7 @@ namespace Cave.Data
                 throw new ObjectDisposedException(ToString());
             }
 
-            if (!Databases.Remove(database))
+            if (!databases.Remove(database))
             {
                 throw new ArgumentException($"The requested databaseName '{database}' was not found!");
             }
@@ -102,11 +102,11 @@ namespace Cave.Data
                 throw new ArgumentException($"The requested databaseName '{databaseName}' was not found!");
             }
 
-            return Databases[databaseName];
+            return databases[databaseName];
         }
 
         /// <inheritdoc/>
-        public override bool HasDatabase(string databaseName) => Databases.ContainsKey(databaseName);
+        public override bool HasDatabase(string databaseName) => databases.ContainsKey(databaseName);
 
         #endregion Public Methods
     }

@@ -13,7 +13,7 @@ namespace Cave.Data.SQLite
     {
         #region Private Fields
 
-        const string StaticConnectionString = "Data Source={0}";
+        const string staticConnectionString = "Data Source={0}";
 
         #endregion Private Fields
 
@@ -39,7 +39,7 @@ namespace Cave.Data.SQLite
             }
 
             var path = GetFileName(database);
-            return string.Format(null, StaticConnectionString, path);
+            return string.Format(null, staticConnectionString, path);
         }
 
         /// <inheritdoc/>

@@ -11,8 +11,8 @@ namespace Cave.Data
     {
         #region Private Fields
 
-        readonly IDatabase Database;
         Dictionary<string, ITable> tables = new();
+        readonly IDatabase database;
 
         #endregion Private Fields
 
@@ -24,7 +24,7 @@ namespace Cave.Data
         /// <param name="database">Database instance.</param>
         public CachedDatabase(IDatabase database)
         {
-            this.Database = database;
+            this.database = database;
             Reload();
         }
 
@@ -33,22 +33,22 @@ namespace Cave.Data
         #region Public Properties
 
         /// <inheritdoc/>
+        public bool IsClosed => database.IsClosed;
+
+        /// <inheritdoc/>
+        public bool IsSecure => database.IsSecure;
+
+        /// <inheritdoc/>
+        public string Name => database.Name;
+
+        /// <inheritdoc/>
+        public IStorage Storage => database.Storage;
+
+        /// <inheritdoc/>
+        public StringComparison TableNameComparison => database.TableNameComparison;
+
+        /// <inheritdoc/>
         public IList<string> TableNames => tables.Keys.ToArray();
-
-        /// <inheritdoc/>
-        public bool IsClosed => Database.IsClosed;
-
-        /// <inheritdoc/>
-        public bool IsSecure => Database.IsSecure;
-
-        /// <inheritdoc/>
-        public string Name => Database.Name;
-
-        /// <inheritdoc/>
-        public IStorage Storage => Database.Storage;
-
-        /// <inheritdoc/>
-        public StringComparison TableNameComparison => Database.TableNameComparison;
 
         #endregion Public Properties
 
@@ -62,12 +62,12 @@ namespace Cave.Data
         #region Public Methods
 
         /// <inheritdoc/>
-        public void Close() => Database.Close();
+        public void Close() => database.Close();
 
         /// <inheritdoc/>
         public ITable CreateTable(RowLayout layout, TableFlags flags = TableFlags.None)
         {
-            var result = Database.CreateTable(layout, flags);
+            var result = database.CreateTable(layout, flags);
             tables[result.Name] = result;
             return result;
         }
@@ -75,7 +75,7 @@ namespace Cave.Data
         /// <inheritdoc/>
         public void DeleteTable(string tableName)
         {
-            Database.DeleteTable(tableName);
+            database.DeleteTable(tableName);
             tables.Remove(tableName);
         }
 
@@ -85,7 +85,7 @@ namespace Cave.Data
             var cached = tables[tableName];
             if (cached == null)
             {
-                tables[tableName] = cached = Database.GetTable(tableName, flags);
+                tables[tableName] = cached = database.GetTable(tableName, flags);
             }
 
             if (cached.Flags != flags)
@@ -97,7 +97,7 @@ namespace Cave.Data
         }
 
         /// <inheritdoc/>
-        public ITable GetTable(RowLayout layout, TableFlags flags = default) => Database.GetTable(layout, flags);
+        public ITable GetTable(RowLayout layout, TableFlags flags = default) => database.GetTable(layout, flags);
 
         /// <inheritdoc/>
         public bool HasTable(string tableName) => tables.Keys.Any(t => string.Equals(tableName, t, TableNameComparison));
@@ -108,7 +108,7 @@ namespace Cave.Data
         public void Reload()
         {
             var newTables = new Dictionary<string, ITable>();
-            foreach (var table in Database.TableNames)
+            foreach (var table in database.TableNames)
             {
                 newTables[table] = null;
             }

@@ -12,8 +12,8 @@ namespace Cave.Data
     {
         #region Private Fields
 
-        readonly Dictionary<TKey, TStruct?> Cache = new();
-        readonly ITable<TKey, TStruct> Table;
+        readonly Dictionary<TKey, TStruct?> cache = new();
+        readonly ITable<TKey, TStruct> table;
 
         #endregion Private Fields
 
@@ -23,7 +23,7 @@ namespace Cave.Data
         /// Creates a new row cache using the specified table.
         /// </summary>
         /// <param name="table">Table to read rows from.</param>
-        public RowCache(ITable table) => this.Table = new Table<TKey, TStruct>(table);
+        public RowCache(ITable table) => this.table = new Table<TKey, TStruct>(table);
 
         #endregion Public Constructors
 
@@ -47,7 +47,7 @@ namespace Cave.Data
         {
             lock (this)
             {
-                Cache.Clear();
+                cache.Clear();
             }
 
             ;
@@ -62,21 +62,21 @@ namespace Cave.Data
         {
             lock (this)
             {
-                if (Cache.TryGetValue(id, out var result))
+                if (cache.TryGetValue(id, out var result))
                 {
                     HitCount++;
                     return result;
                 }
 
                 MissCount++;
-                if (Table.TryGetStruct(id, out var value))
+                if (table.TryGetStruct(id, out var value))
                 {
-                    return Cache[id] = value;
+                    return cache[id] = value;
                 }
             }
 
             NotFoundCount++;
-            return Cache[id] = null;
+            return cache[id] = null;
         }
 
         /// <summary>

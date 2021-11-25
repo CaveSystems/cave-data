@@ -540,11 +540,6 @@ namespace Cave.Data
         /// <returns>Returns an updated result instance.</returns>
         public static GenerateTableCodeResult SaveStructFile(this GenerateTableCodeResult result, string structFile = null)
         {
-            if (result == null)
-            {
-                throw new ArgumentNullException(nameof(result));
-            }
-
             if (result.FileName == null)
             {
                 if (structFile == null)

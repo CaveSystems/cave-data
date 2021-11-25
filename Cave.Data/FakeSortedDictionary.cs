@@ -9,16 +9,16 @@ namespace Cave.Data
     {
         #region Private Fields
 
-        readonly IDictionary<TKey, TValue> Unsorted;
+        readonly IDictionary<TKey, TValue> unsorted;
         TKey[] sortedKeys;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public FakeSortedDictionary() => Unsorted = new Dictionary<TKey, TValue>();
+        public FakeSortedDictionary() => unsorted = new Dictionary<TKey, TValue>();
 
-        public FakeSortedDictionary(int capacity) => Unsorted = new Dictionary<TKey, TValue>(capacity);
+        public FakeSortedDictionary(int capacity) => unsorted = new Dictionary<TKey, TValue>(capacity);
 
         #endregion Public Constructors
 
@@ -30,8 +30,8 @@ namespace Cave.Data
             {
                 if (sortedKeys == null)
                 {
-                    sortedKeys = new TKey[Unsorted.Count];
-                    Unsorted.Keys.CopyTo(sortedKeys, 0);
+                    sortedKeys = new TKey[unsorted.Count];
+                    unsorted.Keys.CopyTo(sortedKeys, 0);
                     Array.Sort(sortedKeys);
                 }
 
@@ -39,12 +39,12 @@ namespace Cave.Data
             }
         }
 
-        public ICollection<TKey> UnsortedKeys => Unsorted.Keys;
-        public IList<TValue> Values => SortedKeys.Select(k => Unsorted[k]).ToList();
+        public ICollection<TKey> UnsortedKeys => unsorted.Keys;
+        public IList<TValue> Values => SortedKeys.Select(k => unsorted[k]).ToList();
 
-        public int Count => Unsorted.Count;
+        public int Count => unsorted.Count;
 
-        public bool IsReadOnly => Unsorted.IsReadOnly;
+        public bool IsReadOnly => unsorted.IsReadOnly;
 
         #endregion Public Properties
 
@@ -52,10 +52,10 @@ namespace Cave.Data
 
         public TValue this[TKey key]
         {
-            get => Unsorted[key];
+            get => unsorted[key];
             set
             {
-                Unsorted[key] = value;
+                unsorted[key] = value;
                 sortedKeys = null;
             }
         }
@@ -66,56 +66,56 @@ namespace Cave.Data
 
         public void Add(TKey key, TValue value)
         {
-            Unsorted.Add(key, value);
+            unsorted.Add(key, value);
             sortedKeys = null;
         }
 
         public void Add(KeyValuePair<TKey, TValue> item)
         {
-            Unsorted.Add(item);
+            unsorted.Add(item);
             sortedKeys = null;
         }
 
         public void Clear()
         {
-            Unsorted.Clear();
+            unsorted.Clear();
             sortedKeys = null;
         }
 
-        public bool Contains(KeyValuePair<TKey, TValue> item) => Unsorted.Contains(item);
+        public bool Contains(KeyValuePair<TKey, TValue> item) => unsorted.Contains(item);
 
-        public bool ContainsKey(TKey key) => Unsorted.ContainsKey(key);
+        public bool ContainsKey(TKey key) => unsorted.ContainsKey(key);
 
-        public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex) => Unsorted.CopyTo(array, arrayIndex);
+        public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex) => unsorted.CopyTo(array, arrayIndex);
 
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() => ToArray().GetEnumerator();
 
         public bool Remove(TKey key)
         {
             sortedKeys = null;
-            return Unsorted.Remove(key);
+            return unsorted.Remove(key);
         }
 
         public bool Remove(KeyValuePair<TKey, TValue> item)
         {
             sortedKeys = null;
-            return Unsorted.Remove(item);
+            return unsorted.Remove(item);
         }
 
         public IList<KeyValuePair<TKey, TValue>> ToArray()
         {
-            var count = Unsorted.Count;
+            var count = unsorted.Count;
             var result = new KeyValuePair<TKey, TValue>[count];
             var i = 0;
             foreach (var key in SortedKeys)
             {
-                result[i++] = new KeyValuePair<TKey, TValue>(key, Unsorted[key]);
+                result[i++] = new KeyValuePair<TKey, TValue>(key, unsorted[key]);
             }
 
             return result;
         }
 
-        public bool TryGetValue(TKey key, out TValue value) => Unsorted.TryGetValue(key, out value);
+        public bool TryGetValue(TKey key, out TValue value) => unsorted.TryGetValue(key, out value);
 
         IEnumerator IEnumerable.GetEnumerator() => ToArray().GetEnumerator();
 

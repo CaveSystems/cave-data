@@ -11,7 +11,7 @@ namespace Cave.Data
     {
         #region Private Fields
 
-        readonly object[] Data;
+        readonly object[] data;
 
         #endregion Private Fields
 
@@ -51,11 +51,11 @@ namespace Cave.Data
 
             if (!layout.Identifier.Any())
             {
-                Data = row.Values;
+                data = row.Values;
             }
             else
             {
-                Data = layout.Identifier.Select(field => row[field.Index]).ToArray();
+                data = layout.Identifier.Select(field => row[field.Index]).ToArray();
             }
         }
 
@@ -64,21 +64,21 @@ namespace Cave.Data
         /// </summary>
         /// <param name="row">Row to create to create identifier for.</param>
         /// <param name="fields">The fields to use for the identifier.</param>
-        public Identifier(Row row, params int[] fields) => Data = GetData(row, fields);
+        public Identifier(Row row, params int[] fields) => data = GetData(row, fields);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Identifier"/> class.
         /// </summary>
         /// <param name="row">Row to create to create identifier for.</param>
         /// <param name="fields">The fields to use for the identifier.</param>
-        public Identifier(Row row, IEnumerable<int> fields) => Data = GetData(row, fields);
+        public Identifier(Row row, IEnumerable<int> fields) => data = GetData(row, fields);
 
         #endregion Public Constructors
 
         #region Public Methods
 
         /// <inheritdoc/>
-        public bool Equals(Identifier other) => (other != null) && Data.SequenceEqual(other.Data);
+        public bool Equals(Identifier other) => (other != null) && data.SequenceEqual(other.data);
 
         /// <inheritdoc/>
         public override bool Equals(object obj) => obj is Identifier other && Equals(other);
@@ -87,7 +87,7 @@ namespace Cave.Data
         public override int GetHashCode()
         {
             var hash = 0;
-            foreach (var item in Data)
+            foreach (var item in data)
             {
                 hash ^= item?.GetHashCode() ?? 0;
                 hash = hash.BitwiseRotateLeft(1);
@@ -97,7 +97,7 @@ namespace Cave.Data
         }
 
         /// <inheritdoc/>
-        public override string ToString() => Data.Select(d => $"{d}").Join('|');
+        public override string ToString() => data.Select(d => $"{d}").Join('|');
 
         #endregion Public Methods
     }

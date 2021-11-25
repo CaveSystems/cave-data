@@ -47,7 +47,7 @@ namespace Test.Cave
     [Table("TestStructBug")]
     struct TestStructBug
     {
-        static readonly Environment.SpecialFolder[] EnumValues = Enum.GetValues(typeof(Environment.SpecialFolder)).Cast<Environment.SpecialFolder>().ToArray();
+        static readonly Environment.SpecialFolder[] enumValues = Enum.GetValues(typeof(Environment.SpecialFolder)).Cast<Environment.SpecialFolder>().ToArray();
 
         public static TestStructBug Create(int i)
         {
@@ -59,7 +59,7 @@ namespace Test.Cave
                 BuggyField = i.ToString(),
                 IndexedField = (uint) i,
                 NoField = i.ToString(),
-                SomeEnum = EnumValues[i % EnumValues.Length],
+                SomeEnum = enumValues[i % enumValues.Length],
                 UniqueIndexedField = (sbyte) (-i / 10),
                 UniqueField = (short) i,
                 AutoIncField = (ushort) i

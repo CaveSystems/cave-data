@@ -12,11 +12,11 @@ namespace Cave.Data.Sql
     {
         #region Private Fields
 
-        readonly List<SqlParam> ParameterList = new();
+        readonly List<SqlParam> parameterList = new();
 
-        readonly SqlStorage Storage;
+        readonly SqlStorage storage;
 
-        readonly StringBuilder StringBuilder = new();
+        readonly StringBuilder stringBuilder = new();
 
         #endregion Private Fields
 
@@ -28,8 +28,8 @@ namespace Cave.Data.Sql
         /// <param name="storage">The storage engine.</param>
         public SqlCommandBuilder(SqlStorage storage)
         {
-            this.Storage = storage ?? throw new ArgumentNullException(nameof(storage));
-            Parameters = new ReadOnlyCollection<SqlParam>(ParameterList);
+            this.storage = storage ?? throw new ArgumentNullException(nameof(storage));
+            Parameters = new ReadOnlyCollection<SqlParam>(parameterList);
         }
 
         #endregion Public Constructors
@@ -39,12 +39,12 @@ namespace Cave.Data.Sql
         /// <summary>
         /// Gets the length of the command text.
         /// </summary>
-        public int Length => StringBuilder.Length;
+        public int Length => stringBuilder.Length;
 
         /// <summary>
         /// Gets the parameter count.
         /// </summary>
-        public int ParameterCount => ParameterList.Count;
+        public int ParameterCount => parameterList.Count;
 
         /// <summary>
         /// Gets all parameters present.
@@ -54,7 +54,7 @@ namespace Cave.Data.Sql
         /// <summary>
         /// Gets the full command text.
         /// </summary>
-        public string Text => StringBuilder.ToString();
+        public string Text => stringBuilder.ToString();
 
         #endregion Public Properties
 
@@ -70,19 +70,19 @@ namespace Cave.Data.Sql
         /// Appends a command text.
         /// </summary>
         /// <param name="text">Text to add.</param>
-        public void Append(string text) => this.StringBuilder.Append(text);
+        public void Append(string text) => stringBuilder.Append(text);
 
         /// <summary>
         /// Appends a command text.
         /// </summary>
         /// <param name="text">Text to add.</param>
-        public void AppendLine(string text) => this.StringBuilder.AppendLine(text);
+        public void AppendLine(string text) => stringBuilder.AppendLine(text);
 
         /// <summary>
         /// Appends a parameter to the command text and parameter list.
         /// </summary>
         /// <param name="databaseValue">The value at the database.</param>
-        public void CreateAndAddParameter(object databaseValue) => StringBuilder.Append(CreateParameter(databaseValue).Name);
+        public void CreateAndAddParameter(object databaseValue) => stringBuilder.Append(CreateParameter(databaseValue).Name);
 
         /// <summary>
         /// Appends a parameter to the parameter list.
@@ -91,14 +91,14 @@ namespace Cave.Data.Sql
         /// <returns>A new parameter instance.</returns>
         public SqlParam CreateParameter(object databaseValue)
         {
-            var name = Storage.ParameterPrefix;
-            if (Storage.SupportsNamedParameters)
+            var name = storage.ParameterPrefix;
+            if (storage.SupportsNamedParameters)
             {
-                name += ParameterList.Count;
+                name += parameterList.Count;
             }
 
             var parameter = new SqlParam(name, databaseValue);
-            ParameterList.Add(parameter);
+            parameterList.Add(parameter);
             return parameter;
         }
 
@@ -106,7 +106,7 @@ namespace Cave.Data.Sql
         /// Gets the full command text.
         /// </summary>
         /// <returns>Command text.</returns>
-        public override string ToString() => StringBuilder.ToString();
+        public override string ToString() => stringBuilder.ToString();
 
         #endregion Public Methods
     }

@@ -11,9 +11,9 @@ namespace Cave.Data
     {
         #region Private Fields
 
-        readonly LinkedList<SqlConnection> Queue = new();
-        readonly SqlStorage Storage;
-        readonly Set<SqlConnection> Used = new();
+        readonly LinkedList<SqlConnection> queue = new();
+        readonly SqlStorage storage;
+        readonly Set<SqlConnection> used = new();
         TimeSpan? timeout = TimeSpan.FromMinutes(5);
 
         #endregion Private Fields
@@ -22,7 +22,7 @@ namespace Cave.Data
 
         SqlConnection GetQueuedConnection(string database)
         {
-            var nextNode = Queue.First;
+            var nextNode = queue.First;
             LinkedListNode<SqlConnection> selectedNode = null;
             while (nextNode != null)
             {
@@ -33,14 +33,14 @@ namespace Cave.Data
                 // remove dead and old connections
                 if ((currentNode.Value.State != ConnectionState.Open) || (DateTime.UtcNow > (currentNode.Value.LastUsed + timeout.Value)))
                 {
-                    Trace.TraceInformation($"Closing connection {currentNode.Value} (livetime exceeded) (Idle:{Queue.Count} Used:{Used.Count})");
+                    Trace.TraceInformation($"Closing connection {currentNode.Value} (livetime exceeded) (Idle:{queue.Count} Used:{used.Count})");
                     currentNode.Value.Dispose();
-                    Queue.Remove(currentNode);
+                    queue.Remove(currentNode);
                     continue;
                 }
 
                 // allow only connection with matching db name ?
-                if (!Storage.DBConnectionCanChangeDataBase)
+                if (!storage.DBConnectionCanChangeDataBase)
                 {
                     // check if database name matches
                     if (currentNode.Value.Database != database)
@@ -68,8 +68,8 @@ namespace Cave.Data
                 }
 
                 // we got a matching connection, remove node
-                Queue.Remove(selectedNode);
-                Used.Add(selectedNode.Value);
+                queue.Remove(selectedNode);
+                used.Add(selectedNode.Value);
                 return selectedNode.Value;
             }
 
@@ -85,7 +85,7 @@ namespace Cave.Data
         /// Initializes a new instance of the <see cref="SqlConnectionPool"/> class.
         /// </summary>
         /// <param name="storage">The storage.</param>
-        public SqlConnectionPool(SqlStorage storage) => this.Storage = storage;
+        public SqlConnectionPool(SqlStorage storage) => this.storage = storage;
 
         #endregion Public Constructors
 
@@ -108,20 +108,20 @@ namespace Cave.Data
         {
             lock (this)
             {
-                foreach (var connection in Used)
+                foreach (var connection in used)
                 {
                     Trace.TraceInformation($"Closing connection {connection} (pool clearing)");
                     connection.Close();
                 }
 
-                foreach (var connection in Queue)
+                foreach (var connection in queue)
                 {
                     Trace.TraceInformation($"Closing connection {connection} (pool clearing)");
                     connection.Close();
                 }
 
-                Queue.Clear();
-                Used.Clear();
+                queue.Clear();
+                used.Clear();
             }
         }
 
@@ -142,11 +142,11 @@ namespace Cave.Data
                 var connection = GetQueuedConnection(databaseName);
                 if (connection == null)
                 {
-                    Trace.TraceInformation("Creating new connection for Database {0} (Idle:{1} Used:{2})", databaseName, Queue.Count, Used.Count);
-                    var iDbConnection = Storage.CreateNewConnection(databaseName);
+                    Trace.TraceInformation("Creating new connection for Database {0} (Idle:{1} Used:{2})", databaseName, queue.Count, used.Count);
+                    var iDbConnection = storage.CreateNewConnection(databaseName);
                     connection = new SqlConnection(databaseName, iDbConnection);
-                    Used.Add(connection);
-                    Trace.TraceInformation($"Created new connection for Database {databaseName} (Idle:{Queue.Count} Used:{Used.Count})");
+                    used.Add(connection);
+                    Trace.TraceInformation($"Created new connection for Database {databaseName} (Idle:{queue.Count} Used:{used.Count})");
                 }
                 else
                 {
@@ -174,12 +174,12 @@ namespace Cave.Data
 
             lock (this)
             {
-                if (Used.Contains(connection))
+                if (used.Contains(connection))
                 {
-                    Used.Remove(connection);
+                    used.Remove(connection);
                     if (!close && (connection.State == ConnectionState.Open))
                     {
-                        Queue.AddFirst(connection);
+                        queue.AddFirst(connection);
                         connection = null;
                         return;
                     }
@@ -195,7 +195,7 @@ namespace Cave.Data
         {
             lock (this)
             {
-                return $"SqlConnectionPool {Storage} queue:{Queue.Count} used:{Used.Count}";
+                return $"SqlConnectionPool {storage} queue:{queue.Count} used:{used.Count}";
             }
         }
 

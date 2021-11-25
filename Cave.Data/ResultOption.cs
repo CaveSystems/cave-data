@@ -14,7 +14,7 @@ namespace Cave.Data
     {
         #region Private Fields
 
-        readonly IEnumerable<ResultOption> List;
+        readonly IEnumerable<ResultOption> list;
 
         #endregion Private Fields
 
@@ -25,7 +25,7 @@ namespace Cave.Data
             var copy = list.First();
             Mode = copy.Mode;
             Parameter = copy.Parameter;
-            this.List = list;
+            this.list = list;
         }
 
         ResultOption(ResultOptionMode mode, string parameter)
@@ -266,10 +266,10 @@ namespace Cave.Data
         }
 
         /// <inheritdoc/>
-        public IEnumerator<ResultOption> GetEnumerator() => (List ?? new[] { this }).Where(i => i.Mode != ResultOptionMode.None).GetEnumerator();
+        public IEnumerator<ResultOption> GetEnumerator() => (list ?? new[] { this }).Where(i => i.Mode != ResultOptionMode.None).GetEnumerator();
 
         /// <inheritdoc/>
-        IEnumerator IEnumerable.GetEnumerator() => (List ?? new[] { this }).Where(i => i.Mode != ResultOptionMode.None).GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => (list ?? new[] { this }).Where(i => i.Mode != ResultOptionMode.None).GetEnumerator();
 
         #endregion Public Methods
     }

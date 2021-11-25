@@ -13,11 +13,11 @@ namespace Cave.Data
     {
         #region Private Fields
 
-        readonly Dictionary<TKey, TTarget> Cache = new();
+        readonly Dictionary<TKey, TTarget> cache = new();
 
-        readonly RowCacheConvertFunction ConverterFunction;
+        readonly RowCacheConvertFunction converterFunction;
 
-        readonly ITable<TKey, TStruct> Table;
+        readonly ITable<TKey, TStruct> table;
 
         #endregion Private Fields
 
@@ -30,8 +30,8 @@ namespace Cave.Data
         /// <param name="func">Function to convert from <typeparamref name="TStruct"/> to <typeparamref name="TTarget"/>.</param>
         public RowCache(ITable table, RowCacheConvertFunction func)
         {
-            this.Table = new Table<TKey, TStruct>(table);
-            this.ConverterFunction = func ?? throw new ArgumentNullException(nameof(func));
+            this.table = new Table<TKey, TStruct>(table);
+            converterFunction = func ?? throw new ArgumentNullException(nameof(func));
         }
 
         #endregion Public Constructors
@@ -71,7 +71,7 @@ namespace Cave.Data
                 HitCount = 0;
                 MissCount = 0;
                 NotFoundCount = 0;
-                Cache.Clear();
+                cache.Clear();
             }
 
             ;
@@ -98,22 +98,22 @@ namespace Cave.Data
         {
             lock (this)
             {
-                if (Cache.TryGetValue(id, out value))
+                if (cache.TryGetValue(id, out value))
                 {
                     HitCount++;
                     return true;
                 }
 
                 MissCount++;
-                if (Table.TryGetStruct(id, out var row))
+                if (table.TryGetStruct(id, out var row))
                 {
-                    value = Cache[id] = ConverterFunction(id, row);
+                    value = cache[id] = converterFunction(id, row);
                     return true;
                 }
             }
 
             NotFoundCount++;
-            value = Cache[id] = ConverterFunction(id, null);
+            value = cache[id] = converterFunction(id, null);
             return false;
         }
 
