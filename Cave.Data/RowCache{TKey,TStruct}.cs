@@ -47,10 +47,11 @@ namespace Cave.Data
         {
             lock (this)
             {
+                HitCount = 0;
+                MissCount = 0;
+                NotFoundCount = 0;
                 cache.Clear();
             }
-
-            ;
         }
 
         /// <summary>
@@ -58,39 +59,38 @@ namespace Cave.Data
         /// </summary>
         /// <param name="id">Row identifier.</param>
         /// <returns>Returns the row structure or null.</returns>
-        public TStruct? Get(TKey id)
+        public TStruct? Get(TKey id) => (TryGetStruct(id, out var value)) ? value : null;
+
+        /// <summary>
+        /// Tries to get the value with the specified identifier.
+        /// </summary>
+        /// <param name="id">The identifier value.</param>
+        /// <param name="value">Returns the result value.</param>
+        /// <returns>Returns true on success, false otherwise.</returns>
+        public bool TryGetStruct(TKey id, out TStruct value)
         {
             lock (this)
             {
-                if (cache.TryGetValue(id, out var result))
+                if (cache.TryGetValue(id, out var row) && row != null)
                 {
+                    value = row.Value;
                     HitCount++;
-                    return result;
+                    return true;
                 }
 
                 MissCount++;
-                if (table.TryGetStruct(id, out var value))
+                if (table.TryGetStruct(id, out value))
                 {
-                    return cache[id] = value;
+                    cache[id] = value;
+                    return true;
                 }
+
+                NotFoundCount++;
+                cache[id] = value = default;
+                return false;
             }
-
-            NotFoundCount++;
-            return cache[id] = null;
         }
 
-        /// <summary>
-        /// Tries to get the row with the specified identifier.
-        /// </summary>
-        /// <param name="id">The identifier value.</param>
-        /// <param name="row">Returns the result row.</param>
-        /// <returns>Returns true on success, false otherwise.</returns>
-        public bool TryGetStruct(TKey id, out TStruct row)
-        {
-            var result = Get(id);
-            row = result ?? default;
-            return result.HasValue;
-        }
 
         #endregion Public Methods
     }

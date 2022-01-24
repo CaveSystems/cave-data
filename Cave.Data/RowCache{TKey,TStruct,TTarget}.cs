@@ -73,8 +73,6 @@ namespace Cave.Data
                 NotFoundCount = 0;
                 cache.Clear();
             }
-
-            ;
         }
 
         /// <summary>
@@ -82,11 +80,7 @@ namespace Cave.Data
         /// </summary>
         /// <param name="id">Row identifier.</param>
         /// <returns>Returns the converted target value or null.</returns>
-        public TTarget Get(TKey id)
-        {
-            TryGetValue(id, out var value);
-            return value;
-        }
+        public TTarget Get(TKey id) => TryGetValue(id, out var value) ? value : value;
 
         /// <summary>
         /// Tries to get the value with the specified identifier.
@@ -107,14 +101,14 @@ namespace Cave.Data
                 MissCount++;
                 if (table.TryGetStruct(id, out var row))
                 {
-                    value = cache[id] = converterFunction(id, row);
+                    cache[id] = value = converterFunction(id, row);
                     return true;
                 }
-            }
 
-            NotFoundCount++;
-            value = cache[id] = converterFunction(id, null);
-            return false;
+                NotFoundCount++;
+                cache[id] = value = converterFunction(id, null);
+                return false;
+            }
         }
 
         #endregion Public Methods
