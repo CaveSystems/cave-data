@@ -58,7 +58,7 @@ namespace Cave.Data
 
             if (provider == null)
             {
-                throw new ArgumentNullException(nameof(provider));
+                provider = CultureInfo.InvariantCulture;
             }
 
             if (fieldType.Name.StartsWith("Nullable", StringComparison.Ordinal))

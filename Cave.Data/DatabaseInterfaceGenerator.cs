@@ -191,7 +191,7 @@ namespace Cave.Data
             {
                 result.AppendLine();
                 result.AppendLine($"\t\t/// <summary>Gets a new <see cref=\"ITable{{{table.ClassName}}}\"/> instance for accessing the <c>{table.TableName}</c> table.</summary>");
-                result.AppendLine($"\t\tpublic static ITable<{table.ClassName}> {table.GetterName} => new Table<{table.ClassName}>(GetTable({table.TableName}));");
+                result.AppendLine($"\t\tpublic static ITable<{table.ClassName}> {table.GetterName} => new Table<{table.ClassName}>(GetTable(\"{table.TableName}\"));");
             }
 
             result.Append(footer);

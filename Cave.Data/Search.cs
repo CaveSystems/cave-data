@@ -173,6 +173,35 @@ namespace Cave.Data
         /// <summary>
         /// Creates a search for matching specified fields of a row.
         /// </summary>
+        /// <param name="row">The row.</param>
+        /// <param name="fieldNames">The field names.</param>
+        /// <returns>A new search instance.</returns>
+        public static Search FullMatch(Row row, params string[] fieldNames)
+        {
+            if (row == null)
+            {
+                throw new ArgumentNullException(nameof(row));
+            }
+
+            if (fieldNames == null)
+            {
+                throw new ArgumentNullException(nameof(fieldNames));
+            }
+
+            var search = None;
+            foreach (var field in fieldNames)
+            {
+                var index = row.Layout.GetFieldIndex(field, true);
+                var value = row[index];
+                search &= FieldEquals(field, value);
+            }
+
+            return search;
+        }
+
+        /// <summary>
+        /// Creates a search for matching specified fields of a row.
+        /// </summary>
         /// <param name="table">The table.</param>
         /// <param name="row">The row.</param>
         /// <param name="fieldNames">The field names.</param>
@@ -215,14 +244,15 @@ namespace Cave.Data
         /// <returns>Returns a new search instance.</returns>
         public static Search FullMatch<TStruct>(ITable table, TStruct row, bool checkDefaultValues = false)
             where TStruct : struct
-        {
-            if (table == null)
-            {
-                throw new ArgumentNullException(nameof(table));
-            }
+            => FullMatch(table, table.Layout.GetRow(row), checkDefaultValues);
 
-            return FullMatch(table, table.Layout.GetRow(row), checkDefaultValues);
-        }
+        /// <summary>
+        /// Creates a search for matching a given row excluding the ID field.
+        /// </summary>
+        /// <param name="row">The row data to search for.</param>
+        /// <param name="checkDefaultValues">if set to <c>true</c> [check default values].</param>
+        /// <returns>Returns a new search instance.</returns>
+        public static Search FullMatch(Row row, bool checkDefaultValues = false) => FullMatch(row.Layout, row.Values, checkDefaultValues);
 
         /// <summary>
         /// Creates a search for matching a given row excluding the ID field.
@@ -231,20 +261,7 @@ namespace Cave.Data
         /// <param name="row">The row data to search for.</param>
         /// <param name="checkDefaultValues">if set to <c>true</c> [check default values].</param>
         /// <returns>Returns a new search instance.</returns>
-        public static Search FullMatch(ITable table, Row row, bool checkDefaultValues = false)
-        {
-            if (table == null)
-            {
-                throw new ArgumentNullException(nameof(table));
-            }
-
-            if (row == null)
-            {
-                throw new ArgumentNullException(nameof(row));
-            }
-
-            return FullMatch(table, row.Values, checkDefaultValues);
-        }
+        public static Search FullMatch(ITable table, Row row, bool checkDefaultValues = false) => FullMatch(table.Layout, row.Values, checkDefaultValues);
 
         /// <summary>
         /// Creates a search for matching a given row excluding the identifier fields.
@@ -253,11 +270,20 @@ namespace Cave.Data
         /// <param name="fields">The row data to search for.</param>
         /// <param name="checkDefaultValues">if set to <c>true</c> [check default values].</param>
         /// <returns>Returns a new search instance.</returns>
-        public static Search FullMatch(ITable table, object[] fields, bool checkDefaultValues = false)
+        public static Search FullMatch(ITable table, object[] fields, bool checkDefaultValues = false) => FullMatch(table.Layout, fields, checkDefaultValues);
+
+        /// <summary>
+        /// Creates a search for matching a given row excluding the identifier fields.
+        /// </summary>
+        /// <param name="layout">The layout.</param>
+        /// <param name="fields">The row data to search for.</param>
+        /// <param name="checkDefaultValues">if set to <c>true</c> [check default values].</param>
+        /// <returns>Returns a new search instance.</returns>
+        public static Search FullMatch(RowLayout layout, object[] fields, bool checkDefaultValues = false)
         {
-            if (table == null)
+            if (layout == null)
             {
-                throw new ArgumentNullException(nameof(table));
+                throw new ArgumentNullException(nameof(layout));
             }
 
             if (fields == null)
@@ -266,9 +292,9 @@ namespace Cave.Data
             }
 
             var search = None;
-            for (var i = 0; i < table.Layout.FieldCount; i++)
+            for (var i = 0; i < layout.FieldCount; i++)
             {
-                var field = table.Layout[i];
+                var field = layout[i];
                 if (field.Flags.HasFlag(FieldFlags.ID))
                 {
                     continue;
@@ -285,12 +311,12 @@ namespace Cave.Data
                     switch (field.DataType)
                     {
                         case DataType.String:
-                        if (Equals(string.Empty, value))
-                        {
-                            continue;
-                        }
+                            if (Equals(string.Empty, value))
+                            {
+                                continue;
+                            }
 
-                        break;
+                            break;
 
                         default:
                         {
@@ -308,7 +334,29 @@ namespace Cave.Data
                     }
                 }
 
-                search &= FieldEquals(table.Layout.GetName(i), fields.GetValue(i));
+                search &= FieldEquals(layout.GetName(i), fields.GetValue(i));
+            }
+
+            return search;
+        }
+
+        /// <summary>
+        /// Creates a search for matching specified fields of a row.
+        /// </summary>
+        /// <param name="row">The row.</param>
+        /// <returns>A new search instance.</returns>
+        public static Search IdentifierMatch(Row row)
+        {
+            if (row == null)
+            {
+                throw new ArgumentNullException(nameof(row));
+            }
+
+            var search = None;
+            foreach (var field in row.Layout.Identifier)
+            {
+                var value = row[field.Index];
+                search &= FieldEquals(field.Name, value);
             }
 
             return search;

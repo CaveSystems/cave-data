@@ -147,7 +147,8 @@ namespace Cave.Data.Sql
         /// <param name="commandBuilder">The command builder.</param>
         /// <param name="row">The row.</param>
         /// <param name="useParameters">Use databaseName parameters instead of escaped command string.</param>
-        protected virtual void CreateInsert(SqlCommandBuilder commandBuilder, Row row, bool useParameters)
+        /// <returns>Returns a value indicating whether auto increment was used or not.</returns>
+        protected virtual bool CreateInsert(SqlCommandBuilder commandBuilder, Row row, bool useParameters)
         {
             if (row == null)
             {
@@ -158,6 +159,7 @@ namespace Cave.Data.Sql
             {
                 throw new ArgumentNullException(nameof(commandBuilder));
             }
+            var usesAutoIncrement = false;
 
             commandBuilder.Append("INSERT INTO ");
             commandBuilder.Append(FQTN);
@@ -174,7 +176,19 @@ namespace Cave.Data.Sql
                 var field = Layout[i];
                 if (field.Flags.HasFlag(FieldFlags.AutoIncrement))
                 {
-                    continue;
+                    //allow user to set the value explicitly even if field is autoincrement
+                    var currentValue = Storage.GetDatabaseValue(field, row[i]);
+                    var autoIncrement = currentValue == null;
+                    if (!autoIncrement)
+                    {
+                        var defaultValue = Activator.CreateInstance(field.FieldInfo.FieldType);
+                        autoIncrement = Equals(currentValue, defaultValue);
+                    }
+                    if (autoIncrement)
+                    {
+                        usesAutoIncrement = true;
+                        continue;
+                    }
                 }
 
                 if (firstCommand)
@@ -208,6 +222,7 @@ namespace Cave.Data.Sql
             commandBuilder.Append(parameterBuilder.ToString());
             commandBuilder.Append(")");
             commandBuilder.AppendLine(";");
+            return usesAutoIncrement;
         }
 
         /// <summary>
@@ -911,9 +926,18 @@ namespace Cave.Data.Sql
         public override Row Insert(Row row)
         {
             var commandBuilder = new SqlCommandBuilder(Storage);
-            CreateInsert(commandBuilder, row, true);
-            CreateLastInsertedRowCommand(commandBuilder, row);
-            var result = QueryRow(commandBuilder);
+            var autoIncrement = CreateInsert(commandBuilder, row, true);
+            Row result;
+            if (autoIncrement)
+            {
+                CreateLastInsertedRowCommand(commandBuilder, row);
+                result = QueryRow(commandBuilder);
+            }
+            else
+            {
+                Execute(commandBuilder);
+                result = GetRow(Search.IdentifierMatch(row));
+            }
             IncreaseSequenceNumber();
             return result;
         }
