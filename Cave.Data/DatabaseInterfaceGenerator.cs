@@ -108,10 +108,7 @@ namespace Cave.Data
             code.AppendLine("\t\t/// <returns>A new <see cref=\"IDatabase\" /> instance.</returns>");
             code.AppendLine("\t\tpublic static void Connect(IStorage storage, bool createIfNotExists = false)");
             code.AppendLine("\t\t{");
-            code.AppendLine("\t\t\tif (database == null)");
-            code.AppendLine("\t\t\t{");
-            code.AppendLine($"\t\t\t\tdatabase = storage.GetDatabase(\"{database.Name}\", createIfNotExists);");
-            code.AppendLine("\t\t\t}");
+            code.AppendLine($"\t\t\tdatabase = storage.GetDatabase(\"{database.Name}\", createIfNotExists);");
             code.AppendLine("\t\t}");
             code.AppendLine();
             code.AppendLine("\t\t/// <summary>Gets or sets the function used to retrieve tables from the database.</summary>");
