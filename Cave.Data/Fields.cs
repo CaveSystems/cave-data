@@ -67,7 +67,7 @@ namespace Cave.Data
                 {
                     return null;
                 }
-#if NET45_OR_GREATER || NETSTANDARD2_0_OR_GREATER || NET50
+#if NET45_OR_GREATER || NETSTANDARD2_0_OR_GREATER || NET5_0_OR_GREATER
                 fieldType = fieldType.GenericTypeArguments[0];
 #elif NET20_OR_GREATER
                 fieldType = fieldType.GetGenericArguments()[0];

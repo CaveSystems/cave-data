@@ -86,18 +86,19 @@ namespace Cave.Data
             code.AppendLine();
             code.AppendLine("using System;");
             code.AppendLine("using System.Globalization;");
+            code.AppendLine("using System.CodeDom.Compiler;");
             code.AppendLine("using Cave.Data;");
             code.AppendLine();
             code.AppendLine($"namespace {NameSpace}");
             code.AppendLine("{");
             code.AppendLine($"\t/// <summary>Provides access to table structures for database {database.Name}.</summary>");
-            code.AppendLine($"\t[System.CodeDom.Compiler.GeneratedCode(\"{generator.FullName}\",\"{generator.Assembly.GetName().Version}\")]");
+            code.AppendLine($"\t[GeneratedCode(\"{generator.FullName}\",\"{generator.Assembly.GetName().Version}\")]");
             code.AppendLine($"\tpublic static partial class {ClassName}");
             code.AppendLine("\t{");
-            code.AppendLine("\t\tstatic IDatabase database;");
+            code.AppendLine("\t\tstatic IDatabase? database;");
             code.AppendLine();
             code.AppendLine("\t\t/// <summary>Gets the used database instance.</summary>");
-            code.AppendLine("\t\tpublic static IDatabase Database => database;");
+            code.AppendLine("\t\tpublic static IDatabase Database => database ?? throw new InvalidOperationException(\"Database is not connected!\");");
             code.AppendLine();
             code.AppendLine("\t\t/// <summary>Gets or sets the flags used when accessing table instances.</summary>");
             code.AppendLine("\t\tpublic static TableFlags DefaultTableFlags { get; set; }");
@@ -210,7 +211,14 @@ namespace Cave.Data
                 throw new ArgumentNullException(nameof(table));
             }
 
-            var result = table.GenerateStructFile(databaseName ?? table.Database.Name, tableName ?? table.Name, className, structFile, NameSpace, NamingStrategy);
+            var result = new TableInterfaceGenerator()
+            {
+                DatabaseName = databaseName ?? table.Database.Name,
+                TableName = tableName ?? table.Name,
+                ClassName = className,
+                NameSpace = NameSpace,
+                NamingStrategy = NamingStrategy,
+            }.GenerateStructFile(structFile);
             Add(result, getterName);
             return result;
         }

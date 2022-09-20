@@ -23,24 +23,8 @@ namespace Cave.Data
 
             if (table.Flags.HasFlag(TableFlags.IgnoreMissingFields))
             {
-                var comparison = table.GetFieldNameComparison();
-                var result = new List<IFieldProperties>();
                 var layout = RowLayout.CreateTyped(typeof(TStruct));
-                foreach (var field in layout)
-                {
-                    var match = BaseTable.Layout.FirstOrDefault(f => f.Equals(field, comparison));
-                    if (match == null)
-                    {
-                        throw new InvalidDataException($"Field {field} cannot be found at table {BaseTable}");
-                    }
-
-                    var target = field.Clone();
-                    target.Index = match.Index;
-                    result.Add(target);
-                }
-
-                if (result.Select(i => i.Index).Distinct().Count() != result.Count) throw new Exception("Index assignment is not distinct!");
-                Layout = new(table.Name, result.OrderBy(i => i.Index).ToArray(), typeof(TStruct));
+                Layout = layout.GetMatching(BaseTable.Layout, table.Flags);
             }
             else
             {

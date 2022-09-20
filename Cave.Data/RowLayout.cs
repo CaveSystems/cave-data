@@ -715,6 +715,7 @@ namespace Cave.Data
                 var match = baseTableLayout.FirstOrDefault(f => f.Equals(field, comparison));
                 if (match == null)
                 {
+                    if (flags.HasFlag(TableFlags.IgnoreMissingFields)) continue;
                     throw new InvalidDataException($"Field {field} cannot be found at table {baseTableLayout}");
                 }
 

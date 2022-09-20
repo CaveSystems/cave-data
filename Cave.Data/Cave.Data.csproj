@@ -1,25 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-	<TargetFrameworks>netstandard2.0;netstandard2.1;net20;net35;net40;net45;net5.0</TargetFrameworks>
-    <!--project-->
-    <RootNamespace>Cave.Data</RootNamespace>
-    <AssemblyOriginatorKeyFile>Cave.Data.snk</AssemblyOriginatorKeyFile>
-    <Product>CaveSystems Database Library</Product>
-    <PackageTags>CaveSystems Database</PackageTags>
-    <Description>CaveSystems Database Library. Provides simple, fast and typesafe access to ADO.NET based databases. This package supports database first development.</Description>
-    <PackageProjectUrl>https://github.com/CaveSystems/cave-data</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/CaveSystems/cave-data</RepositoryUrl>
-    <!--settings-->
-    <PackageReleaseNotes />
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <SignAssembly>true</SignAssembly>
-    <NeutralLanguage />
-    <DelaySign>false</DelaySign>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFrameworks>netstandard2.0;netstandard2.1;net20;net35;net40;net45;net5.0;net6.0</TargetFrameworks>
+        <!--project-->
+        <RootNamespace>Cave.Data</RootNamespace>
+        <AssemblyOriginatorKeyFile>Cave.Data.snk</AssemblyOriginatorKeyFile>
+        <Product>CaveSystems Database Library</Product>
+        <PackageTags>CaveSystems Database</PackageTags>
+        <Description>CaveSystems Database Library. Provides simple, fast and typesafe access to ADO.NET based databases. This package supports database first development.</Description>
+        <PackageProjectUrl>https://github.com/CaveSystems/cave-data</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/CaveSystems/cave-data</RepositoryUrl>
+        <!--settings-->
+        <PackageReleaseNotes />
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <SignAssembly>true</SignAssembly>
+        <NeutralLanguage />
+        <DelaySign>false</DelaySign>
+    </PropertyGroup>
 
-  <!-- nuget packages -->
-  <ItemGroup>
-    <PackageReference Include="Cave.Extensions" Version="2.1.7" />
-    <PackageReference Include="Cave.IO" Version="2.1.4" />
-  </ItemGroup>
+    <!-- nuget packages -->
+    <ItemGroup>
+        <PackageReference Include="Cave.Extensions" Version="2.1.12" />
+        <PackageReference Include="Cave.IO" Version="2.1.4" />
+    </ItemGroup>
 </Project>

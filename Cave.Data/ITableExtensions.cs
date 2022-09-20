@@ -50,15 +50,18 @@ namespace Cave.Data
         /// <param name="className">The name of the class to generate.</param>
         /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
         /// <returns>Returns a string containing csharp code.</returns>
+        [Obsolete("Use TableInterfaceGenerator.GenerateStruct instead")]
         public static GenerateTableCodeResult GenerateStruct(this ITable table, string databaseName, string tableName, string className,
             NamingStrategy namingStrategy)
         {
-            if (table == null)
+            return new TableInterfaceGenerator()
             {
-                throw new ArgumentNullException(nameof(table));
-            }
-
-            return GenerateStruct(table.Layout, databaseName ?? table.Database.Name, tableName, className, namingStrategy);
+                Layout = table?.Layout ?? throw new ArgumentNullException(nameof(table)),
+                TableName = tableName ?? table.Name,
+                DatabaseName = databaseName ?? table.Database.Name,
+                ClassName = className,
+                NamingStrategy = namingStrategy
+            }.GenerateStruct();
         }
 
         /// <summary>Builds the csharp code containing the row layout structure.</summary>
@@ -69,16 +72,18 @@ namespace Cave.Data
         /// <param name="nameSpace">The namespace to use for the class (defaults to "Database").</param>
         /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
         /// <returns>Returns a string containing csharp code.</returns>
+        [Obsolete("Use TableInterfaceGenerator.GenerateStruct instead")]
         public static GenerateTableCodeResult GenerateStruct(this ITable table, string databaseName = null, string tableName = null, string className = null,
             string nameSpace = null, NamingStrategy namingStrategy = NamingStrategy.CamelCase)
-        {
-            if (table == null)
+            => new TableInterfaceGenerator()
             {
-                throw new ArgumentNullException(nameof(table));
-            }
-
-            return GenerateStruct(table.Layout, databaseName ?? table.Database.Name, tableName, className, nameSpace, namingStrategy);
-        }
+                Layout = table?.Layout ?? throw new ArgumentNullException(nameof(table)),
+                TableName = tableName ?? table.Name,
+                DatabaseName = databaseName ?? table.Database.Name,
+                ClassName = className,
+                NameSpace = nameSpace,
+                NamingStrategy = namingStrategy
+            }.GenerateStruct();
 
         /// <summary>Builds the csharp code containing the row layout structure.</summary>
         /// <param name="layout">The layout to use.</param>
@@ -87,16 +92,17 @@ namespace Cave.Data
         /// <param name="className">The name of the class to generate.</param>
         /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
         /// <returns>Returns a string containing csharp code.</returns>
+        [Obsolete("Use TableInterfaceGenerator.GenerateStruct instead")]
         public static GenerateTableCodeResult GenerateStruct(this RowLayout layout, string databaseName, string tableName, string className,
             NamingStrategy namingStrategy)
-        {
-            if (layout == null)
+            => new TableInterfaceGenerator()
             {
-                throw new ArgumentNullException(nameof(layout));
-            }
-
-            return GenerateStruct(layout, databaseName, tableName, className, null, namingStrategy);
-        }
+                Layout = layout ?? throw new ArgumentNullException(nameof(layout)),
+                TableName = tableName ?? layout.Name,
+                DatabaseName = databaseName ?? throw new ArgumentNullException(nameof(databaseName)),
+                ClassName = className,
+                NamingStrategy = namingStrategy
+            }.GenerateStruct();
 
         /// <summary>Builds the csharp code containing the row layout structure.</summary>
         /// <param name="layout">The layout to use.</param>
@@ -106,297 +112,18 @@ namespace Cave.Data
         /// <param name="nameSpace">The namespace to use for the class (defaults to "Database").</param>
         /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
         /// <returns>Returns a string containing csharp code.</returns>
+        [Obsolete("Use TableInterfaceGenerator.GenerateStruct instead")]
         public static GenerateTableCodeResult GenerateStruct(this RowLayout layout, string databaseName, string tableName = null, string className = null,
             string nameSpace = null, NamingStrategy namingStrategy = NamingStrategy.CamelCase)
-        {
-            if (layout == null)
-            {
-                throw new ArgumentNullException(nameof(layout));
-            }
-
-            #region GetName()
-
-            string[] GetNameParts(string text) => text.ReplaceInvalidChars(ASCII.Strings.Letters + ASCII.Strings.Digits, "_").Split('_').SelectMany(s => s.SplitCamelCase()).ToArray();
-
-            string GetName(string text) =>
-                namingStrategy switch
-                {
-                    NamingStrategy.CamelCase => GetNameParts(text).JoinCamelCase(),
-                    NamingStrategy.SnakeCase => GetNameParts(text).JoinSnakeCase(),
-                    NamingStrategy.Exact => text,
-                    _ => throw new NotImplementedException($"Unknown NamingStrategy {namingStrategy}.")
-                };
-
-            #endregion
-
-            if (nameSpace == null)
-            {
-                nameSpace = "Database";
-            }
-
-            if (databaseName == null)
-            {
-                throw new ArgumentNullException(nameof(databaseName));
-            }
-
-            if (tableName == null)
-            {
-                tableName = layout.Name;
-            }
-
-            var fieldNameLookup = new Dictionary<int, string>();
-            var idCount = layout.Identifier.Count();
-            var idFields = (idCount == 0 ? layout : layout.Identifier).ToList();
-            var code = new StringBuilder();
-            code.AppendLine("//-----------------------------------------------------------------------");
-            code.AppendLine("// <summary>");
-            code.AppendLine("// Autogenerated table class");
-            code.AppendLine($"// Using {typeof(ITableExtensions).Assembly.FullName}");
-            code.AppendLine("// </summary>");
-            code.AppendLine("// <auto-generated />");
-            code.AppendLine("//-----------------------------------------------------------------------");
-            code.AppendLine();
-            code.AppendLine("using System;");
-            code.AppendLine("using System.Globalization;");
-            code.AppendLine("using Cave.Data;");
-
-            #region Build lookup tables
-
-            void BuildLookupTables()
-            {
-                var uniqueFieldNames = new IndexedSet<string>();
-                foreach (var field in layout)
-                {
-                    var sharpName = GetName(field.Name);
-                    var i = 0;
-                    while (uniqueFieldNames.Contains(sharpName))
-                    {
-                        sharpName = GetName(field.Name) + ++i;
-                    }
-
-                    uniqueFieldNames.Add(sharpName);
-                    fieldNameLookup[field.Index] = sharpName;
-                }
-            }
-
-            BuildLookupTables();
-
-            #endregion
-
-            if (className == null)
-            {
-                className = GetName(databaseName) + GetName(tableName) + "Row";
-            }
-
-            code.AppendLine();
-            code.AppendLine($"namespace {nameSpace}");
-            code.AppendLine("{");
-            code.AppendLine($"\t/// <summary>Table structure for {layout.Name}.</summary>");
-            code.AppendLine($"\t[Table(\"{layout.Name}\")]");
-            code.AppendLine($"\tpublic partial struct {className} : IEquatable<{className}>");
-            code.AppendLine("\t{");
-
-            #region static Parse()
-
-            code.AppendLine($"\t\t/// <summary>Converts the string representation of a row to its {className} equivalent.</summary>");
-            code.AppendLine("\t\t/// <param name=\"data\">A string that contains a row to convert.</param>");
-            code.AppendLine($"\t\t/// <returns>A new {className} instance.</returns>");
-            code.AppendLine($"\t\tpublic static {className} Parse(string data) => Parse(data, CultureInfo.InvariantCulture);");
-            code.AppendLine();
-            code.AppendLine($"\t\t/// <summary>Converts the string representation of a row to its {className} equivalent.</summary>");
-            code.AppendLine("\t\t/// <param name=\"data\">A string that contains a row to convert.</param>");
-            code.AppendLine("\t\t/// <param name=\"provider\">The format provider (optional).</param>");
-            code.AppendLine($"\t\t/// <returns>A new {className} instance.</returns>");
-            code.AppendLine($"\t\tpublic static {className} Parse(string data, IFormatProvider provider) => CsvReader.ParseRow<{className}>(data, provider);");
-
-            #endregion
-
-            #region Add fields
-
-            foreach (var field in layout)
-            {
-                code.AppendLine();
-                code.AppendLine($"\t\t/// <summary>{field} {field.Description}.</summary>");
-                if (!string.IsNullOrEmpty(field.Description))
-                {
-                    code.AppendLine($"\t\t[Description(\"{field} {field.Description}\")]");
-                }
-
-                code.Append("\t\t[Field(");
-                var i = 0;
-
-                void AddAttribute<T>(T value, Func<string> content)
-                {
-                    if (Equals(value, default))
-                    {
-                        return;
-                    }
-
-                    if (i++ > 0)
-                    {
-                        code.Append(", ");
-                    }
-
-                    code.Append(content());
-                }
-
-                if (field.Flags != 0)
-                {
-                    code.Append("Flags = ");
-                    var flagCount = 0;
-                    foreach (var flag in field.Flags.GetFlags())
-                    {
-                        if (flagCount++ > 0)
-                        {
-                            code.Append(" | ");
-                        }
-
-                        code.Append("FieldFlags.");
-                        code.Append(flag);
-                    }
-
-                    code.Append(", ");
-                }
-
-                var sharpName = fieldNameLookup[field.Index];
-                if (sharpName != field.Name)
-                {
-                    AddAttribute(field.Name, () => $"Name = \"{field.Name}\"");
-                }
-
-                if (field.MaximumLength < int.MaxValue)
-                {
-                    AddAttribute(field.MaximumLength, () => $"Length = {(int)field.MaximumLength}");
-                }
-
-                AddAttribute(field.AlternativeNames, () => $"AlternativeNames = \"{field.AlternativeNames.Join(", ")}\"");
-                AddAttribute(field.DisplayFormat, () => $"DisplayFormat = \"{field.DisplayFormat.EscapeUtf8()}\"");
-                code.AppendLine(")]");
-                if ((field.DateTimeKind != DateTimeKind.Unspecified) || (field.DateTimeType != DateTimeType.Undefined))
-                {
-                    code.AppendLine($"\t\t[DateTimeFormat({field.DateTimeKind}, {field.DateTimeType})]");
-                }
-
-                if (field.StringEncoding != 0)
-                {
-                    code.AppendLine($"\t\t[Cave.IO.StringFormat(Cave.IO.StringEncoding.{field.StringEncoding})]");
-                }
-
-                code.AppendLine($"\t\tpublic {field.DotNetTypeName} {sharpName};");
-            }
-
-            #endregion
-
-            #region ToString()
-
-            {
-                code.AppendLine();
-                code.AppendLine("\t\t/// <summary>Gets a string representation of this row.</summary>");
-                code.AppendLine("\t\t/// <returns>Returns a string that can be parsed by <see cref=\"Parse(string)\"/>.</returns>");
-                code.AppendLine("\t\tpublic override string ToString() => ToString(CultureInfo.InvariantCulture);");
-                code.AppendLine();
-                code.AppendLine("\t\t/// <summary>Gets a string representation of this row.</summary>");
-                code.AppendLine("\t\t/// <returns>Returns a string that can be parsed by <see cref=\"Parse(string, IFormatProvider)\"/>.</returns>");
-                code.AppendLine("\t\tpublic string ToString(IFormatProvider provider) => CsvWriter.RowToString(this, provider);");
-            }
-
-            #endregion
-
-            #region GetHashCode()
-
-            {
-                code.AppendLine();
-                if (idCount == 1)
-                {
-                    var idField = layout.Identifier.First();
-                    var idFieldName = fieldNameLookup[idField.Index];
-                    code.AppendLine($"\t\t/// <summary>Gets the hash code for the identifier of this row (field {idFieldName}).</summary>");
-                    code.AppendLine("\t\t/// <returns>A hash code for the identifier of this row.</returns>");
-                    code.Append("\t\tpublic override int GetHashCode() => ");
-                    code.Append(idFieldName);
-                    code.AppendLine(".GetHashCode();");
-                }
-                else
-                {
-                    if (idCount == 0)
-                    {
-                        code.AppendLine("\t\t/// <summary>Gets the hash code based on all values of this row (no identififer defined).</summary>");
-                    }
-                    else
-                    {
-                        var names = idFields.Select(field => fieldNameLookup[field.Index]).Join(", ");
-                        code.AppendLine($"\t\t/// <summary>Gets the hash code for the identifier of this row (fields {names}).</summary>");
-                    }
-
-                    code.AppendLine("\t\t/// <returns>A hash code for the identifier of this row.</returns>");
-                    code.AppendLine("\t\tpublic override int GetHashCode() =>");
-                    var first = true;
-                    foreach (var idField in idFields)
-                    {
-                        if (first)
-                        {
-                            first = false;
-                        }
-                        else
-                        {
-                            code.AppendLine(" ^");
-                        }
-
-                        code.Append($"\t\t\t{fieldNameLookup[idField.Index]}.GetHashCode()");
-                    }
-
-                    code.AppendLine(";");
-                }
-            }
-
-            #endregion
-
-            #region Equals()
-
-            {
-                code.AppendLine();
-                code.AppendLine("\t\t/// <inheritdoc/>");
-                code.AppendLine($"\t\tpublic override bool Equals(object other) => other is {className} row && Equals(row);");
-                code.AppendLine();
-                code.AppendLine("\t\t/// <inheritdoc/>");
-                code.AppendLine($"\t\tpublic bool Equals({className} other)");
-                code.AppendLine("\t\t{");
-                code.AppendLine("\t\t\treturn");
-                {
-                    var first = true;
-                    foreach (var field in layout)
-                    {
-                        if (first)
-                        {
-                            first = false;
-                        }
-                        else
-                        {
-                            code.AppendLine(" &&");
-                        }
-
-                        var name = fieldNameLookup[field.Index];
-                        code.Append($"\t\t\t\tEquals(other.{name}, {name})");
-                    }
-
-                    code.AppendLine(";");
-                }
-                code.AppendLine("\t\t}");
-            }
-
-            #endregion
-
-            code.AppendLine("\t}");
-            code.AppendLine("}");
-            code.Replace("\t", "    ");
-            return new()
-            {
-                ClassName = className,
-                TableName = tableName,
-                DatabaseName = databaseName,
-                Code = code.ToString()
-            };
-        }
+             => new TableInterfaceGenerator()
+             {
+                 Layout = layout ?? throw new ArgumentNullException(nameof(layout)),
+                 TableName = tableName ?? layout.Name,
+                 DatabaseName = databaseName ?? throw new ArgumentNullException(nameof(databaseName)),
+                 ClassName = className,
+                 NameSpace = nameSpace,
+                 NamingStrategy = namingStrategy
+             }.GenerateStruct();
 
         /// <summary>Builds the csharp code file containing the row layout structure.</summary>
         /// <param name="table">The table to use.</param>
@@ -406,16 +133,11 @@ namespace Cave.Data
         /// <param name="structFile">The struct file name (defaults to classname.cs).</param>
         /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
         /// <returns>The struct file name.</returns>
+        [Obsolete("Use TableInterfaceGenerator.GenerateStructFile instead")]
         public static GenerateTableCodeResult GenerateStructFile(this ITable table, string databaseName, string tableName,
             string className, string structFile, NamingStrategy namingStrategy)
-        {
-            if (table == null)
-            {
-                throw new ArgumentNullException(nameof(table));
-            }
-
-            return GenerateStruct(table.Layout, databaseName, tableName, className, namingStrategy).SaveStructFile(structFile);
-        }
+            => GenerateStruct(table.Layout, databaseName, tableName, className, namingStrategy)
+                .SaveStructFile(structFile);
 
         /// <summary>Builds the csharp code file containing the row layout structure.</summary>
         /// <param name="table">The table to use.</param>
@@ -426,17 +148,11 @@ namespace Cave.Data
         /// <param name="nameSpace">The namespace to use for the class (defaults to "Database").</param>
         /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
         /// <returns>The struct file name.</returns>
+        [Obsolete("Use TableInterfaceGenerator.GenerateStructFile instead")]
         public static GenerateTableCodeResult GenerateStructFile(this ITable table, string databaseName = null, string tableName = null,
             string className = null, string structFile = null, string nameSpace = null, NamingStrategy namingStrategy = NamingStrategy.CamelCase)
-        {
-            if (table == null)
-            {
-                throw new ArgumentNullException(nameof(table));
-            }
-
-            return GenerateStruct(table.Layout, databaseName ?? table.Database.Name, tableName, className, nameSpace, namingStrategy)
+            => GenerateStruct(table.Layout, databaseName ?? table.Database.Name, tableName, className, nameSpace, namingStrategy)
                .SaveStructFile(structFile);
-        }
 
         /// <summary>Builds the csharp code file containing the row layout structure.</summary>
         /// <param name="layout">The layout to use.</param>
@@ -446,16 +162,11 @@ namespace Cave.Data
         /// <param name="structFile">The struct file name (defaults to classname.cs).</param>
         /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
         /// <returns>The struct file name.</returns>
+        [Obsolete("Use TableInterfaceGenerator.GenerateStructFile instead")]
         public static GenerateTableCodeResult GenerateStructFile(this RowLayout layout, string databaseName, string tableName, string className,
             string structFile, NamingStrategy namingStrategy)
-        {
-            if (layout == null)
-            {
-                throw new ArgumentNullException(nameof(layout));
-            }
-
-            return GenerateStruct(layout, databaseName, tableName, className, namingStrategy).SaveStructFile(structFile);
-        }
+            => GenerateStruct(layout, databaseName, tableName, className, namingStrategy)
+                .SaveStructFile(structFile);
 
         /// <summary>Builds the csharp code file containing the row layout structure.</summary>
         /// <param name="layout">The layout to use.</param>
@@ -466,16 +177,11 @@ namespace Cave.Data
         /// <param name="nameSpace">The namespace to use for the class (defaults to "Database").</param>
         /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
         /// <returns>The struct file name.</returns>
+        [Obsolete("Use TableInterfaceGenerator.GenerateStructFile instead")]
         public static GenerateTableCodeResult GenerateStructFile(this RowLayout layout, string databaseName = null, string tableName = null,
             string className = null, string structFile = null, string nameSpace = null, NamingStrategy namingStrategy = NamingStrategy.CamelCase)
-        {
-            if (layout == null)
-            {
-                throw new ArgumentNullException(nameof(layout));
-            }
-
-            return GenerateStruct(layout, databaseName, tableName, className, nameSpace, namingStrategy).SaveStructFile(structFile);
-        }
+            => GenerateStruct(layout, databaseName, tableName, className, nameSpace, namingStrategy)
+                .SaveStructFile(structFile);
 
         /// <summary>Gets the string comparison to use for field name comparison.</summary>
         /// <param name="tableFlags">Flags to use for setting.</param>
@@ -538,6 +244,7 @@ namespace Cave.Data
         /// <param name="result">Result to update.</param>
         /// <param name="structFile">Name of the file to write to (optional).</param>
         /// <returns>Returns an updated result instance.</returns>
+        [Obsolete("Use TableInterfaceGenerator.SaveStructFile instead")]
         public static GenerateTableCodeResult SaveStructFile(this GenerateTableCodeResult result, string structFile = null)
         {
             if (result.FileName == null)
