@@ -120,7 +120,7 @@ namespace Cave.Data.Sql
                         Trace.TraceInformation("{0} transactions committed to {1}.", n, FQTN);
                     }
 
-                    execute = Task.Factory.StartNew(cmd => Execute((SqlCmd)cmd), commandBuilder);
+                    execute = Task.Factory.StartNew(cmd => Execute((SqlCommandBuilder)cmd), commandBuilder);
                     n += i;
                 }
                 catch (Exception ex)
