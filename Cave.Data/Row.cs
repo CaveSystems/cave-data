@@ -21,7 +21,7 @@ namespace Cave.Data
         /// <param name="layout">Layout of this row.</param>
         /// <param name="values">Values for all fields.</param>
         /// <param name="clone">Copy values on row create.</param>
-        internal Row(RowLayout layout, object[] values, bool clone)
+        public Row(RowLayout layout, object[] values, bool clone)
         {
             Layout = layout ?? throw new ArgumentNullException(nameof(layout));
             if (values == null)
@@ -115,7 +115,7 @@ namespace Cave.Data
 
                 if (obj.GetType().IsArray)
                 {
-                    foreach (var item in (Array) obj)
+                    foreach (var item in (Array)obj)
                     {
                         hash = hash.BitwiseRotateLeft(1);
                         hash ^= item?.GetHashCode() ?? 0;
@@ -130,12 +130,8 @@ namespace Cave.Data
             return hash;
         }
 
-        #region overrides
-
         /// <inheritdoc />
         public override string ToString() => CsvWriter.RowToString(CsvProperties.Default, Layout, this);
-
-        #endregion
 
         #endregion
 
@@ -143,7 +139,7 @@ namespace Cave.Data
 
         /// <summary>Gets all values of the row.</summary>
         /// <returns>A copy of all values.</returns>
-        public object[] CopyValues() => (object[]) Values.Clone();
+        public object[] CopyValues() => (object[])Values.Clone();
 
         /// <summary>Obtains a row value as string using the string format defined at the rowlayout.</summary>
         /// <param name="layout">The layout.</param>
@@ -198,7 +194,7 @@ namespace Cave.Data
 
             object result = default(TStruct);
             layout.SetValues(ref result, Values);
-            return (TStruct) result;
+            return (TStruct)result;
         }
 
         /// <summary>Gets the value with the specified name.</summary>
@@ -219,7 +215,7 @@ namespace Cave.Data
                 return default;
             }
 
-            return (T) result;
+            return (T)result;
         }
 
         /// <summary>Gets a dictionary containing all field.Name = value combinations of this row.</summary>

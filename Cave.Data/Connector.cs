@@ -44,18 +44,15 @@ namespace Cave.Data
         /// <param name="options">The options.</param>
         /// <returns>Returns a new storage connection.</returns>
         /// <exception cref="NotSupportedException">Unknown database provider '{connectionString.Protocol}'!.</exception>
-        public static IStorage ConnectStorage(ConnectionString connectionString, ConnectionFlags options = 0)
+        public static IStorage ConnectStorage(ConnectionString connectionString, ConnectionFlags options = 0) => connectionString.ConnectionType switch
         {
-            return connectionString.ConnectionType switch
-            {
-                ConnectionType.MEMORY => new MemoryStorage(),
-                ConnectionType.MYSQL => new MySqlStorage(connectionString, options),
-                ConnectionType.MSSQL => new MsSqlStorage(connectionString, options),
-                ConnectionType.SQLITE => new SQLiteStorage(connectionString, options),
-                ConnectionType.PGSQL => new PgSqlStorage(connectionString, options),
-                _ => throw new NotSupportedException($"Unknown database provider '{connectionString.Protocol}'!"),
-            };
-        }
+            ConnectionType.MEMORY => new MemoryStorage(),
+            ConnectionType.MYSQL => new MySqlStorage(connectionString, options),
+            ConnectionType.MSSQL => new MsSqlStorage(connectionString, options),
+            ConnectionType.SQLITE => new SQLiteStorage(connectionString, options),
+            ConnectionType.PGSQL => new PgSqlStorage(connectionString, options),
+            _ => throw new NotSupportedException($"Unknown database provider '{connectionString.Protocol}'!"),
+        };
 
         #endregion Public Methods
     }

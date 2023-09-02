@@ -68,25 +68,25 @@ namespace Cave.Data
                     switch (transaction.Type)
                     {
                         case TransactionType.Inserted:
-                        Insert(transaction.Row);
-                        break;
+                            Insert(transaction.Row);
+                            break;
 
                         case TransactionType.Replaced:
-                        Replace(transaction.Row);
-                        break;
+                            Replace(transaction.Row);
+                            break;
 
                         case TransactionType.Updated:
-                        Update(transaction.Row);
-                        break;
+                            Update(transaction.Row);
+                            break;
 
                         case TransactionType.Deleted:
-                        Delete(transaction.Row);
-                        break;
+                            Delete(transaction.Row);
+                            break;
 
                         default:
-                        if (flags.HasFlag(TransactionFlags.NoExceptions)) { return -1; }
+                            if (flags.HasFlag(TransactionFlags.NoExceptions)) { return -1; }
 
-                        throw new NotImplementedException();
+                            throw new NotImplementedException();
                     }
 
                     i++;
@@ -277,26 +277,26 @@ namespace Cave.Data
             switch (field.DataType)
             {
                 case DataType.TimeSpan:
-                foreach (var row in GetRows(search))
-                {
-                    sum += ((TimeSpan)row[fieldNumber]).TotalSeconds;
-                }
+                    foreach (var row in GetRows(search))
+                    {
+                        sum += ((TimeSpan)row[fieldNumber]).TotalSeconds;
+                    }
 
-                break;
+                    break;
 
                 case DataType.Binary:
                 case DataType.DateTime:
                 case DataType.String:
                 case DataType.User:
                 case DataType.Unknown:
-                throw new NotSupportedException($"Sum() is not supported for fieldName {field}!");
+                    throw new NotSupportedException($"Sum() is not supported for fieldName {field}!");
                 default:
-                foreach (var row in GetRows(search))
-                {
-                    sum += Convert.ToDouble(row[fieldNumber], CultureInfo.CurrentCulture);
-                }
+                    foreach (var row in GetRows(search))
+                    {
+                        sum += Convert.ToDouble(row[fieldNumber], CultureInfo.CurrentCulture);
+                    }
 
-                break;
+                    break;
             }
 
             return sum;

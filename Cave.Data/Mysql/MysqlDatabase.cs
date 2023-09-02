@@ -12,7 +12,7 @@ namespace Cave.Data.Mysql
     {
         #region Constructors
 
-        /// <summary>Initializes a new instance of the <see cref="MySqlDatabase" /> class.</summary>
+        /// <summary>Initializes a new instance of the <see cref="MySqlDatabase"/> class.</summary>
         /// <param name="storage">the mysql storage engine.</param>
         /// <param name="name">the name of the database.</param>
         public MySqlDatabase(MySqlStorage storage, string name)
@@ -20,11 +20,11 @@ namespace Cave.Data.Mysql
         {
         }
 
-        #endregion
+        #endregion Constructors
 
         #region Overrides
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override ITable CreateTable(RowLayout layout, TableFlags flags)
         {
             if (layout == null)
@@ -37,7 +37,7 @@ namespace Cave.Data.Mysql
                 throw new ArgumentException($"Table name {layout.Name} contains invalid chars!");
             }
 
-            var utf8Charset = ((MySqlStorage) Storage).CharacterSet;
+            var utf8Charset = ((MySqlStorage)Storage).CharacterSet;
             LogCreateTable(layout);
             var queryText = new StringBuilder();
             queryText.Append($"CREATE TABLE {SqlStorage.FQTN(Name, layout.Name)} (");
@@ -76,9 +76,11 @@ namespace Cave.Data.Mysql
                         }
 
                         break;
+
                     case DataType.Bool:
                         queryText.Append("TINYINT(1)");
                         break;
+
                     case DataType.DateTime:
                         switch (fieldProperties.DateTimeType)
                         {
@@ -86,21 +88,26 @@ namespace Cave.Data.Mysql
                             case DateTimeType.Native:
                                 queryText.Append("DATETIME");
                                 break;
+
                             case DateTimeType.DoubleEpoch:
                             case DateTimeType.DoubleSeconds:
                                 queryText.Append("DOUBLE");
                                 break;
+
                             case DateTimeType.DecimalSeconds:
                                 queryText.Append("DECIMAL(65,30)");
                                 break;
+
                             case DateTimeType.BigIntHumanReadable:
                             case DateTimeType.BigIntTicks:
                                 queryText.Append("BIGINT");
                                 break;
+
                             default: throw new NotImplementedException();
                         }
 
                         break;
+
                     case DataType.TimeSpan:
                         switch (fieldProperties.DateTimeType)
                         {
@@ -108,54 +115,70 @@ namespace Cave.Data.Mysql
                             case DateTimeType.Native:
                                 queryText.Append("TIME");
                                 break;
+
                             case DateTimeType.DoubleEpoch:
                             case DateTimeType.DoubleSeconds:
                                 queryText.Append("DOUBLE");
                                 break;
+
                             case DateTimeType.DecimalSeconds:
                                 queryText.Append("DECIMAL(65,30)");
                                 break;
+
                             case DateTimeType.BigIntHumanReadable:
                             case DateTimeType.BigIntTicks:
                                 queryText.Append("BIGINT");
                                 break;
+
                             default: throw new NotImplementedException();
                         }
 
                         break;
+
                     case DataType.Int8:
                         queryText.Append("TINYINT");
                         break;
+
                     case DataType.Int16:
                         queryText.Append("SMALLINT");
                         break;
+
                     case DataType.Int32:
                         queryText.Append("INTEGER");
                         break;
+
                     case DataType.Int64:
                         queryText.Append("BIGINT");
                         break;
+
                     case DataType.Single:
                         queryText.Append("FLOAT");
                         break;
+
                     case DataType.Double:
                         queryText.Append("DOUBLE");
                         break;
+
                     case DataType.Enum:
                         queryText.Append("BIGINT");
                         break;
+
                     case DataType.UInt8:
                         queryText.Append("TINYINT UNSIGNED");
                         break;
+
                     case DataType.UInt16:
                         queryText.Append("SMALLINT UNSIGNED");
                         break;
+
                     case DataType.UInt32:
                         queryText.Append("INTEGER UNSIGNED");
                         break;
+
                     case DataType.UInt64:
                         queryText.Append("BIGINT UNSIGNED");
                         break;
+
                     case DataType.User:
                     case DataType.String:
                         if (fieldProperties.MaximumLength <= 0)
@@ -182,27 +205,44 @@ namespace Cave.Data.Mysql
                         switch (fieldProperties.StringEncoding)
                         {
                             case StringEncoding.Undefined:
+                            case StringEncoding.US_ASCII:
+#pragma warning disable CS0618
                             case StringEncoding.ASCII:
+#pragma warning restore CS0618
                                 queryText.Append(" CHARACTER SET latin1 COLLATE latin1_general_ci");
                                 break;
+
+                            case StringEncoding.UTF_8:
+#pragma warning disable CS0618
                             case StringEncoding.UTF8:
+#pragma warning restore CS0618
                                 queryText.Append($" CHARACTER SET utf8mb4 COLLATE {utf8Charset}_general_ci");
                                 break;
+
+                            case StringEncoding.UTF_16:
+#pragma warning disable CS0618
                             case StringEncoding.UTF16:
+#pragma warning restore CS0618
                                 queryText.Append(" CHARACTER SET ucs2 COLLATE ucs2_general_ci");
                                 break;
+
+                            case StringEncoding.UTF_32:
+#pragma warning disable CS0618
                             case StringEncoding.UTF32:
+#pragma warning restore CS0618
                                 queryText.Append(" CHARACTER SET utf32 COLLATE utf32_general_ci");
                                 break;
+
                             default: throw new NotSupportedException($"MYSQL Server does not support {fieldProperties.StringEncoding}!");
                         }
 
                         break;
+
                     case DataType.Decimal:
                         if (fieldProperties.MaximumLength > 0)
                         {
-                            var precision = (int) fieldProperties.MaximumLength;
-                            var scale = (int) ((fieldProperties.MaximumLength - precision) * 100);
+                            var precision = (int)fieldProperties.MaximumLength;
+                            var scale = (int)((fieldProperties.MaximumLength - precision) * 100);
                             if (scale >= precision)
                             {
                                 throw new ArgumentOutOfRangeException(
@@ -217,6 +257,7 @@ namespace Cave.Data.Mysql
                         }
 
                         break;
+
                     default: throw new NotImplementedException($"Unknown DataType {fieldProperties.DataType}!");
                 }
 
@@ -247,6 +288,7 @@ namespace Cave.Data.Mysql
                         case DataType.Single:
                         case DataType.TimeSpan:
                             break;
+
                         case DataType.String:
                             if (fieldProperties.MaximumLength <= 0)
                             {
@@ -255,6 +297,7 @@ namespace Cave.Data.Mysql
                             }
 
                             break;
+
                         default: throw new NotSupportedException($"Uniqueness for tableName {layout.Name} field {fieldProperties.Name} is not supported!");
                     }
                 }
@@ -312,7 +355,7 @@ namespace Cave.Data.Mysql
                             case DataType.Binary:
                             case DataType.String:
                             case DataType.User:
-                                var size = (int) field.MaximumLength;
+                                var size = (int)field.MaximumLength;
                                 if (size < 1)
                                 {
                                     size = 32;
@@ -321,6 +364,7 @@ namespace Cave.Data.Mysql
                                 command =
                                     $"CREATE INDEX `idx_{layout.Name}_{field.Name}` ON {SqlStorage.FQTN(Name, layout.Name)} ({SqlStorage.EscapeFieldName(field)} ({size}))";
                                 break;
+
                             case DataType.Bool:
                             case DataType.Char:
                             case DataType.DateTime:
@@ -340,6 +384,7 @@ namespace Cave.Data.Mysql
                                 command =
                                     $"CREATE INDEX `idx_{layout.Name}_{field.Name}` ON {SqlStorage.FQTN(Name, layout.Name)} ({SqlStorage.EscapeFieldName(field)})";
                                 break;
+
                             default: throw new NotSupportedException($"INDEX for datatype of field {field} is not supported!");
                         }
 
@@ -356,10 +401,10 @@ namespace Cave.Data.Mysql
             return GetTable(layout);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override ITable GetTable(string tableName, TableFlags flags) => MySqlTable.Connect(this, flags, tableName);
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override string[] GetTableNames()
         {
             var result = new List<string>();
@@ -368,7 +413,7 @@ namespace Cave.Data.Mysql
                 SqlStorage.EscapeString(Name));
             foreach (var row in rows)
             {
-                result.Add((string) row[0]);
+                result.Add((string)row[0]);
             }
 
             return result.ToArray();
@@ -398,6 +443,6 @@ namespace Cave.Data.Mysql
             }
         }
 
-        #endregion
+        #endregion Overrides
     }
 }

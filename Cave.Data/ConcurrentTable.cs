@@ -143,7 +143,7 @@ namespace Cave.Data
         /// Initializes a new instance of the <see cref="ConcurrentTable"/> class.
         /// </summary>
         /// <param name="table">The table to synchronize.</param>
-        public ConcurrentTable(ITable table) => BaseTable = !(table is ConcurrentTable) ? table : throw new ArgumentException("Table is already synchronized!");
+        public ConcurrentTable(ITable table) => BaseTable = table is not ConcurrentTable ? table : throw new ArgumentException("Table is already synchronized!");
 
         #endregion Public Constructors
 

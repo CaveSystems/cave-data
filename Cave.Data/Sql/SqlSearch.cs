@@ -43,8 +43,8 @@ namespace Cave.Data.Sql
             switch (search.Mode)
             {
                 case SearchMode.None:
-                sb.Append("1=1");
-                return;
+                    sb.Append("1=1");
+                    return;
 
                 case SearchMode.In:
                 {

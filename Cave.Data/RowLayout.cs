@@ -11,9 +11,7 @@ using Cave.IO;
 
 namespace Cave.Data
 {
-    /// <summary>
-    /// Provides a row layout implementation.
-    /// </summary>
+    /// <summary>Provides a row layout implementation.</summary>
     [DebuggerDisplay("{" + nameof(Name) + "} [{" + nameof(FieldCount) + "}]")]
     public sealed class RowLayout : IEquatable<RowLayout>, IEnumerable<IFieldProperties>
     {
@@ -27,9 +25,7 @@ namespace Cave.Data
 
         #region Private Methods
 
-        /// <summary>
-        /// Saves the fieldproperties to the specified writer.
-        /// </summary>
+        /// <summary>Saves the fieldproperties to the specified writer.</summary>
         /// <param name="writer">The writer.</param>
         /// <param name="field">Field properties to save.</param>
         static void Save(DataWriter writer, IFieldProperties field)
@@ -53,7 +49,7 @@ namespace Cave.Data
                 writer.Write7BitEncoded32((int)field.DateTimeType);
             }
 
-            if ((field.DataType == DataType.String) || (field.DataType == DataType.User))
+            if (field.DataType is DataType.String or DataType.User)
             {
                 writer.Write(field.MaximumLength);
             }
@@ -78,9 +74,7 @@ namespace Cave.Data
 
         #region Internal Constructors
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RowLayout"/> class.
-        /// </summary>
+        /// <summary>Initializes a new instance of the <see cref="RowLayout"/> class.</summary>
         /// <param name="name">The Name of the Layout.</param>
         /// <param name="fields">The fieldproperties to use.</param>
         /// <param name="rowtype">Dotnet row type.</param>
@@ -119,38 +113,26 @@ namespace Cave.Data
 
         #region Public Fields
 
-        /// <summary>
-        /// Gets the field count.
-        /// </summary>
+        /// <summary>Gets the field count.</summary>
         public readonly int FieldCount;
 
-        /// <summary>
-        /// Maximum field index.
-        /// </summary>
+        /// <summary>Maximum field index.</summary>
         public readonly int MaxIndex;
 
-        /// <summary>
-        /// Minimum field index.
-        /// </summary>
+        /// <summary>Minimum field index.</summary>
         public readonly int MinIndex;
 
-        /// <summary>
-        /// Gets the name of the layout.
-        /// </summary>
+        /// <summary>Gets the name of the layout.</summary>
         public readonly string Name;
 
-        /// <summary>
-        /// The row type.
-        /// </summary>
+        /// <summary>The row type.</summary>
         public readonly Type RowType;
 
         #endregion Public Fields
 
         #region Public Constructors
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RowLayout"/> class.
-        /// </summary>
+        /// <summary>Initializes a new instance of the <see cref="RowLayout"/> class.</summary>
         public RowLayout()
         {
             fieldProperties = new IFieldProperties[0];
@@ -161,41 +143,29 @@ namespace Cave.Data
 
         #region Public Properties
 
-        /// <summary>
-        /// Gets or sets a value indicating whether caching for known typed layouts is disabled or not.
-        /// </summary>
+        /// <summary>Gets or sets a value indicating whether caching for known typed layouts is disabled or not.</summary>
         public static bool DisableLayoutCache { get; set; }
 
-        /// <summary>
-        /// Gets the field properties.
-        /// </summary>
+        /// <summary>Gets the field properties.</summary>
         /// <value>A new readonly collection instance containing all field properties.</value>
         public IList<IFieldProperties> Fields => new ReadOnlyCollection<IFieldProperties>(fieldProperties);
 
-        /// <summary>
-        /// Gets the fields marked with the <see cref="FieldFlags.ID"/>.
-        /// </summary>
+        /// <summary>Gets the fields marked with the <see cref="FieldFlags.ID"/>.</summary>
         public IEnumerable<IFieldProperties> Identifier => fieldProperties.Where(p => p.Flags.HasFlag(FieldFlags.ID));
 
-        /// <summary>
-        /// Gets a value indicating whether the layout was created from a typed struct or not.
-        /// </summary>
+        /// <summary>Gets a value indicating whether the layout was created from a typed struct or not.</summary>
         public bool IsTyped => RowType != null;
 
         #endregion Public Properties
 
         #region Public Indexers
 
-        /// <summary>
-        /// Gets the field properties of the field with the specified index.
-        /// </summary>
+        /// <summary>Gets the field properties of the field with the specified index.</summary>
         /// <param name="index">Field index.</param>
         /// <returns>The <see cref="Cave.FieldProperties"/> instance.</returns>
         public IFieldProperties this[int index] => fieldProperties[index];
 
-        /// <summary>
-        /// Gets the field properties of the field with the specified name.
-        /// </summary>
+        /// <summary>Gets the field properties of the field with the specified name.</summary>
         /// <param name="fieldName">Field name.</param>
         /// <returns>The <see cref="Cave.FieldProperties"/> instance.</returns>
         public IFieldProperties this[string fieldName] => fieldProperties[GetFieldIndex(fieldName, true)];
@@ -204,9 +174,7 @@ namespace Cave.Data
 
         #region Public Methods
 
-        /// <summary>
-        /// Checks two layouts for equality.
-        /// </summary>
+        /// <summary>Checks two layouts for equality.</summary>
         /// <param name="expected">The expected layout.</param>
         /// <param name="current">The layout to check.</param>
         /// <param name="fieldPropertiesConversion">field conversion function to use.</param>
@@ -249,9 +217,7 @@ namespace Cave.Data
             }
         }
 
-        /// <summary>
-        /// Clears the layout cache.
-        /// </summary>
+        /// <summary>Clears the layout cache.</summary>
         public static void ClearCache()
         {
             lock (layoutCache)
@@ -260,17 +226,13 @@ namespace Cave.Data
             }
         }
 
-        /// <summary>
-        /// Creates an alien row layout without using any field properies.
-        /// </summary>
+        /// <summary>Creates an alien row layout without using any field properies.</summary>
         /// <param name="type">Type to parse fields from.</param>
         /// <param name="onlyPublic">if set to <c>true</c> [use only public].</param>
         /// <returns>A new <see cref="RowLayout"/> instance.</returns>
         public static RowLayout CreateAlien(Type type, bool onlyPublic) => CreateAlien(type, onlyPublic, NamingStrategy.Exact);
 
-        /// <summary>
-        /// Creates an alien row layout without using any field properies.
-        /// </summary>
+        /// <summary>Creates an alien row layout without using any field properies.</summary>
         /// <param name="type">Type to parse fields from.</param>
         /// <param name="onlyPublic">if set to <c>true</c> [use only public].</param>
         /// <param name="namingStrategy">Naming strategy for fields.</param>
@@ -313,17 +275,13 @@ namespace Cave.Data
             return new(type.Name, properties, type);
         }
 
-        /// <summary>
-        /// Creates a RowLayout instance for the specified struct.
-        /// </summary>
+        /// <summary>Creates a RowLayout instance for the specified struct.</summary>
         /// <param name="type">The type to build the rowlayout for.</param>
         /// <param name="excludedFields">The excluded fields.</param>
         /// <returns>A new <see cref="RowLayout"/> instance.</returns>
         public static RowLayout CreateTyped(Type type, string[] excludedFields) => CreateTyped(type, null, null, excludedFields);
 
-        /// <summary>
-        /// Creates a RowLayout instance for the specified struct.
-        /// </summary>
+        /// <summary>Creates a RowLayout instance for the specified struct.</summary>
         /// <param name="type">The type to build the rowlayout for.</param>
         /// <param name="nameOverride">The table name override.</param>
         /// <param name="storage">The Storage engine to use.</param>
@@ -400,17 +358,13 @@ namespace Cave.Data
             }
         }
 
-        /// <summary>
-        /// Creates a new layout with the given name and field properties.
-        /// </summary>
+        /// <summary>Creates a new layout with the given name and field properties.</summary>
         /// <param name="name">Name of the layout.</param>
         /// <param name="fields">FieldProperties to use.</param>
         /// <returns>A new <see cref="RowLayout"/> instance.</returns>
         public static RowLayout CreateUntyped(string name, params IFieldProperties[] fields) => new(name, fields, null);
 
-        /// <summary>
-        /// Gets the <see cref="DataType"/> for a given <see cref="Type"/>.
-        /// </summary>
+        /// <summary>Gets the <see cref="DataType"/> for a given <see cref="Type"/>.</summary>
         /// <param name="type">The <see cref="Type"/> to convert.</param>
         /// <returns>The data type.</returns>
         public static DataType DataTypeFromType(Type type)
@@ -508,9 +462,7 @@ namespace Cave.Data
             return type.IsEnum ? DataType.Enum : DataType.User;
         }
 
-        /// <summary>
-        /// Builds a new name matching the the specified <paramref name="namingStrategy"/>.
-        /// </summary>
+        /// <summary>Builds a new name matching the the specified <paramref name="namingStrategy"/>.</summary>
         /// <param name="namingStrategy">Naming strategy to use.</param>
         /// <param name="name">Original name.</param>
         /// <returns>A new string containing the new name.</returns>
@@ -530,9 +482,7 @@ namespace Cave.Data
             };
         }
 
-        /// <summary>
-        /// Loads the row layout from the specified reader.
-        /// </summary>
+        /// <summary>Loads the row layout from the specified reader.</summary>
         /// <param name="reader">The reader.</param>
         /// <returns>A new <see cref="RowLayout"/> instance.</returns>
         public static RowLayout Load(DataReader reader)
@@ -543,7 +493,7 @@ namespace Cave.Data
             }
 
             var count = reader.Read7BitEncodedInt32();
-            var tableName = reader.ReadString();
+            var tableName = reader.ReadPrefixedString();
             var fieldProperties = new FieldProperties[count];
             for (var i = 0; i < count; i++)
             {
@@ -554,9 +504,7 @@ namespace Cave.Data
             return new(tableName, fieldProperties, null);
         }
 
-        /// <summary>
-        /// Enums the value.
-        /// </summary>
+        /// <summary>Enums the value.</summary>
         /// <param name="index">The field index.</param>
         /// <param name="value">The value.</param>
         /// <param name="provider">The format provider.</param>
@@ -594,9 +542,7 @@ namespace Cave.Data
         /// <inheritdoc/>
         public override bool Equals(object obj) => obj is RowLayout layout && Equals(layout);
 
-        /// <summary>
-        /// Gets the string representing the specified value using the field properties.
-        /// </summary>
+        /// <summary>Gets the string representing the specified value using the field properties.</summary>
         /// <param name="fieldIndex">The field number.</param>
         /// <param name="value">The value.</param>
         /// <param name="culture">The culture.</param>
@@ -609,7 +555,7 @@ namespace Cave.Data
                 "FormatTimeSpan" or "TimeSpan" => field.DataType switch
                 {
                     DataType.TimeSpan => ((TimeSpan)value).FormatTime(),
-                    _ => Convert.ToDouble(value, culture).FormatTime()
+                    _ => Convert.ToDouble(value, culture).FormatSeconds()
                 },
                 "FormatValue" or "Size" => Convert.ToDecimal(value, culture).FormatSize(),
                 "FormatBinary" or "Binary" => Convert.ToDecimal(value, culture).FormatSize(),
@@ -636,25 +582,19 @@ namespace Cave.Data
         /// <inheritdoc/>
         public IEnumerator<IFieldProperties> GetEnumerator() => fieldProperties.GetEnumerator();
 
-        /// <summary>
-        /// Gets the field index of the specified field name.
-        /// </summary>
+        /// <summary>Gets the field index of the specified field name.</summary>
         /// <param name="fieldName">The field name to search for.</param>
         /// <returns>The field index of the specified field name.</returns>
         [Obsolete("Use int GetFieldIndex(string fieldName, bool throwException) instead!")]
         public int GetFieldIndex(string fieldName) => GetFieldIndex(fieldName, false);
 
-        /// <summary>
-        /// Gets the field index of the specified field name.
-        /// </summary>
+        /// <summary>Gets the field index of the specified field name.</summary>
         /// <param name="fieldName">The field name to search for.</param>
         /// <param name="throwException">Throw exception if field cannot be found.</param>
         /// <returns>The field index of the specified field name.</returns>
         public int GetFieldIndex(string fieldName, bool throwException) => GetFieldIndex(fieldName, 0, throwException);
 
-        /// <summary>
-        /// Gets the field index of the specified field name.
-        /// </summary>
+        /// <summary>Gets the field index of the specified field name.</summary>
         /// <param name="fieldName">The field name to search for.</param>
         /// <param name="comparison">Field name comparison</param>
         /// <param name="throwException">Throw exception if field cannot be found.</param>
@@ -695,9 +635,7 @@ namespace Cave.Data
             return result;
         }
 
-        /// <summary>
-        /// Calculates a new <see cref="RowLayout"/> instance by matching the current typed layout to a database layout.
-        /// </summary>
+        /// <summary>Calculates a new <see cref="RowLayout"/> instance by matching the current typed layout to a database layout.</summary>
         /// <param name="baseTableLayout">Database table layout.</param>
         /// <param name="flags">Table flags</param>
         /// <returns>Returns a new <see cref="RowLayout"/> instance</returns>
@@ -732,16 +670,12 @@ namespace Cave.Data
             return new(Name, result.OrderBy(i => i.Index).ToArray(), RowType);
         }
 
-        /// <summary>
-        /// Gets the name of the field with the given number.
-        /// </summary>
+        /// <summary>Gets the name of the field with the given number.</summary>
         /// <param name="index">The field index.</param>
         /// <returns>The name of the field.</returns>
         public string GetName(int index) => fieldProperties[index].Name;
 
-        /// <summary>
-        /// Loads the structure fields into a new <see cref="Row"/> instance.
-        /// </summary>
+        /// <summary>Loads the structure fields into a new <see cref="Row"/> instance.</summary>
         /// <typeparam name="TStruct">Structure type.</typeparam>
         /// <param name="item">Structure to read.</param>
         /// <returns>A new row instance.</returns>
@@ -763,9 +697,7 @@ namespace Cave.Data
             return field.GetString(value, stringMarker, culture);
         }
 
-        /// <summary>
-        /// Gets the value of a field from the specified struct.
-        /// </summary>
+        /// <summary>Gets the value of a field from the specified struct.</summary>
         /// <param name="index">The field index.</param>
         /// <param name="item">The struct to read the value from.</param>
         /// <returns>The value of the specified field.</returns>
@@ -779,9 +711,7 @@ namespace Cave.Data
             return fieldProperties[index].FieldInfo.GetValue(item);
         }
 
-        /// <summary>
-        /// Gets all values of the struct.
-        /// </summary>
+        /// <summary>Gets all values of the struct.</summary>
         /// <param name="item">The struct to get the values from.</param>
         /// <returns>Returns all values of the struct.</returns>
         /// <typeparam name="TStruct">Structure type.</typeparam>
@@ -811,24 +741,18 @@ namespace Cave.Data
             return result;
         }
 
-        /// <summary>
-        /// Checks whether a field with the specified name exists or not.
-        /// </summary>
+        /// <summary>Checks whether a field with the specified name exists or not.</summary>
         /// <param name="fieldName">The field name.</param>
         /// <returns>True is the field exists.</returns>
         public bool HasField(string fieldName) => GetFieldIndex(fieldName, 0, false) > -1;
 
-        /// <summary>
-        /// Checks whether a field with the specified name exists or not.
-        /// </summary>
+        /// <summary>Checks whether a field with the specified name exists or not.</summary>
         /// <param name="fieldName">The field name.</param>
         /// <param name="comparison">Field name comparison</param>
         /// <returns>True is the field exists.</returns>
         public bool HasField(string fieldName, StringComparison comparison) => GetFieldIndex(fieldName, comparison, false) > -1;
 
-        /// <summary>
-        /// Parses the value.
-        /// </summary>
+        /// <summary>Parses the value.</summary>
         /// <param name="index">The field index.</param>
         /// <param name="value">The value.</param>
         /// <param name="stringMarker">The string marker.</param>
@@ -840,9 +764,7 @@ namespace Cave.Data
             return field.ParseValue(value, stringMarker, provider);
         }
 
-        /// <summary>
-        /// Creates a copy of this layout without the specified field.
-        /// </summary>
+        /// <summary>Creates a copy of this layout without the specified field.</summary>
         /// <param name="fieldName">Name of the field to remove.</param>
         /// <returns>Returns a new <see cref="RowLayout"/> instance.</returns>
         public RowLayout Remove(string fieldName)
@@ -862,9 +784,7 @@ namespace Cave.Data
             return new(Name, fieldProperties.ToArray(), RowType);
         }
 
-        /// <summary>
-        /// Saves the layout to the specified writer.
-        /// </summary>
+        /// <summary>Saves the layout to the specified writer.</summary>
         /// <param name="writer">The writer.</param>
         public void Save(DataWriter writer)
         {
@@ -881,9 +801,7 @@ namespace Cave.Data
             }
         }
 
-        /// <summary>
-        /// Sets a value at the specified struct.
-        /// </summary>
+        /// <summary>Sets a value at the specified struct.</summary>
         /// <param name="index">The field index.</param>
         /// <param name="target">The struct to set the value at.</param>
         /// <param name="value">The value to set.</param>
@@ -891,9 +809,7 @@ namespace Cave.Data
         [Obsolete("Use overload with IFieldProperties definition!")]
         public void SetValue(int index, ref object target, object value, CultureInfo culture = null) => SetValue(ref target, fieldProperties[index], value, culture);
 
-        /// <summary>
-        /// Sets a value at the specified struct.
-        /// </summary>
+        /// <summary>Sets a value at the specified struct.</summary>
         /// <param name="target">The struct to set the value at.</param>
         /// <param name="field">Field properties to use</param>
         /// <param name="value">The value to set.</param>
@@ -908,9 +824,7 @@ namespace Cave.Data
             SetValueInternal(ref target, field, value, culture);
         }
 
-        /// <summary>
-        /// Sets all values of the struct.
-        /// </summary>
+        /// <summary>Sets all values of the struct.</summary>
         /// <param name="target">The struct to set the values at.</param>
         /// <param name="values">The values to set.</param>
         /// <param name="culture">Culture to use when converting values.</param>

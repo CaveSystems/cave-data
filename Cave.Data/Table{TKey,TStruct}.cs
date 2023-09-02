@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 
 namespace Cave.Data
@@ -33,9 +31,9 @@ namespace Cave.Data
             }
 
             var keyField = Layout.Identifier.Single();
-            var dbValue = (IConvertible) Activator.CreateInstance(keyField.ValueType);
-            var converted = (IConvertible) dbValue.ToType(typeof(TKey), CultureInfo.InvariantCulture);
-            var test = (IConvertible) converted.ToType(keyField.ValueType, CultureInfo.InvariantCulture);
+            var dbValue = (IConvertible)Activator.CreateInstance(keyField.ValueType);
+            var converted = (IConvertible)dbValue.ToType(typeof(TKey), CultureInfo.InvariantCulture);
+            var test = (IConvertible)converted.ToType(keyField.ValueType, CultureInfo.InvariantCulture);
             if (!Equals(test, dbValue))
             {
                 throw new ArgumentException($"Type (local) {nameof(TKey)} can not be converted from and to (database) {keyField.ValueType}!");

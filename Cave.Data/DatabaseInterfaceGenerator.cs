@@ -227,10 +227,7 @@ namespace Cave.Data
         /// <param name="fileName">Filename to save to.</param>
         public void Save(string fileName = null)
         {
-            if (fileName == null)
-            {
-                fileName = ClassName + ".cs";
-            }
+            fileName ??= ClassName + ".cs";
 
             File.WriteAllText(fileName, Generate());
         }

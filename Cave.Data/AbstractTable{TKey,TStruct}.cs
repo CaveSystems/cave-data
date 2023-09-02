@@ -64,7 +64,7 @@ namespace Cave.Data
 
         /// <inheritdoc />
         public IDictionary<TKey, TStruct> GetDictionary(Search search = null, ResultOption resultOption = null) =>
-            GetRows(search, resultOption).ToDictionary(r => (TKey) r[KeyField.Index], r => r.GetStruct<TStruct>(Layout));
+            GetRows(search, resultOption).ToDictionary(r => (TKey)r[KeyField.Index], r => r.GetStruct<TStruct>(Layout));
 
         #endregion
     }

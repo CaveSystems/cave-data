@@ -7,9 +7,7 @@ using Cave.IO;
 
 namespace Cave.Data
 {
-    /// <summary>
-    /// Provides writing of csv files using a struct or class.
-    /// </summary>
+    /// <summary>Provides writing of csv files using a struct or class.</summary>
     public sealed class DatWriter : IDisposable
     {
         #region Private Fields
@@ -50,29 +48,29 @@ namespace Cave.Data
                     {
                         case DataType.User:
                         case DataType.String:
-                        if (version > 2)
-                        {
-                            writer.Write7BitEncoded32((int)field.StringEncoding);
-                        }
+                            if (version > 2)
+                            {
+                                writer.Write7BitEncoded32((int)field.StringEncoding);
+                            }
 
-                        break;
+                            break;
 
                         case DataType.DateTime:
-                        if (version > 1)
-                        {
-                            writer.Write7BitEncoded32((int)field.DateTimeKind);
-                            writer.Write7BitEncoded32((int)field.DateTimeType);
-                        }
+                            if (version > 1)
+                            {
+                                writer.Write7BitEncoded32((int)field.DateTimeKind);
+                                writer.Write7BitEncoded32((int)field.DateTimeType);
+                            }
 
-                        break;
+                            break;
 
                         case DataType.TimeSpan:
-                        if (version > 3)
-                        {
-                            writer.Write7BitEncoded32((int)field.DateTimeType);
-                        }
+                            if (version > 3)
+                            {
+                                writer.Write7BitEncoded32((int)field.DateTimeType);
+                            }
 
-                        break;
+                            break;
                     }
 
                     if ((field.DataType & DataType.MaskRequireValueType) != 0)
@@ -117,10 +115,7 @@ namespace Cave.Data
                         var data = (byte[])row[i];
                         if (version < 3)
                         {
-                            if (data == null)
-                            {
-                                data = new byte[0];
-                            }
+                            data ??= new byte[0];
 
                             w.Write(data.Length);
                             w.Write(data);
@@ -133,88 +128,88 @@ namespace Cave.Data
                         break;
                     }
                     case DataType.Bool:
-                    w.Write(Convert.ToBoolean(row[i] ?? default(bool), CultureInfo.CurrentCulture));
-                    break;
+                        w.Write(Convert.ToBoolean(row[i] ?? default(bool), CultureInfo.CurrentCulture));
+                        break;
 
                     case DataType.TimeSpan:
-                    w.Write(((TimeSpan)(row[i] ?? default(TimeSpan))).Ticks);
-                    break;
+                        w.Write(((TimeSpan)(row[i] ?? default(TimeSpan))).Ticks);
+                        break;
 
                     case DataType.DateTime:
-                    w.Write(((DateTime)(row[i] ?? default(DateTime))).Ticks);
-                    break;
+                        w.Write(((DateTime)(row[i] ?? default(DateTime))).Ticks);
+                        break;
 
                     case DataType.Single:
-                    w.Write((float)(row[i] ?? default(float)));
-                    break;
+                        w.Write((float)(row[i] ?? default(float)));
+                        break;
 
                     case DataType.Double:
-                    w.Write((double)(row[i] ?? default(double)));
-                    break;
+                        w.Write((double)(row[i] ?? default(double)));
+                        break;
 
                     case DataType.Int8:
-                    w.Write((sbyte)(row[i] ?? default(sbyte)));
-                    break;
+                        w.Write((sbyte)(row[i] ?? default(sbyte)));
+                        break;
 
                     case DataType.Int16:
-                    w.Write((short)(row[i] ?? default(short)));
-                    break;
+                        w.Write((short)(row[i] ?? default(short)));
+                        break;
 
                     case DataType.UInt8:
-                    w.Write((byte)(row[i] ?? default(byte)));
-                    break;
+                        w.Write((byte)(row[i] ?? default(byte)));
+                        break;
 
                     case DataType.UInt16:
-                    w.Write((ushort)(row[i] ?? default(ushort)));
-                    break;
+                        w.Write((ushort)(row[i] ?? default(ushort)));
+                        break;
 
                     case DataType.Int32:
-                    if (version == 1)
-                    {
-                        w.Write((int)row[i]);
-                        break;
-                    }
+                        if (version == 1)
+                        {
+                            w.Write((int)row[i]);
+                            break;
+                        }
 
-                    w.Write7BitEncoded32((int)(row[i] ?? default(int)));
-                    break;
+                        w.Write7BitEncoded32((int)(row[i] ?? default(int)));
+                        break;
 
                     case DataType.Int64:
-                    if (version == 1)
-                    {
-                        w.Write((long)row[i]);
-                        break;
-                    }
+                        if (version == 1)
+                        {
+                            w.Write((long)row[i]);
+                            break;
+                        }
 
-                    w.Write7BitEncoded64((long)(row[i] ?? default(long)));
-                    break;
+                        w.Write7BitEncoded64((long)(row[i] ?? default(long)));
+                        break;
 
                     case DataType.UInt32:
-                    if (version == 1)
-                    {
-                        w.Write((uint)row[i]);
-                        break;
-                    }
+                        if (version == 1)
+                        {
+                            w.Write((uint)row[i]);
+                            break;
+                        }
 
-                    w.Write7BitEncoded32((uint)(row[i] ?? default(uint)));
-                    break;
+                        w.Write7BitEncoded32((uint)(row[i] ?? default(uint)));
+                        break;
 
                     case DataType.UInt64:
-                    if (version == 1)
-                    {
-                        w.Write((ulong)row[i]);
-                        break;
-                    }
+                        if (version == 1)
+                        {
+                            w.Write((ulong)row[i]);
+                            break;
+                        }
 
-                    w.Write7BitEncoded64((ulong)(row[i] ?? default(ulong)));
-                    break;
+                        w.Write7BitEncoded64((ulong)(row[i] ?? default(ulong)));
+                        break;
 
                     case DataType.Char:
-                    w.Write((char)(row[i] ?? default(char)));
-                    break;
+                        w.Write((char)(row[i] ?? default(char)));
+                        break;
 
                     case DataType.Decimal:
-                    w.Write((decimal)(row[i] ?? default(decimal)));
-                    break;
+                        w.Write((decimal)(row[i] ?? default(decimal)));
+                        break;
 
                     case DataType.String:
                     case DataType.User:
@@ -227,30 +222,6 @@ namespace Cave.Data
                         else
                         {
                             var text = data.ToString();
-
-                            // check for invalid characters
-                            switch (fieldProperties.StringEncoding)
-                            {
-                                case StringEncoding.ASCII:
-                                if (!ASCII.IsClean(text))
-                                {
-                                    throw new InvalidDataException($"Invalid character at field {fieldProperties}");
-                                }
-
-                                break;
-
-                                case StringEncoding.UTF16:
-                                text = Encoding.Unicode.GetString(Encoding.Unicode.GetBytes(text));
-                                break;
-
-                                case StringEncoding.UTF32:
-                                text = Encoding.Unicode.GetString(Encoding.UTF32.GetBytes(text));
-                                break;
-
-                                case StringEncoding.UTF8: break;
-                                default: throw new NotImplementedException();
-                            }
-
                             w.WritePrefixed(text);
                         }
 
@@ -263,7 +234,7 @@ namespace Cave.Data
                         break;
                     }
                     default:
-                    throw new NotImplementedException($"Datatype {fieldProperties.DataType} not implemented!");
+                        throw new NotImplementedException($"Datatype {fieldProperties.DataType} not implemented!");
                 }
             }
 
@@ -291,18 +262,14 @@ namespace Cave.Data
 
         #region Public Fields
 
-        /// <summary>
-        /// The current version.
-        /// </summary>
+        /// <summary>The current version.</summary>
         public const int CurrentVersion = 4;
 
         #endregion Public Fields
 
         #region Public Constructors
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DatWriter"/> class.
-        /// </summary>
+        /// <summary>Initializes a new instance of the <see cref="DatWriter"/> class.</summary>
         /// <param name="layout">Table layout.</param>
         /// <param name="fileName">Filename to write to.</param>
         public DatWriter(RowLayout layout, string fileName)
@@ -310,9 +277,7 @@ namespace Cave.Data
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DatWriter"/> class.
-        /// </summary>
+        /// <summary>Initializes a new instance of the <see cref="DatWriter"/> class.</summary>
         /// <param name="layout">Table layout.</param>
         /// <param name="stream">Stream to write to.</param>
         public DatWriter(RowLayout layout, Stream stream)
@@ -331,9 +296,7 @@ namespace Cave.Data
 
         #region Public Methods
 
-        /// <summary>
-        /// Creates a new dat file with the specified name and writes the whole table.
-        /// </summary>
+        /// <summary>Creates a new dat file with the specified name and writes the whole table.</summary>
         /// <param name="fileName">Filename to write to.</param>
         /// <param name="table">Table to write.</param>
         public static void WriteTable(string fileName, ITable table)
@@ -347,9 +310,7 @@ namespace Cave.Data
             writer.WriteTable(table);
         }
 
-        /// <summary>
-        /// Closes the writer and the stream.
-        /// </summary>
+        /// <summary>Closes the writer and the stream.</summary>
         public void Close()
         {
             if (writer != null)
@@ -362,9 +323,7 @@ namespace Cave.Data
         /// <inheritdoc/>
         public void Dispose() => Close();
 
-        /// <summary>
-        /// Writes a row to the file.
-        /// </summary>
+        /// <summary>Writes a row to the file.</summary>
         /// <param name="row">Row to write.</param>
         public void Write(Row row)
         {
@@ -377,18 +336,14 @@ namespace Cave.Data
             WriteData(data);
         }
 
-        /// <summary>
-        /// Writes a row to the file.
-        /// </summary>
+        /// <summary>Writes a row to the file.</summary>
         /// <param name="value">Row to write.</param>
         /// <typeparam name="TStruct">Structure type.</typeparam>
         public void Write<TStruct>(TStruct value)
             where TStruct : struct =>
             Write(new Row(layout, layout.GetValues(value), false));
 
-        /// <summary>
-        /// Writes a number of rows to the file.
-        /// </summary>
+        /// <summary>Writes a number of rows to the file.</summary>
         /// <param name="table">Table to write.</param>
         /// <typeparam name="TStruct">Structure type.</typeparam>
         public void WriteRows<TStruct>(IEnumerable<TStruct> table)
@@ -407,9 +362,7 @@ namespace Cave.Data
             }
         }
 
-        /// <summary>
-        /// Writes a number of rows to the file.
-        /// </summary>
+        /// <summary>Writes a number of rows to the file.</summary>
         /// <param name="table">Table to write.</param>
         public void WriteTable(IEnumerable<Row> table)
         {
@@ -425,9 +378,7 @@ namespace Cave.Data
             }
         }
 
-        /// <summary>
-        /// Writes a full table of rows to the file.
-        /// </summary>
+        /// <summary>Writes a full table of rows to the file.</summary>
         /// <param name="table">Table to write.</param>
         public void WriteTable(ITable table)
         {

@@ -22,7 +22,7 @@ namespace Cave.Data.SQLite
         {
             Version = version;
             this.data = data;
-            IsValid = (Version >= 8) || (Version <= 10);
+            IsValid = version is >= 8 and <= 10;
         }
 
         #endregion Internal Constructors
@@ -32,17 +32,11 @@ namespace Cave.Data.SQLite
         /// <summary>
         /// Gets a value indicating whether the entry was deleted or not.
         /// </summary>
-        public bool Deleted
+        public bool Deleted => Version switch
         {
-            get
-            {
-                return Version switch
-                {
-                    8 or 9 or 10 => data[5] == "delete",
-                    _ => false,
-                };
-            }
-        }
+            8 or 9 or 10 => data[5] == "delete",
+            _ => false,
+        };
 
         /// <summary>
         /// Gets a value indicating whether the entry is valid or not.
@@ -57,18 +51,12 @@ namespace Cave.Data.SQLite
         /// <summary>
         /// Gets the type of the <see cref="SubversionEntry"/>.
         /// </summary>
-        public SubversionEntryType Type
+        public SubversionEntryType Type => data[1] switch
         {
-            get
-            {
-                return data[1] switch
-                {
-                    "dir" => SubversionEntryType.Directory,
-                    "file" => SubversionEntryType.File,
-                    _ => SubversionEntryType.Unknown,
-                };
-            }
-        }
+            "dir" => SubversionEntryType.Directory,
+            "file" => SubversionEntryType.File,
+            _ => SubversionEntryType.Unknown,
+        };
 
         /// <summary>
         /// Gets the subversion entry version.

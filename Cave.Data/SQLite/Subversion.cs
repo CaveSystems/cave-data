@@ -32,14 +32,11 @@ namespace Cave.Data.SQLite
             throw new DirectoryNotFoundException("Could not find .svn directory!");
         }
 
-        static string[] ReadEntries(string path)
+        static string[] ReadEntries(string path) => GetVersion(path) switch
         {
-            return GetVersion(path) switch
-            {
-                8 or 9 or 10 => File.ReadAllLines(Path.Combine(GetRootPath(path), "entries")),
-                _ => throw new NotSupportedException(),
-            };
-        }
+            8 or 9 or 10 => File.ReadAllLines(Path.Combine(GetRootPath(path), "entries")),
+            _ => throw new NotSupportedException(),
+        };
 
         #endregion Private Methods
 

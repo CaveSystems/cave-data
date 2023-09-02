@@ -59,8 +59,8 @@ namespace Cave.Data
                         case ResultOptionMode.SortAsc:
                         case ResultOptionMode.SortDesc:
                         case ResultOptionMode.Group:
-                        result.Add(option.Parameter);
-                        break;
+                            result.Add(option.Parameter);
+                            break;
                     }
                 }
 

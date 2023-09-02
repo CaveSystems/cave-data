@@ -53,16 +53,16 @@ namespace Test.Cave
         {
             var t = new TestStructBug
             {
-                IDField = (ulong) (i * i),
+                IDField = (ulong)(i * i),
                 AutoIncUniqueIndexedField = i * i * i,
-                AutoIncIndexField = (byte) (i & 0xFF),
+                AutoIncIndexField = (byte)(i & 0xFF),
                 BuggyField = i.ToString(),
-                IndexedField = (uint) i,
+                IndexedField = (uint)i,
                 NoField = i.ToString(),
                 SomeEnum = enumValues[i % enumValues.Length],
-                UniqueIndexedField = (sbyte) (-i / 10),
-                UniqueField = (short) i,
-                AutoIncField = (ushort) i
+                UniqueIndexedField = (sbyte)(-i / 10),
+                UniqueField = (short)i,
+                AutoIncField = (ushort)i
             };
             return t;
         }
@@ -113,18 +113,18 @@ namespace Test.Cave
         {
             var t = new TestStructClean
             {
-                Arr = BitConverterLE.Instance.GetBytes((long) i),
-                B = (byte) (i & 0xFF),
-                SB = (sbyte) (-i / 10),
-                US = (ushort) i,
-                C = (char) i,
+                Arr = BitConverterLE.Instance.GetBytes((long)i),
+                B = (byte)(i & 0xFF),
+                SB = (sbyte)(-i / 10),
+                US = (ushort)i,
+                C = (char)i,
                 I = i,
                 F = (500 - i) * 0.5f,
                 D = (500 - i) * 0.5d,
                 Date = new DateTime(1 + Math.Abs(i), 12, 31, 23, 59, 48, i % 1000, DateTimeKind.Local),
                 Time = TimeSpan.FromSeconds(i),
-                S = (short) (i - 500),
-                UI = (uint) i,
+                S = (short)(i - 500),
+                UI = (uint)i,
                 Text = i.ToString(),
                 Dec = 0.005m * (i - 500),
                 Uri = new Uri("http://localhost/" + i),
@@ -191,7 +191,7 @@ namespace Test.Cave
                 return false;
             }
 
-            var other = (TestStructClean) obj;
+            var other = (TestStructClean)obj;
             return
                 DefaultComparer.Equals(Arr, other.Arr) &&
                 Equals(B, other.B) &&
