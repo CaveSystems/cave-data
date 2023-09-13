@@ -30,14 +30,7 @@ namespace Cave.Data
         {
             if (disposing)
             {
-                if (CloseBaseStream)
-                {
-                    if (reader != null)
-                    {
-                        reader.BaseStream.Dispose();
-                    }
-                }
-
+                reader?.BaseStream.Dispose();
                 reader = null;
             }
         }
@@ -547,7 +540,11 @@ namespace Cave.Data
         /// <summary>
         /// Releases unmanaged and managed resources.
         /// </summary>
-        public void Dispose() => Dispose(true);
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
         /// <summary>
         /// Reads the whole file to a new list.

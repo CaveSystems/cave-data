@@ -405,19 +405,14 @@ namespace Cave.Data.Sql
                     case ResultOptionMode.SortAsc:
                     case ResultOptionMode.SortDesc:
                     case ResultOptionMode.None:
-                    break;
+                        break;
 
                     default:
-                    throw new InvalidOperationException($"ResultOptionMode {o.Mode} not supported!");
+                        throw new InvalidOperationException($"ResultOptionMode {o.Mode} not supported!");
                 }
             }
 
-            var value = Storage.QueryValue(new SqlCmd(command.ToString(), search.Parameters.ToArray()));
-            if (value == null)
-            {
-                throw new InvalidDataException($"Could not read value from {FQTN}!");
-            }
-
+            var value = Storage.QueryValue(new SqlCmd(command.ToString(), search.Parameters.ToArray())) ?? throw new InvalidDataException($"Could not read value from {FQTN}!");
             return Convert.ToInt64(value, Storage.Culture);
         }
 
@@ -483,12 +478,7 @@ namespace Cave.Data.Sql
                 command.Append(Storage.EscapeFieldName(Layout[o.Parameter]));
             }
 
-            var value = QueryValue(new SqlCmd(command.ToString(), search.Parameters.ToArray()));
-            if (value == null)
-            {
-                throw new InvalidDataException($"Could not read value from {FQTN}!");
-            }
-
+            var value = QueryValue(new SqlCmd(command.ToString(), search.Parameters.ToArray())) ?? throw new InvalidDataException($"Could not read value from {FQTN}!");
             return Convert.ToInt64(value, null);
         }
 
@@ -720,10 +710,7 @@ namespace Cave.Data.Sql
         /// <inheritdoc/>
         public override long Count(Search search = default, ResultOption resultOption = default)
         {
-            if (search == null)
-            {
-                search = Search.None;
-            }
+            search ??= Search.None;
 
             if (resultOption == null)
             {
@@ -736,12 +723,7 @@ namespace Cave.Data.Sql
                 return SqlCount(s, resultOption);
             }
 
-            var value = QueryValue(new SqlCmd("SELECT COUNT(*) FROM " + FQTN + " WHERE " + s, s.Parameters.ToArray()));
-            if (value == null)
-            {
-                throw new InvalidDataException($"Could not read row count from {FQTN}!");
-            }
-
+            var value = QueryValue(new SqlCmd("SELECT COUNT(*) FROM " + FQTN + " WHERE " + s, s.Parameters.ToArray())) ?? throw new InvalidDataException($"Could not read row count from {FQTN}!");
             return Convert.ToInt64(value, Storage.Culture);
         }
 
@@ -806,10 +788,7 @@ namespace Cave.Data.Sql
         /// <inheritdoc/>
         public override bool Exist(Search search)
         {
-            if (search == null)
-            {
-                search = Search.None;
-            }
+            search ??= Search.None;
 
             var s = ToSqlSearch(search);
             var query = "SELECT DISTINCT 1 FROM " + FQTN + " WHERE " + s;
@@ -853,10 +832,7 @@ namespace Cave.Data.Sql
         /// <inheritdoc/>
         public override IList<Row> GetRows(Search search = null, ResultOption resultOption = null)
         {
-            if (search == null)
-            {
-                search = Search.None;
-            }
+            search ??= Search.None;
 
             if (resultOption == null)
             {
@@ -945,10 +921,7 @@ namespace Cave.Data.Sql
         /// <inheritdoc/>
         public override TValue? Maximum<TValue>(string fieldName, Search search = null)
         {
-            if (search == null)
-            {
-                search = Search.None;
-            }
+            search ??= Search.None;
 
             var command = new SqlCommandBuilder(Storage);
             command.Append("SELECT MAX(");
@@ -958,16 +931,13 @@ namespace Cave.Data.Sql
             command.Append(" WHERE ");
             command.Append(ToSqlSearch(search).ToString());
             var value = Storage.QueryValue(database: Database.Name, table: Name, cmd: command);
-            return value == null ? (TValue?)null : (TValue)value;
+            return value == null ? null : (TValue)value;
         }
 
         /// <inheritdoc/>
         public override TValue? Minimum<TValue>(string fieldName, Search search = null)
         {
-            if (search == null)
-            {
-                search = Search.None;
-            }
+            search ??= Search.None;
 
             var command = new SqlCommandBuilder(Storage);
             command.Append("SELECT MIN(");
@@ -977,7 +947,7 @@ namespace Cave.Data.Sql
             command.Append(" WHERE ");
             command.Append(ToSqlSearch(search).ToString());
             var value = Storage.QueryValue(database: Database.Name, table: Name, cmd: command);
-            return value == null ? (TValue?)null : (TValue)value;
+            return value == null ? null : (TValue)value;
         }
 
         /// <summary>
@@ -1069,7 +1039,7 @@ namespace Cave.Data.Sql
         public override double Sum(string fieldName, Search search = null)
         {
             var field = Layout[fieldName];
-            if (search == null) { search = Search.None; }
+            search ??= Search.None;
 
             var s = ToSqlSearch(search);
             var command = new StringBuilder();
@@ -1080,12 +1050,7 @@ namespace Cave.Data.Sql
             command.Append(" WHERE ");
             command.Append(s);
             var result = double.NaN;
-            var value = Storage.QueryValue(new SqlCmd(command.ToString(), s.Parameters.ToArray()));
-            if (value == null)
-            {
-                throw new InvalidDataException($"Could not read value from {FQTN}!");
-            }
-
+            var value = Storage.QueryValue(new SqlCmd(command.ToString(), s.Parameters.ToArray())) ?? throw new InvalidDataException($"Could not read value from {FQTN}!");
             switch (field.DataType)
             {
                 case DataType.Binary:
@@ -1093,29 +1058,29 @@ namespace Cave.Data.Sql
                 case DataType.String:
                 case DataType.User:
                 case DataType.Unknown:
-                throw new NotSupportedException($"Sum() is not supported for fieldName {field}!");
-                case DataType.TimeSpan:
-                switch (field.DateTimeType)
-                {
-                    case DateTimeType.BigIntHumanReadable:
-                    case DateTimeType.Undefined:
                     throw new NotSupportedException($"Sum() is not supported for fieldName {field}!");
-                    case DateTimeType.BigIntTicks:
-                    result = Convert.ToDouble(value, CultureInfo.CurrentCulture) / TimeSpan.TicksPerSecond;
-                    break;
+                case DataType.TimeSpan:
+                    switch (field.DateTimeType)
+                    {
+                        case DateTimeType.BigIntHumanReadable:
+                        case DateTimeType.Undefined:
+                            throw new NotSupportedException($"Sum() is not supported for fieldName {field}!");
+                        case DateTimeType.BigIntTicks:
+                            result = Convert.ToDouble(value, CultureInfo.CurrentCulture) / TimeSpan.TicksPerSecond;
+                            break;
 
-                    case DateTimeType.DecimalSeconds:
-                    case DateTimeType.Native:
-                    case DateTimeType.DoubleSeconds:
-                    result = Convert.ToDouble(value, CultureInfo.CurrentCulture);
-                    break;
-                }
+                        case DateTimeType.DecimalSeconds:
+                        case DateTimeType.Native:
+                        case DateTimeType.DoubleSeconds:
+                            result = Convert.ToDouble(value, CultureInfo.CurrentCulture);
+                            break;
+                    }
 
-                break;
+                    break;
 
                 default:
-                result = Convert.ToDouble(value, CultureInfo.CurrentCulture);
-                break;
+                    result = Convert.ToDouble(value, CultureInfo.CurrentCulture);
+                    break;
             }
 
             return result;

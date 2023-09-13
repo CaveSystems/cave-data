@@ -126,34 +126,28 @@ namespace Cave.Data.SQLite
         /// <param name="dataType">Local DataType.</param>
         /// <returns>The databaseName data type to use.</returns>
         /// <exception cref="ArgumentNullException">FieldType.</exception>
-        public static DataType GetDatabaseDataType(DataType dataType)
+        public static DataType GetDatabaseDataType(DataType dataType) => GetValueType(dataType) switch
         {
-            return GetValueType(dataType) switch
-            {
-                SQLiteValueType.BLOB => DataType.Binary,
-                SQLiteValueType.INTEGER => DataType.Int64,
-                SQLiteValueType.REAL => DataType.Double,
-                SQLiteValueType.TEXT => DataType.String,
-                _ => throw new NotImplementedException($"FieldType {dataType} is not implemented!"),
-            };
-        }
+            SQLiteValueType.BLOB => DataType.Binary,
+            SQLiteValueType.INTEGER => DataType.Int64,
+            SQLiteValueType.REAL => DataType.Double,
+            SQLiteValueType.TEXT => DataType.String,
+            _ => throw new NotImplementedException($"FieldType {dataType} is not implemented!"),
+        };
 
         /// <summary>
         /// Gets the sqlite value type of the specified datatype.
         /// </summary>
         /// <param name="dataType">Data type.</param>
         /// <returns>The sqlite value type.</returns>
-        public static SQLiteValueType GetValueType(DataType dataType)
+        public static SQLiteValueType GetValueType(DataType dataType) => dataType switch
         {
-            return dataType switch
-            {
-                DataType.Binary => SQLiteValueType.BLOB,
-                DataType.Bool or DataType.Enum or DataType.Int8 or DataType.Int16 or DataType.Int32 or DataType.Int64 or DataType.UInt8 or DataType.UInt16 or DataType.UInt32 or DataType.UInt64 => SQLiteValueType.INTEGER,
-                DataType.DateTime or DataType.Char or DataType.String or DataType.User => SQLiteValueType.TEXT,
-                DataType.TimeSpan or DataType.Decimal or DataType.Double or DataType.Single => SQLiteValueType.REAL,
-                _ => throw new NotImplementedException($"DataType {dataType} is not implemented!"),
-            };
-        }
+            DataType.Binary => SQLiteValueType.BLOB,
+            DataType.Bool or DataType.Enum or DataType.Int8 or DataType.Int16 or DataType.Int32 or DataType.Int64 or DataType.UInt8 or DataType.UInt16 or DataType.UInt32 or DataType.UInt64 => SQLiteValueType.INTEGER,
+            DataType.DateTime or DataType.Char or DataType.String or DataType.User => SQLiteValueType.TEXT,
+            DataType.TimeSpan or DataType.Decimal or DataType.Double or DataType.Single => SQLiteValueType.REAL,
+            _ => throw new NotImplementedException($"DataType {dataType} is not implemented!"),
+        };
 
         /// <inheritdoc/>
         public override IDatabase CreateDatabase(string databaseName)

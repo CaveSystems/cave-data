@@ -21,14 +21,7 @@ namespace Cave.Data
         {
             if (disposing)
             {
-                if (CloseBaseStream)
-                {
-                    if (writer != null)
-                    {
-                        writer.BaseStream.Dispose();
-                    }
-                }
-
+                writer?.BaseStream.Dispose();
                 writer = null;
             }
         }
@@ -140,10 +133,7 @@ namespace Cave.Data
                 throw new ArgumentNullException(nameof(row));
             }
 
-            if (provider == null)
-            {
-                provider = properties.Format;
-            }
+            provider ??= properties.Format;
 
             var result = new StringBuilder();
             var values = row.Values;
@@ -161,7 +151,7 @@ namespace Cave.Data
                     {
                         case DataType.Binary:
                         {
-                            var str = Base64.NoPadding.Encode((byte[]) values[i]);
+                            var str = Base64.NoPadding.Encode((byte[])values[i]);
                             result.Append(str);
                             break;
                         }
@@ -186,7 +176,7 @@ namespace Cave.Data
                         }
                         case DataType.Char:
                         {
-                            if (!properties.SaveDefaultValues && values[i].Equals((char) 0))
+                            if (!properties.SaveDefaultValues && values[i].Equals((char)0))
                             {
                                 break;
                             }
@@ -202,7 +192,7 @@ namespace Cave.Data
                                 break;
                             }
 
-                            var value = (decimal) values[i];
+                            var value = (decimal)values[i];
                             result.Append(value.ToString(provider));
                             break;
                         }
@@ -213,7 +203,7 @@ namespace Cave.Data
                                 break;
                             }
 
-                            var value = (float) values[i];
+                            var value = (float)values[i];
                             result.Append(value.ToString("R", provider));
                             break;
                         }
@@ -224,7 +214,7 @@ namespace Cave.Data
                                 break;
                             }
 
-                            var value = (double) values[i];
+                            var value = (double)values[i];
                             result.Append(value.ToString("R", provider));
                             break;
                         }
@@ -249,7 +239,7 @@ namespace Cave.Data
                             string str;
                             if (properties.DateTimeFormat != null)
                             {
-                                str = ((DateTime) values[i]).ToString(properties.DateTimeFormat, provider);
+                                str = ((DateTime)values[i]).ToString(properties.DateTimeFormat, provider);
                             }
                             else
                             {

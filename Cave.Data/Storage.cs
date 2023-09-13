@@ -178,7 +178,7 @@ namespace Cave.Data
             }
 
             var value = Math.Truncate(count);
-            var decimalValue = (int) Math.Round((count - value) * 100);
+            var decimalValue = (int)Math.Round((count - value) * 100);
             decimal result = 1;
             while (decimalValue-- > 0)
             {

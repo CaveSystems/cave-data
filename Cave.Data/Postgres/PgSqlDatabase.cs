@@ -215,8 +215,8 @@ namespace Cave.Data.Postgres
 
                         if (fieldProperties.MaximumLength > 0)
                         {
-                            var precision = (int) fieldProperties.MaximumLength;
-                            var scale = (int) ((fieldProperties.MaximumLength - precision) * 100);
+                            var precision = (int)fieldProperties.MaximumLength;
+                            var scale = (int)((fieldProperties.MaximumLength - precision) * 100);
                             if (scale >= precision)
                             {
                                 throw new ArgumentOutOfRangeException(

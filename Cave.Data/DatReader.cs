@@ -5,9 +5,7 @@ using Cave.IO;
 
 namespace Cave.Data
 {
-    /// <summary>
-    /// Provides reading of dat files to a struct / class.
-    /// </summary>
+    /// <summary>Provides reading of dat files to a struct / class.</summary>
     public sealed class DatReader : IDisposable
     {
         #region Private Fields
@@ -38,75 +36,75 @@ namespace Cave.Data
         {
             var dateTimeKind = DateTimeKind.Unspecified;
             var dateTimeType = DateTimeType.Undefined;
-            var stringEncoding = StringEncoding.UTF8;
+            var stringEncoding = StringEncoding.UTF_8;
             if (reader.ReadString(8) != "DatTable")
             {
                 throw new FormatException();
             }
 
             version = reader.Read7BitEncodedInt32();
-            if ((version < 1) || (version > 4))
+            if (version is < 1 or > 4)
             {
                 throw new InvalidDataException("Unknown Table version!");
             }
 
             // read name and create layout
-            var layoutName = reader.ReadString();
+            var layoutName = reader.ReadPrefixedString();
             var fieldCount = reader.Read7BitEncodedInt32();
             var fields = new FieldProperties[fieldCount];
             for (var i = 0; i < fieldCount; i++)
             {
-                var fieldName = reader.ReadString();
+                var fieldName = reader.ReadPrefixedString();
                 var dataType = (DataType)reader.Read7BitEncodedInt32();
                 var fieldFlags = (FieldFlags)reader.Read7BitEncodedInt32();
                 var databaseDataType = dataType;
                 switch (dataType)
                 {
                     case DataType.Enum:
-                    databaseDataType = DataType.Int64;
-                    break;
+                        databaseDataType = DataType.Int64;
+                        break;
 
                     case DataType.User:
                     case DataType.String:
-                    databaseDataType = DataType.String;
-                    if (version > 2)
-                    {
-                        stringEncoding = (StringEncoding)reader.Read7BitEncodedInt32();
-                    }
-                    else
-                    {
-                        stringEncoding = StringEncoding.UTF8;
-                    }
+                        databaseDataType = DataType.String;
+                        if (version > 2)
+                        {
+                            stringEncoding = (StringEncoding)reader.Read7BitEncodedInt32();
+                        }
+                        else
+                        {
+                            stringEncoding = StringEncoding.UTF_8;
+                        }
 
-                    break;
+                        break;
 
                     case DataType.TimeSpan:
-                    if (version > 3)
-                    {
-                        dateTimeType = (DateTimeType)reader.Read7BitEncodedInt32();
-                    }
+                        if (version > 3)
+                        {
+                            dateTimeType = (DateTimeType)reader.Read7BitEncodedInt32();
+                        }
 
-                    break;
+                        break;
 
                     case DataType.DateTime:
-                    if (version > 1)
-                    {
-                        dateTimeKind = (DateTimeKind)reader.Read7BitEncodedInt32();
-                        dateTimeType = (DateTimeType)reader.Read7BitEncodedInt32();
-                    }
-                    else
-                    {
-                        dateTimeKind = DateTimeKind.Utc;
-                        dateTimeType = DateTimeType.BigIntHumanReadable;
-                    }
+                        if (version > 1)
+                        {
+                            dateTimeKind = (DateTimeKind)reader.Read7BitEncodedInt32();
+                            dateTimeType = (DateTimeType)reader.Read7BitEncodedInt32();
+                        }
+                        else
+                        {
+                            dateTimeKind = DateTimeKind.Utc;
+                            dateTimeType = DateTimeType.BigIntHumanReadable;
+                        }
 
-                    break;
+                        break;
                 }
 
                 Type valueType = null;
                 if ((dataType & DataType.MaskRequireValueType) != 0)
                 {
-                    var typeName = reader.ReadString();
+                    var typeName = reader.ReadPrefixedString();
                     valueType = AppDom.FindType(typeName.BeforeFirst(','), typeName.AfterFirst(',').Trim());
                 }
 
@@ -156,113 +154,113 @@ namespace Cave.Data
                 switch (dataType)
                 {
                     case DataType.Binary:
-                    if (version >= 3)
-                    {
-                        values[i] = reader.ReadBytes();
-                    }
-                    else
-                    {
-                        var size = reader.ReadInt32();
-                        values[i] = reader.ReadBytes(size);
-                    }
+                        if (version >= 3)
+                        {
+                            values[i] = reader.ReadBytes();
+                        }
+                        else
+                        {
+                            var size = reader.ReadInt32();
+                            values[i] = reader.ReadBytes(size);
+                        }
 
-                    break;
+                        break;
 
                     case DataType.Bool:
-                    values[i] = reader.ReadBool();
-                    break;
+                        values[i] = reader.ReadBool();
+                        break;
 
                     case DataType.DateTime:
-                    values[i] = new DateTime(reader.ReadInt64(), field.DateTimeKind);
-                    break;
+                        values[i] = new DateTime(reader.ReadInt64(), field.DateTimeKind);
+                        break;
 
                     case DataType.TimeSpan:
-                    values[i] = new TimeSpan(reader.ReadInt64());
-                    break;
+                        values[i] = new TimeSpan(reader.ReadInt64());
+                        break;
 
                     case DataType.Int8:
-                    values[i] = reader.ReadInt8();
-                    break;
+                        values[i] = reader.ReadInt8();
+                        break;
 
                     case DataType.Int16:
-                    values[i] = reader.ReadInt16();
-                    break;
+                        values[i] = reader.ReadInt16();
+                        break;
 
                     case DataType.Int32:
-                    if (version == 1)
-                    {
-                        values[i] = reader.ReadInt32();
-                        break;
-                    }
+                        if (version == 1)
+                        {
+                            values[i] = reader.ReadInt32();
+                            break;
+                        }
 
-                    values[i] = reader.Read7BitEncodedInt32();
-                    break;
+                        values[i] = reader.Read7BitEncodedInt32();
+                        break;
 
                     case DataType.Int64:
-                    if (version == 1)
-                    {
-                        values[i] = reader.ReadInt64();
-                        break;
-                    }
+                        if (version == 1)
+                        {
+                            values[i] = reader.ReadInt64();
+                            break;
+                        }
 
-                    values[i] = reader.Read7BitEncodedInt64();
-                    break;
+                        values[i] = reader.Read7BitEncodedInt64();
+                        break;
 
                     case DataType.UInt32:
-                    if (version == 1)
-                    {
-                        values[i] = reader.ReadUInt32();
-                        break;
-                    }
+                        if (version == 1)
+                        {
+                            values[i] = reader.ReadUInt32();
+                            break;
+                        }
 
-                    values[i] = reader.Read7BitEncodedUInt32();
-                    break;
+                        values[i] = reader.Read7BitEncodedUInt32();
+                        break;
 
                     case DataType.UInt64:
-                    if (version == 1)
-                    {
-                        values[i] = reader.ReadUInt64();
-                        break;
-                    }
+                        if (version == 1)
+                        {
+                            values[i] = reader.ReadUInt64();
+                            break;
+                        }
 
-                    values[i] = reader.Read7BitEncodedUInt64();
-                    break;
+                        values[i] = reader.Read7BitEncodedUInt64();
+                        break;
 
                     case DataType.UInt8:
-                    values[i] = reader.ReadUInt8();
-                    break;
+                        values[i] = reader.ReadUInt8();
+                        break;
 
                     case DataType.UInt16:
-                    values[i] = reader.ReadUInt16();
-                    break;
+                        values[i] = reader.ReadUInt16();
+                        break;
 
                     case DataType.Char:
-                    values[i] = reader.ReadChar();
-                    break;
+                        values[i] = reader.ReadChar();
+                        break;
 
                     case DataType.Single:
-                    values[i] = reader.ReadSingle();
-                    break;
+                        values[i] = reader.ReadSingle();
+                        break;
 
                     case DataType.Double:
-                    values[i] = reader.ReadDouble();
-                    break;
+                        values[i] = reader.ReadDouble();
+                        break;
 
                     case DataType.Decimal:
-                    values[i] = reader.ReadDecimal();
-                    break;
+                        values[i] = reader.ReadDecimal();
+                        break;
 
                     case DataType.String:
-                    values[i] = reader.ReadString();
-                    break;
+                        values[i] = reader.ReadPrefixedString();
+                        break;
 
                     case DataType.Enum:
-                    values[i] = layout.EnumValue(i, reader.Read7BitEncodedInt64());
-                    break;
+                        values[i] = layout.EnumValue(i, reader.Read7BitEncodedInt64());
+                        break;
 
                     case DataType.User:
-                    values[i] = layout.ParseValue(i, reader.ReadString(), null);
-                    break;
+                        values[i] = layout.ParseValue(i, reader.ReadPrefixedString(), null);
+                        break;
 
                     default: throw new NotImplementedException($"Datatype {dataType} not implemented!");
                 }
@@ -286,9 +284,7 @@ namespace Cave.Data
 
         #region Public Constructors
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DatReader"/> class.
-        /// </summary>
+        /// <summary>Initializes a new instance of the <see cref="DatReader"/> class.</summary>
         /// <param name="fileName">Filename to read from.</param>
         public DatReader(string fileName)
         {
@@ -304,9 +300,7 @@ namespace Cave.Data
             }
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DatReader"/> class.
-        /// </summary>
+        /// <summary>Initializes a new instance of the <see cref="DatReader"/> class.</summary>
         /// <param name="stream">Stream to read from.</param>
         public DatReader(Stream stream) => Load(stream);
 
@@ -314,23 +308,17 @@ namespace Cave.Data
 
         #region Public Properties
 
-        /// <summary>
-        /// Gets the layout of the table.
-        /// </summary>
+        /// <summary>Gets the layout of the table.</summary>
         public RowLayout Layout { get; private set; }
 
-        /// <summary>
-        /// Gets the version the database was created with.
-        /// </summary>
+        /// <summary>Gets the version the database was created with.</summary>
         public int Version { get; private set; }
 
         #endregion Public Properties
 
         #region Public Methods
 
-        /// <summary>
-        /// Reads a whole table from the specified dat file.
-        /// </summary>
+        /// <summary>Reads a whole table from the specified dat file.</summary>
         /// <param name="table">Table to read the dat file into.</param>
         /// <param name="fileName">File name of the dat file.</param>
         public static void ReadTable(ITable table, string fileName)
@@ -339,9 +327,7 @@ namespace Cave.Data
             reader.ReadTable(table);
         }
 
-        /// <summary>
-        /// Reads a whole table from the specified dat file.
-        /// </summary>
+        /// <summary>Reads a whole table from the specified dat file.</summary>
         /// <param name="table">Table to read the dat file into.</param>
         /// <param name="stream">The stream.</param>
         public static void ReadTable(ITable table, Stream stream)
@@ -350,9 +336,7 @@ namespace Cave.Data
             reader.ReadTable(table);
         }
 
-        /// <summary>
-        /// Closes the reader.
-        /// </summary>
+        /// <summary>Closes the reader.</summary>
         public void Close()
         {
             if (reader != null)
@@ -362,14 +346,10 @@ namespace Cave.Data
             }
         }
 
-        /// <summary>
-        /// Disposes the base stream.
-        /// </summary>
+        /// <summary>Disposes the base stream.</summary>
         public void Dispose() => Close();
 
-        /// <summary>
-        /// Reads the whole file to a new list.
-        /// </summary>
+        /// <summary>Reads the whole file to a new list.</summary>
         /// <typeparam name="TStruct">Structure type.</typeparam>
         /// <returns>A new <see cref="List{TStruct}"/>.</returns>
         public IList<TStruct> ReadList<TStruct>()
@@ -395,9 +375,7 @@ namespace Cave.Data
             return result;
         }
 
-        /// <summary>
-        /// Reads a row from the file.
-        /// </summary>
+        /// <summary>Reads a row from the file.</summary>
         /// <param name="checkLayout">Check layout prior read.</param>
         /// <param name="row">The read row.</param>
         /// <typeparam name="TStruct">Structure type.</typeparam>

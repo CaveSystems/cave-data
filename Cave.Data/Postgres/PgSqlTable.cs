@@ -29,7 +29,7 @@ namespace Cave.Data.Postgres
         public static PgSqlTable Connect(PgSqlDatabase database, TableFlags flags, RowLayout layout)
         {
             var table = new PgSqlTable();
-            table.Connect((IDatabase) database, flags, layout);
+            table.Connect((IDatabase)database, flags, layout);
             return table;
         }
 

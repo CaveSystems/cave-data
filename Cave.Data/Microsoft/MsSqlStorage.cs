@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Cave.Data.Sql;
 
@@ -19,7 +18,7 @@ namespace Cave.Data.Microsoft
             var requireSSL = !AllowUnsafeConnections;
             if (requireSSL)
             {
-                if ((ConnectionString.Server == "127.0.0.1") || (ConnectionString.Server == "::1") || (ConnectionString.Server == "localhost"))
+                if (ConnectionString.Server is "127.0.0.1" or "::1" or "localhost")
                 {
                     requireSSL = false;
                 }
@@ -93,10 +92,10 @@ namespace Cave.Data.Microsoft
                         case "model":
                         case "msdb":
                         case "tempdb":
-                        continue;
+                            continue;
                         default:
-                        result.Add(databaseName);
-                        continue;
+                            result.Add(databaseName);
+                            continue;
                     }
                 }
 
@@ -216,9 +215,9 @@ namespace Cave.Data.Microsoft
             switch (field.DataType)
             {
                 case DataType.Int8:
-                var result = field.Clone();
-                result.TypeAtDatabase = DataType.Int16;
-                return result;
+                    var result = field.Clone();
+                    result.TypeAtDatabase = DataType.Int16;
+                    return result;
             }
 
             return base.GetDatabaseFieldProperties(field);

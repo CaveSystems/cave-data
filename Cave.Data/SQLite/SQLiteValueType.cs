@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Cave.Data.SQLite
 {
     /// <summary>Provides the available SQLite value types.</summary>

@@ -11,7 +11,7 @@ namespace Cave.Data
         /// <summary>Initializes a new instance of the <see cref="SynchronizedTable" /> class.</summary>
         /// <param name="table">The table to synchronize.</param>
         public SynchronizedTable(ITable table) =>
-            BaseTable = !(table is SynchronizedTable) ? table : throw new ArgumentException("Table is already synchronized!");
+            BaseTable = table is not SynchronizedTable ? table : throw new ArgumentException("Table is already synchronized!");
 
         #endregion
 

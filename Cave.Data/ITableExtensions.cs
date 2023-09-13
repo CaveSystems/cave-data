@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
-using Cave.Collections.Generic;
 
 namespace Cave.Data
 {
@@ -52,9 +50,7 @@ namespace Cave.Data
         /// <returns>Returns a string containing csharp code.</returns>
         [Obsolete("Use TableInterfaceGenerator.GenerateStruct instead")]
         public static GenerateTableCodeResult GenerateStruct(this ITable table, string databaseName, string tableName, string className,
-            NamingStrategy namingStrategy)
-        {
-            return new TableInterfaceGenerator()
+            NamingStrategy namingStrategy) => new TableInterfaceGenerator()
             {
                 Layout = table?.Layout ?? throw new ArgumentNullException(nameof(table)),
                 TableName = tableName ?? table.Name,
@@ -62,7 +58,6 @@ namespace Cave.Data
                 ClassName = className,
                 NamingStrategy = namingStrategy
             }.GenerateStruct();
-        }
 
         /// <summary>Builds the csharp code containing the row layout structure.</summary>
         /// <param name="table">The table to use.</param>

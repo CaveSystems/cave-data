@@ -227,33 +227,33 @@ namespace Cave.Data.Sql
             switch (value)
             {
                 case null:
-                return "NULL";
+                    return "NULL";
 
                 case byte[] bytes:
-                return EscapeBinary(bytes);
+                    return EscapeBinary(bytes);
 
-                case byte _:
-                case sbyte _:
-                case ushort _:
-                case short _:
-                case uint _:
-                case int _:
-                case long _:
-                case ulong _:
-                case decimal _:
-                return value.ToString();
+                case byte:
+                case sbyte:
+                case ushort:
+                case short:
+                case uint:
+                case int:
+                case long:
+                case ulong:
+                case decimal:
+                    return value.ToString();
 
                 case double d:
-                return d.ToString("R", Culture);
+                    return d.ToString("R", Culture);
 
                 case float f:
-                return f.ToString("R", Culture);
+                    return f.ToString("R", Culture);
 
                 case bool b:
-                return b ? "1" : "0";
+                    return b ? "1" : "0";
 
                 case TimeSpan timeSpan:
-                return timeSpan.TotalSeconds.ToString("R", Culture);
+                    return timeSpan.TotalSeconds.ToString("R", Culture);
 
                 case DateTime dateTime:
                 {
@@ -276,7 +276,7 @@ namespace Cave.Data.Sql
                     };
                 }
                 default:
-                return value.GetType().IsEnum ? $"{Convert.ToInt64(value, Culture)}" : EscapeString(value.ToString());
+                    return value.GetType().IsEnum ? $"{Convert.ToInt64(value, Culture)}" : EscapeString(value.ToString());
             }
         }
 
@@ -311,10 +311,10 @@ namespace Cave.Data.Sql
                 switch (field.DataType)
                 {
                     case DataType.Enum:
-                    return Convert.ToInt64(localValue, Culture);
+                        return Convert.ToInt64(localValue, Culture);
 
                     case DataType.User:
-                    return localValue.ToString();
+                        return localValue.ToString();
 
                     case DataType.TimeSpan:
                     {
@@ -341,31 +341,31 @@ namespace Cave.Data.Sql
                         {
                             case DateTimeKind.Unspecified: break;
                             case DateTimeKind.Local:
-                            if (value.Kind == DateTimeKind.Utc)
-                            {
-                                value = value.ToLocalTime();
-                            }
-                            else
-                            {
-                                value = new DateTime(value.Ticks, DateTimeKind.Local);
-                            }
+                                if (value.Kind == DateTimeKind.Utc)
+                                {
+                                    value = value.ToLocalTime();
+                                }
+                                else
+                                {
+                                    value = new DateTime(value.Ticks, DateTimeKind.Local);
+                                }
 
-                            break;
+                                break;
 
                             case DateTimeKind.Utc:
-                            if (value.Kind == DateTimeKind.Local)
-                            {
-                                value = value.ToUniversalTime();
-                            }
-                            else
-                            {
-                                value = new DateTime(value.Ticks, DateTimeKind.Utc);
-                            }
+                                if (value.Kind == DateTimeKind.Local)
+                                {
+                                    value = value.ToUniversalTime();
+                                }
+                                else
+                                {
+                                    value = new DateTime(value.Ticks, DateTimeKind.Utc);
+                                }
 
-                            break;
+                                break;
 
                             default:
-                            throw new NotSupportedException($"DateTimeKind {field.DateTimeKind} not supported!");
+                                throw new NotSupportedException($"DateTimeKind {field.DateTimeKind} not supported!");
                         }
 
                         return field.DateTimeType switch
@@ -413,7 +413,7 @@ namespace Cave.Data.Sql
                 throw new ArgumentNullException(nameof(reader));
             }
 
-            if (databaseValue is DBNull || databaseValue is null)
+            if (databaseValue is DBNull or null)
             {
                 return null;
             }
@@ -444,44 +444,44 @@ namespace Cave.Data.Sql
                         }
                         case DateTimeType.Undefined:
                         case DateTimeType.Native:
-                        try
-                        {
-                            if (databaseValue is DateTime dt)
+                            try
                             {
-                                ticks = dt.Ticks;
+                                if (databaseValue is DateTime dt)
+                                {
+                                    ticks = dt.Ticks;
+                                }
+                                else
+                                {
+                                    ticks = reader.GetDateTime(field.Index).Ticks;
+                                }
                             }
-                            else
+                            catch (Exception ex)
                             {
-                                ticks = reader.GetDateTime(field.Index).Ticks;
+                                var msg = $"Invalid datetime value {reader.GetValue(field.Index)} at {field}.";
+                                Trace.WriteLine(msg);
+                                if (ThrowDateTimeFieldExceptions)
+                                {
+                                    throw new InvalidDataException(msg, ex);
+                                }
                             }
-                        }
-                        catch (Exception ex)
-                        {
-                            var msg = $"Invalid datetime value {reader.GetValue(field.Index)} at {field}.";
-                            Trace.WriteLine(msg);
-                            if (ThrowDateTimeFieldExceptions)
-                            {
-                                throw new InvalidDataException(msg, ex);
-                            }
-                        }
 
-                        break;
+                            break;
 
                         case DateTimeType.BigIntTicks:
-                        ticks = (long)databaseValue;
-                        break;
+                            ticks = (long)databaseValue;
+                            break;
 
                         case DateTimeType.DecimalSeconds:
-                        ticks = (long)decimal.Round((decimal)databaseValue * TimeSpan.TicksPerSecond);
-                        break;
+                            ticks = (long)decimal.Round((decimal)databaseValue * TimeSpan.TicksPerSecond);
+                            break;
 
                         case DateTimeType.DoubleSeconds:
-                        ticks = (long)Math.Round((double)databaseValue * TimeSpan.TicksPerSecond);
-                        break;
+                            ticks = (long)Math.Round((double)databaseValue * TimeSpan.TicksPerSecond);
+                            break;
 
                         case DateTimeType.DoubleEpoch:
-                        ticks = (long)Math.Round(((double)databaseValue * TimeSpan.TicksPerSecond) + EpochTicks);
-                        break;
+                            ticks = (long)Math.Round(((double)databaseValue * TimeSpan.TicksPerSecond) + EpochTicks);
+                            break;
                     }
 
                     var kind = field.DateTimeKind != 0 ? field.DateTimeKind : DefaultDateTimeKind;
@@ -501,24 +501,24 @@ namespace Cave.Data.Sql
                         }
                         case DateTimeType.Undefined:
                         case DateTimeType.Native:
-                        ticks = ((TimeSpan)Convert.ChangeType(databaseValue, typeof(TimeSpan), Culture)).Ticks;
-                        break;
+                            ticks = ((TimeSpan)Convert.ChangeType(databaseValue, typeof(TimeSpan), Culture)).Ticks;
+                            break;
 
                         case DateTimeType.BigIntTicks:
-                        ticks = (long)databaseValue;
-                        break;
+                            ticks = (long)databaseValue;
+                            break;
 
                         case DateTimeType.DecimalSeconds:
-                        ticks = (long)decimal.Round((decimal)databaseValue * TimeSpan.TicksPerSecond);
-                        break;
+                            ticks = (long)decimal.Round((decimal)databaseValue * TimeSpan.TicksPerSecond);
+                            break;
 
                         case DateTimeType.DoubleSeconds:
-                        ticks = (long)Math.Round((double)databaseValue * TimeSpan.TicksPerSecond);
-                        break;
+                            ticks = (long)Math.Round((double)databaseValue * TimeSpan.TicksPerSecond);
+                            break;
 
                         case DateTimeType.DoubleEpoch:
-                        ticks = (long)Math.Round(((double)databaseValue * TimeSpan.TicksPerSecond) + EpochTicks);
-                        break;
+                            ticks = (long)Math.Round(((double)databaseValue * TimeSpan.TicksPerSecond) + EpochTicks);
+                            break;
                     }
 
                     return new TimeSpan(ticks);
@@ -655,35 +655,35 @@ namespace Cave.Data.Sql
                 }
                 case DataType.DateTime:
                 case DataType.TimeSpan:
-                switch (field.DateTimeType)
-                {
-                    case DateTimeType.Undefined:
-                    case DateTimeType.Native:
+                    switch (field.DateTimeType)
                     {
-                        return field;
+                        case DateTimeType.Undefined:
+                        case DateTimeType.Native:
+                        {
+                            return field;
+                        }
+                        case DateTimeType.BigIntHumanReadable:
+                        case DateTimeType.BigIntTicks:
+                        {
+                            var result = field.Clone();
+                            result.TypeAtDatabase = DataType.Int64;
+                            return result;
+                        }
+                        case DateTimeType.DecimalSeconds:
+                        {
+                            var result = field.Clone();
+                            result.TypeAtDatabase = DataType.Decimal;
+                            result.MaximumLength = 65.3f;
+                            return result;
+                        }
+                        case DateTimeType.DoubleSeconds:
+                        {
+                            var result = field.Clone();
+                            result.TypeAtDatabase = DataType.Double;
+                            return result;
+                        }
+                        default: throw new NotImplementedException();
                     }
-                    case DateTimeType.BigIntHumanReadable:
-                    case DateTimeType.BigIntTicks:
-                    {
-                        var result = field.Clone();
-                        result.TypeAtDatabase = DataType.Int64;
-                        return result;
-                    }
-                    case DateTimeType.DecimalSeconds:
-                    {
-                        var result = field.Clone();
-                        result.TypeAtDatabase = DataType.Decimal;
-                        result.MaximumLength = 65.3f;
-                        return result;
-                    }
-                    case DateTimeType.DoubleSeconds:
-                    {
-                        var result = field.Clone();
-                        result.TypeAtDatabase = DataType.Double;
-                        return result;
-                    }
-                    default: throw new NotImplementedException();
-                }
             }
 
             return field;
@@ -965,10 +965,7 @@ namespace Cave.Data.Sql
                 throw new ArgumentNullException(nameof(layout));
             }
 
-            if (table == null)
-            {
-                table = layout.Name;
-            }
+            table ??= layout.Name;
 
             var rows = Query(cmd, ref layout, database, table);
             return rows.Select(r => r.GetStruct<TStruct>(layout)).ToList();
@@ -1002,10 +999,7 @@ namespace Cave.Data.Sql
                 throw new ObjectDisposedException(ToString());
             }
 
-            if (table == null)
-            {
-                table = "result";
-            }
+            table ??= "result";
 
             // get command
             for (var i = 1; ; i++)

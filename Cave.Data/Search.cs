@@ -529,10 +529,10 @@ namespace Cave.Data
             {
                 case SearchMode.And:
                 case SearchMode.Or:
-                break;
+                    break;
 
                 default:
-                throw new ArgumentException($"Invalid mode {Mode}!");
+                    throw new ArgumentException($"Invalid mode {Mode}!");
             }
 
             Inverted = not;
@@ -553,12 +553,12 @@ namespace Cave.Data
             switch (mode)
             {
                 case SearchMode.In:
-                if (!(value is Set<object>))
-                {
-                    throw new ArgumentException("Value needs to be a set!");
-                }
+                    if (value is not Set<object>)
+                    {
+                        throw new ArgumentException("Value needs to be a set!");
+                    }
 
-                break;
+                    break;
 
                 case SearchMode.Equals:
                 case SearchMode.Like:
@@ -566,10 +566,10 @@ namespace Cave.Data
                 case SearchMode.Greater:
                 case SearchMode.GreaterOrEqual:
                 case SearchMode.SmallerOrEqual:
-                break;
+                    break;
 
                 default:
-                throw new ArgumentException($"Invalid mode {Mode}!");
+                    throw new ArgumentException($"Invalid mode {Mode}!");
             }
 
             Inverted = not;
@@ -650,32 +650,32 @@ namespace Cave.Data
                 case SearchMode.And: return (Inverted ? "NOT " : string.Empty) + "(" + SearchA + " AND " + SearchB + ")";
                 case SearchMode.Or: return (Inverted ? "NOT " : string.Empty) + "(" + SearchA + " OR " + SearchB + ")";
                 case SearchMode.Equals:
-                operation = Inverted ? "!=" : "==";
-                break;
+                    operation = Inverted ? "!=" : "==";
+                    break;
 
                 case SearchMode.Like:
-                operation = Inverted ? "NOT LIKE" : "LIKE";
-                break;
+                    operation = Inverted ? "NOT LIKE" : "LIKE";
+                    break;
 
                 case SearchMode.Greater:
-                operation = Inverted ? "<=" : ">";
-                break;
+                    operation = Inverted ? "<=" : ">";
+                    break;
 
                 case SearchMode.Smaller:
-                operation = Inverted ? ">=" : "<";
-                break;
+                    operation = Inverted ? ">=" : "<";
+                    break;
 
                 case SearchMode.GreaterOrEqual:
-                operation = Inverted ? "<" : ">=";
-                break;
+                    operation = Inverted ? "<" : ">=";
+                    break;
 
                 case SearchMode.SmallerOrEqual:
-                operation = Inverted ? ">" : "<=";
-                break;
+                    operation = Inverted ? ">" : "<=";
+                    break;
 
                 case SearchMode.In:
-                operation = (Inverted ? "NOT " : string.Empty) + "IN (" + ((IEnumerable)FieldValue).Join(",") + ")";
-                break;
+                    operation = (Inverted ? "NOT " : string.Empty) + "IN (" + ((IEnumerable)FieldValue).Join(",") + ")";
+                    break;
 
                 default: return $"Unknown mode {Mode}!";
             }
@@ -808,30 +808,30 @@ namespace Cave.Data
             switch (Mode)
             {
                 case SearchMode.None:
-                if (Inverted)
-                {
-                    result = !result;
-                }
+                    if (Inverted)
+                    {
+                        result = !result;
+                    }
 
-                return result;
+                    return result;
 
                 case SearchMode.And:
-                result = SearchA.Check(row) && SearchB.Check(row);
-                if (Inverted)
-                {
-                    result = !result;
-                }
+                    result = SearchA.Check(row) && SearchB.Check(row);
+                    if (Inverted)
+                    {
+                        result = !result;
+                    }
 
-                return result;
+                    return result;
 
                 case SearchMode.Or:
-                result = SearchA.Check(row) || SearchB.Check(row);
-                if (Inverted)
-                {
-                    result = !result;
-                }
+                    result = SearchA.Check(row) || SearchB.Check(row);
+                    if (Inverted)
+                    {
+                        result = !result;
+                    }
 
-                return result;
+                    return result;
             }
 
 #if DEBUG
@@ -950,7 +950,7 @@ namespace Cave.Data
 
         internal void LoadLayout(RowLayout layout, StringComparison fieldNameComparison)
         {
-            if ((Mode == SearchMode.And) || (Mode == SearchMode.Or) || (Mode == SearchMode.None))
+            if (Mode is SearchMode.And or SearchMode.Or or SearchMode.None)
             {
                 return;
             }
@@ -1042,17 +1042,17 @@ namespace Cave.Data
                     switch (c)
                     {
                         case '%':
-                        if (lastWasWildcard)
-                        {
-                            continue;
-                        }
+                            if (lastWasWildcard)
+                            {
+                                continue;
+                            }
 
-                        lastWasWildcard = true;
-                        sb.Append(".*");
-                        continue;
+                            lastWasWildcard = true;
+                            sb.Append(".*");
+                            continue;
                         case '_':
-                        sb.Append('.');
-                        continue;
+                            sb.Append('.');
+                            continue;
                         case ' ':
                         case '\\':
                         case '*':
@@ -1067,8 +1067,8 @@ namespace Cave.Data
                         case '$':
                         case '.':
                         case '#':
-                        sb.Append('\\');
-                        break;
+                            sb.Append('\\');
+                            break;
                     }
 
                     sb.Append(c);

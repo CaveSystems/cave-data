@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+#pragma warning disable IDE0130 //compatibility
 
 namespace Cave
 {

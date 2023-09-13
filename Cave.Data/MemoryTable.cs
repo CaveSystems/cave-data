@@ -190,10 +190,7 @@ namespace Cave.Data
             }
 
             Storage.CheckLayout(table.Layout, Layout, table.Flags);
-            if (search == null)
-            {
-                search = Search.None;
-            }
+            search ??= Search.None;
 
             Clear();
             var offset = 0;
@@ -465,10 +462,7 @@ namespace Cave.Data
         /// <returns>The number of dataset deleted.</returns>
         public override int TryDelete(Search search)
         {
-            if (search == null)
-            {
-                search = Search.None;
-            }
+            search ??= Search.None;
 
             var rows = search.Scan(null, Layout, indices, this);
             var count = 0;
@@ -714,7 +708,7 @@ namespace Cave.Data
                 }
 
                 limit = Math.Min(limit, sorted.Count - offset);
-                return limit <= 0 ? new Row[0] : (IList<Row>)sorted.GetRange(offset, limit);
+                return limit <= 0 ? new Row[0] : sorted.GetRange(offset, limit);
             }
 
             return sorted;
@@ -777,93 +771,93 @@ namespace Cave.Data
                 switch (field.DataType)
                 {
                     default:
-                    throw new NotSupportedException($"Autoincrement field {field} not supported!");
+                        throw new NotSupportedException($"Autoincrement field {field} not supported!");
                     case DataType.DateTime:
-                    if ((value == null) || ((DateTime)value == default))
-                    {
-                        value = DateTime.UtcNow;
-                    }
+                        if ((value == null) || ((DateTime)value == default))
+                        {
+                            value = DateTime.UtcNow;
+                        }
 
-                    break;
+                        break;
 
                     case DataType.User:
-                    if (field.ValueType == typeof(Guid))
-                    {
-                        if ((value == null) || ((Guid)value == default))
+                        if (field.ValueType == typeof(Guid))
                         {
-                            value = Guid.NewGuid();
+                            if ((value == null) || ((Guid)value == default))
+                            {
+                                value = Guid.NewGuid();
+                            }
                         }
-                    }
-                    else
-                    {
-                        throw new NotSupportedException($"Autoincrement field {field} not supported!");
-                    }
+                        else
+                        {
+                            throw new NotSupportedException($"Autoincrement field {field} not supported!");
+                        }
 
-                    break;
+                        break;
 
                     case DataType.Int8:
-                    if ((value == null) || ((sbyte)value == default(sbyte)))
-                    {
-                        value = (Maximum<sbyte>(field.Name) ?? 0) + 1;
-                    }
+                        if ((value == null) || ((sbyte)value == default(sbyte)))
+                        {
+                            value = (Maximum<sbyte>(field.Name) ?? 0) + 1;
+                        }
 
-                    break;
+                        break;
 
                     case DataType.UInt8:
-                    if ((value == null) || ((byte)value == default(byte)))
-                    {
-                        value = (Maximum<byte>(field.Name) ?? 0) + 1;
-                    }
+                        if ((value == null) || ((byte)value == default(byte)))
+                        {
+                            value = (Maximum<byte>(field.Name) ?? 0) + 1;
+                        }
 
-                    break;
+                        break;
 
                     case DataType.Int16:
-                    if ((value == null) || ((short)value == default(short)))
-                    {
-                        value = (Maximum<short>(field.Name) ?? 0) + 1;
-                    }
+                        if ((value == null) || ((short)value == default(short)))
+                        {
+                            value = (Maximum<short>(field.Name) ?? 0) + 1;
+                        }
 
-                    break;
+                        break;
 
                     case DataType.UInt16:
-                    if ((value == null) || ((ushort)value == default(ushort)))
-                    {
-                        value = (Maximum<ushort>(field.Name) ?? 0) + 1;
-                    }
+                        if ((value == null) || ((ushort)value == default(ushort)))
+                        {
+                            value = (Maximum<ushort>(field.Name) ?? 0) + 1;
+                        }
 
-                    break;
+                        break;
 
                     case DataType.Int32:
-                    if ((value == null) || ((int)value == default))
-                    {
-                        value = (Maximum<int>(field.Name) ?? 0) + 1;
-                    }
+                        if ((value == null) || ((int)value == default))
+                        {
+                            value = (Maximum<int>(field.Name) ?? 0) + 1;
+                        }
 
-                    break;
+                        break;
 
                     case DataType.UInt32:
-                    if ((value == null) || ((uint)value == default))
-                    {
-                        value = (Maximum<uint>(field.Name) ?? 0) + 1;
-                    }
+                        if ((value == null) || ((uint)value == default))
+                        {
+                            value = (Maximum<uint>(field.Name) ?? 0) + 1;
+                        }
 
-                    break;
+                        break;
 
                     case DataType.Int64:
-                    if ((value == null) || ((long)value == default))
-                    {
-                        value = (Maximum<long>(field.Name) ?? 0) + 1;
-                    }
+                        if ((value == null) || ((long)value == default))
+                        {
+                            value = (Maximum<long>(field.Name) ?? 0) + 1;
+                        }
 
-                    break;
+                        break;
 
                     case DataType.UInt64:
-                    if ((value == null) || ((ulong)value == default))
-                    {
-                        value = (Maximum<ulong>(field.Name) ?? 0) + 1;
-                    }
+                        if ((value == null) || ((ulong)value == default))
+                        {
+                            value = (Maximum<ulong>(field.Name) ?? 0) + 1;
+                        }
 
-                    break;
+                        break;
                 }
 
                 values[field.Index] = value;

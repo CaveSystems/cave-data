@@ -7,10 +7,10 @@ namespace Cave.Data
     {
         #region Members
 
-        /// <summary>Retrieves all identifiers for the specified object.</summary>
-        /// <param name="obj">The object.</param>
+        /// <summary>Retrieves all identifiers for the specified value.</summary>
+        /// <param name="value">The value.</param>
         /// <returns>All matching rows found.</returns>
-        IEnumerable<object[]> Find(object obj);
+        IEnumerable<object[]> Find(object value);
 
         #endregion
     }

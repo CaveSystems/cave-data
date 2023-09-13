@@ -26,7 +26,7 @@ namespace Cave.Data.Postgres
         public PgSqlStorage(ConnectionString connectionString, ConnectionFlags flags = default)
             : base(connectionString, flags)
         {
-            VersionString = (string) QueryValue("SELECT VERSION()");
+            VersionString = (string)QueryValue("SELECT VERSION()");
             var parts = VersionString.Split(' ');
             Version = new Version(parts[1]);
             Trace.TraceInformation($"pgsql version {Version}");
@@ -66,7 +66,7 @@ namespace Cave.Data.Postgres
                 var rows = Query(database: "SCHEMATA", cmd: "SELECT datname FROM pg_database;");
                 foreach (var row in rows)
                 {
-                    result.Add((string) row[0]);
+                    result.Add((string)row[0]);
                 }
 
                 return result;
@@ -201,7 +201,7 @@ namespace Cave.Data.Postgres
         {
             var flags = AppDom.LoadFlags.NoException | (AllowAssemblyLoad ? AppDom.LoadFlags.LoadAssemblies : 0);
             var type = AppDom.FindType("Npgsql.NpgsqlConnection", "Npgsql", flags);
-            return (IDbConnection) Activator.CreateInstance(type);
+            return (IDbConnection)Activator.CreateInstance(type);
         }
 
         /// <inheritdoc />
@@ -210,7 +210,7 @@ namespace Cave.Data.Postgres
             var requireSSL = !AllowUnsafeConnections;
             if (requireSSL)
             {
-                if ((ConnectionString.Server == "127.0.0.1") || (ConnectionString.Server == "::1") || (ConnectionString.Server == "localhost"))
+                if (ConnectionString.Server is "127.0.0.1" or "::1" or "localhost")
                 {
                     requireSSL = false;
                 }

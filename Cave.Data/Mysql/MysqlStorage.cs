@@ -26,7 +26,7 @@ namespace Cave.Data.Mysql
         public MySqlStorage(ConnectionString connectionString, ConnectionFlags flags = default)
             : base(connectionString, flags)
         {
-            VersionString = (string) QueryValue("SELECT VERSION()");
+            VersionString = (string)QueryValue("SELECT VERSION()");
             if (VersionString == null)
             {
                 throw new InvalidDataException("Could not read mysql version!");
@@ -91,7 +91,7 @@ namespace Cave.Data.Mysql
                 var rows = Query(database: "information_schema", table: "SCHEMATA", cmd: "SELECT SCHEMA_NAME FROM information_schema.SCHEMATA;");
                 foreach (var row in rows)
                 {
-                    result.Add((string) row[0]);
+                    result.Add((string)row[0]);
                 }
 
                 return result;
@@ -136,7 +136,7 @@ namespace Cave.Data.Mysql
         /// <inheritdoc />
         public override object GetLocalValue(IFieldProperties field, IDataReader reader, object databaseValue)
         {
-            if ((field.DataType == DataType.DateTime) && !(databaseValue is DBNull) && !(databaseValue is DateTime))
+            if ((field.DataType == DataType.DateTime) && databaseValue is not DBNull && databaseValue is not DateTime)
             {
                 if (isValidDateTimeProperty == null)
                 {
@@ -152,9 +152,9 @@ namespace Cave.Data.Mysql
                     }
                 }
 #if NET20 || NET35 || NET40
-                var isValid = (bool) isValidDateTimeProperty.GetValue(databaseValue, null);
+                var isValid = (bool)isValidDateTimeProperty.GetValue(databaseValue, null);
 #else
-                var isValid = (bool) isValidDateTimeProperty.GetValue(databaseValue);
+                var isValid = (bool)isValidDateTimeProperty.GetValue(databaseValue);
 #endif
                 if (isValid)
                 {
@@ -208,7 +208,7 @@ namespace Cave.Data.Mysql
                     if (!SupportsFullUTF8)
                     {
                         // dirty hack: check mysql 3 byte utf-8
-                        var value = (string) localValue;
+                        var value = (string)localValue;
                         foreach (var c in value)
                         {
                             if (Encoding.UTF8.GetByteCount(new[] { c }) > 3)
@@ -225,7 +225,7 @@ namespace Cave.Data.Mysql
                 case DataType.Double:
                 {
                     var d = Convert.ToDouble(localValue, Culture);
-                    return double.IsPositiveInfinity(d) ? double.MaxValue : double.IsNegativeInfinity(d) ? double.MinValue : (object) d;
+                    return double.IsPositiveInfinity(d) ? double.MaxValue : double.IsNegativeInfinity(d) ? double.MinValue : (object)d;
                 }
                 case DataType.Single:
                 {
@@ -235,7 +235,7 @@ namespace Cave.Data.Mysql
                         return float.MaxValue;
                     }
 
-                    return float.IsNegativeInfinity(f) ? float.MinValue : (object) f;
+                    return float.IsNegativeInfinity(f) ? float.MinValue : (object)f;
                 }
             }
 
@@ -271,12 +271,8 @@ namespace Cave.Data.Mysql
             }
 
             var value = QueryValue(database: "information_schema", table: "SCHEMATA",
-                cmd: "SELECT COUNT(*) FROM information_schema.SCHEMATA WHERE SCHEMA_NAME LIKE " + EscapeString(databaseName) + ";");
-            if (value == null)
-            {
-                throw new InvalidDataException("Could not read information_schema.tables!");
-            }
-
+                cmd: "SELECT COUNT(*) FROM information_schema.SCHEMATA WHERE SCHEMA_NAME LIKE " + EscapeString(databaseName) + ";")
+                ?? throw new InvalidDataException("Could not read information_schema.tables!");
             return Convert.ToInt32(value, Culture) > 0;
         }
 
@@ -369,7 +365,7 @@ namespace Cave.Data.Mysql
 
             return type == null
                 ? throw new TypeLoadException("Could not load type MySql.Data.MySqlClient.MySqlConnection!")
-                : (IDbConnection) Activator.CreateInstance(type);
+                : (IDbConnection)Activator.CreateInstance(type);
         }
 
         /// <inheritdoc />
@@ -378,7 +374,7 @@ namespace Cave.Data.Mysql
             var requireSSL = !AllowUnsafeConnections;
             if (requireSSL)
             {
-                if ((ConnectionString.Server == "127.0.0.1") || (ConnectionString.Server == "::1") || (ConnectionString.Server == "localhost"))
+                if (ConnectionString.Server is "127.0.0.1" or "::1" or "localhost")
                 {
                     requireSSL = false;
                 }

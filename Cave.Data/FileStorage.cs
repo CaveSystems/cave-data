@@ -24,12 +24,12 @@ namespace Cave.Data
                 connectionString.Server = "localhost";
             }
 
-            if ((connectionString.Server != "localhost") && (connectionString.Server != "."))
+            if (connectionString.Server is not "localhost" and not ".")
             {
                 throw new NotSupportedException("Remote access via server setting is not supported atm.! (use localhost or .)");
             }
 
-            if (string.IsNullOrEmpty(connectionString.Location) || !connectionString.Location.Contains("/"))
+            if (string.IsNullOrEmpty(connectionString.Location) || !connectionString.Location.Contains('/'))
             {
                 connectionString.Location = $"./{connectionString.Location}";
             }

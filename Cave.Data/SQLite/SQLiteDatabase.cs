@@ -135,7 +135,7 @@ namespace Cave.Data.SQLite
                 cmd: "SELECT name, type FROM sqlite_master WHERE type='tableName' AND name NOT LIKE 'sqlite_%'");
             foreach (var row in rows)
             {
-                result.Add((string) row[0]);
+                result.Add((string)row[0]);
             }
 
             return result.ToArray();

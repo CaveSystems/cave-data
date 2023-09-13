@@ -16,7 +16,7 @@ namespace Cave.Data
         /// The namespace to use for the class (defaults to <see cref="DatabaseName"/>). Optional. Default = "Database".
         /// </summary>
         public string? NameSpace { get; set; }
-        
+
         /// <summary>
         /// Gets or sets the database name (only used for the structure name). Required!
         /// </summary>
@@ -113,10 +113,7 @@ namespace Cave.Data
 
             #endregion
 
-            if (ClassName == null)
-            {
-                ClassName = GetName(DatabaseName) + GetName(TableName) + "Row";
-            }
+            ClassName ??= GetName(DatabaseName) + GetName(TableName) + "Row";
 
             code.AppendLine();
             code.AppendLine($"namespace {NameSpace}");
@@ -353,10 +350,7 @@ namespace Cave.Data
         /// <returns>Returns the generated code.</returns>
         public GenerateTableCodeResult SaveStructFile(GenerateTableCodeResult result)
         {
-            if (result.FileName == null)
-            {
-                result.FileName = result.ClassName + ".cs";
-            }
+            result.FileName ??= result.ClassName + ".cs";
             File.WriteAllText(result.FileName, result.Code);
             return result;
         }
