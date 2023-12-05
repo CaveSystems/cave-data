@@ -26,9 +26,9 @@ namespace Cave.Data
             }
         }
 
-        #endregion
+        #endregion IDisposable Support
 
-        #endregion
+        #endregion Members
 
         #region constructor
 
@@ -82,7 +82,7 @@ namespace Cave.Data
             writer.Flush();
         }
 
-        #endregion
+        #endregion constructor
 
         #region properties
 
@@ -99,7 +99,7 @@ namespace Cave.Data
         /// <value><c>true</c> if [close base stream on close]; otherwise, <c>false</c>.</value>
         public bool CloseBaseStream { get; }
 
-        #endregion
+        #endregion properties
 
         #region public static functions
 
@@ -144,14 +144,15 @@ namespace Cave.Data
                     result.Append(properties.Separator);
                 }
 
-                if ((values != null) && (values[i] != null))
+                var value = values[layout.Fields[i].Index];
+                if (value is not null)
                 {
                     var field = layout[i];
                     switch (field.DataType)
                     {
                         case DataType.Binary:
                         {
-                            var str = Base64.NoPadding.Encode((byte[])values[i]);
+                            var str = Base64.NoPadding.Encode((byte[])value);
                             result.Append(str);
                             break;
                         }
@@ -165,73 +166,73 @@ namespace Cave.Data
                         case DataType.UInt32:
                         case DataType.UInt64:
                         {
-                            if (!properties.SaveDefaultValues && values[i].Equals(0))
+                            if (!properties.SaveDefaultValues && value.Equals(0))
                             {
                                 break;
                             }
 
-                            var str = values[i].ToString();
+                            var str = value.ToString();
                             result.Append(str);
                             break;
                         }
                         case DataType.Char:
                         {
-                            if (!properties.SaveDefaultValues && values[i].Equals((char)0))
+                            if (!properties.SaveDefaultValues && value.Equals((char)0))
                             {
                                 break;
                             }
 
-                            var str = values[i].ToString();
+                            var str = value.ToString();
                             result.Append(str);
                             break;
                         }
                         case DataType.Decimal:
                         {
-                            if (!properties.SaveDefaultValues && values[i].Equals(0m))
+                            if (!properties.SaveDefaultValues && value.Equals(0m))
                             {
                                 break;
                             }
 
-                            var value = (decimal)values[i];
-                            result.Append(value.ToString(provider));
+                            var dec = (decimal)value;
+                            result.Append(dec.ToString(provider));
                             break;
                         }
                         case DataType.Single:
                         {
-                            if (!properties.SaveDefaultValues && values[i].Equals(0f))
+                            if (!properties.SaveDefaultValues && value.Equals(0f))
                             {
                                 break;
                             }
 
-                            var value = (float)values[i];
-                            result.Append(value.ToString("R", provider));
+                            var f = (float)value;
+                            result.Append(f.ToString("R", provider));
                             break;
                         }
                         case DataType.Double:
                         {
-                            if (!properties.SaveDefaultValues && values[i].Equals(0d))
+                            if (!properties.SaveDefaultValues && value.Equals(0d))
                             {
                                 break;
                             }
 
-                            var value = (double)values[i];
-                            result.Append(value.ToString("R", provider));
+                            var d = (double)value;
+                            result.Append(d.ToString("R", provider));
                             break;
                         }
                         case DataType.TimeSpan:
                         {
-                            if (!properties.SaveDefaultValues && values[i].Equals(TimeSpan.Zero))
+                            if (!properties.SaveDefaultValues && value.Equals(TimeSpan.Zero))
                             {
                                 break;
                             }
 
-                            var str = field.GetString(values[i], $"{properties.StringMarker}", provider);
+                            var str = field.GetString(value, $"{properties.StringMarker}", provider);
                             result.Append(str);
                             break;
                         }
                         case DataType.DateTime:
                         {
-                            if (!properties.SaveDefaultValues && values[i].Equals(new DateTime(0)))
+                            if (!properties.SaveDefaultValues && value.Equals(new DateTime(0)))
                             {
                                 break;
                             }
@@ -239,11 +240,11 @@ namespace Cave.Data
                             string str;
                             if (properties.DateTimeFormat != null)
                             {
-                                str = ((DateTime)values[i]).ToString(properties.DateTimeFormat, provider);
+                                str = ((DateTime)value).ToString(properties.DateTimeFormat, provider);
                             }
                             else
                             {
-                                str = field.GetString(values[i], $"{properties.StringMarker}", provider);
+                                str = field.GetString(value, $"{properties.StringMarker}", provider);
                             }
 
                             result.Append(str);
@@ -252,12 +253,12 @@ namespace Cave.Data
                         case DataType.User:
                         case DataType.String:
                         {
-                            if (!properties.SaveDefaultValues && values[i].Equals(string.Empty))
+                            if (!properties.SaveDefaultValues && string.IsNullOrEmpty(value as string))
                             {
                                 break;
                             }
 
-                            var str = values[i] == null ? string.Empty : values[i].ToString();
+                            var str = value == null ? string.Empty : value.ToString();
                             str = str.EscapeUtf8();
                             if (properties.StringMarker.HasValue)
                             {
@@ -298,12 +299,12 @@ namespace Cave.Data
                         }
                         case DataType.Enum:
                         {
-                            if (!properties.SaveDefaultValues && Convert.ToInt32(values[i], provider).Equals(0))
+                            if (!properties.SaveDefaultValues && Convert.ToInt32(value, provider).Equals(0))
                             {
                                 break;
                             }
 
-                            var str = values[i].ToString();
+                            var str = value.ToString();
                             result.Append(str);
                             break;
                         }
@@ -400,7 +401,7 @@ namespace Cave.Data
             }
         }
 
-        #endregion
+        #endregion public static functions
 
         #region instance functions
 
@@ -476,6 +477,6 @@ namespace Cave.Data
         /// <inheritdoc />
         public void Dispose() => Dispose(true);
 
-        #endregion
+        #endregion instance functions
     }
 }

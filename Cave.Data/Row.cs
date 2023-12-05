@@ -31,13 +31,13 @@ namespace Cave.Data
 
             if (values.Length < layout.MaxIndex)
             {
-                throw new ArgumentOutOfRangeException(nameof(layout), "values.Length < layout.MaxIndex");
+                throw new ArgumentOutOfRangeException(nameof(layout), "Row data does not match field count!");
             }
 
             Values = clone ? (object[])values.Clone() : values;
         }
 
-        #endregion
+        #endregion Constructors
 
         #region Properties
 
@@ -54,7 +54,7 @@ namespace Cave.Data
         /// <returns>Returns a value or null.</returns>
         public object this[string fieldName] => Values[Layout.GetFieldIndex(fieldName, true)];
 
-        #endregion
+        #endregion Properties
 
         #region IEnumerable<KeyValuePair<string,object>> Members
 
@@ -64,7 +64,7 @@ namespace Cave.Data
         /// <inheritdoc />
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator() => ToDictionary().GetEnumerator();
 
-        #endregion
+        #endregion IEnumerable<KeyValuePair<string,object>> Members
 
         #region IEquatable<Row> Members
 
@@ -91,7 +91,7 @@ namespace Cave.Data
             return true;
         }
 
-        #endregion
+        #endregion IEquatable<Row> Members
 
         #region Overrides
 
@@ -133,7 +133,7 @@ namespace Cave.Data
         /// <inheritdoc />
         public override string ToString() => CsvWriter.RowToString(CsvProperties.Default, Layout, this);
 
-        #endregion
+        #endregion Overrides
 
         #region Members
 
@@ -222,6 +222,6 @@ namespace Cave.Data
         /// <returns>Returns a new <see cref="IDictionary{TKey, TValue}" /> instance.</returns>
         public IDictionary<string, object> ToDictionary() => Layout.ToDictionary(field => field.Name, field => Values[field.Index]);
 
-        #endregion
+        #endregion Members
     }
 }

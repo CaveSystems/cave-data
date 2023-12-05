@@ -16,7 +16,7 @@ namespace Cave.Data
         /// <summary>Gets the identifier field.</summary>
         protected abstract IFieldProperties KeyField { get; }
 
-        #endregion
+        #endregion Properties
 
         #region ITable<TKey,TStruct> Members
 
@@ -25,9 +25,9 @@ namespace Cave.Data
         /// <inheritdoc />
         public TStruct this[TKey id] => GetStruct(id);
 
-        #endregion
+        #endregion ITable{TKey, TStruct} properties
 
-        #endregion
+        #endregion ITable<TKey,TStruct> Members
 
         #region ITable{TKey, TStruct} interface
 
@@ -66,6 +66,6 @@ namespace Cave.Data
         public IDictionary<TKey, TStruct> GetDictionary(Search search = null, ResultOption resultOption = null) =>
             GetRows(search, resultOption).ToDictionary(r => (TKey)r[KeyField.Index], r => r.GetStruct<TStruct>(Layout));
 
-        #endregion
+        #endregion ITable{TKey, TStruct} interface
     }
 }
