@@ -728,14 +728,15 @@ namespace Cave.Data
                 throw new InvalidOperationException($"This RowLayout {RowType} does not match structure type {typeof(TStruct)}!");
             }
 
-            var result = new object[FieldCount];
+            var result = new object[MaxIndex + 1];
             for (var i = 0; i < FieldCount; i++)
             {
-                var value = result[i] = fieldProperties[i].FieldInfo.GetValue(item);
+                var value = fieldProperties[i].FieldInfo.GetValue(item);
                 if (value is DateTime dt && (dt.Kind == DateTimeKind.Unspecified))
                 {
-                    result[i] = new DateTime(dt.Ticks, DateTimeKind.Local);
+                    value = new DateTime(dt.Ticks, DateTimeKind.Local);
                 }
+                result[fieldProperties[i].Index] = value;
             }
 
             return result;
