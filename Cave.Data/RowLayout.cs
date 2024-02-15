@@ -306,7 +306,7 @@ namespace Cave.Data
                     }
 
                     var tableAttribute = TableAttribute.Get(type);
-                    var tableName = GetNameByStrategy(tableAttribute.NamingStrategy, tableAttribute.Name ?? type.Name);
+                    var tableName = tableAttribute.NamingStrategy.GetNameByStrategy(tableAttribute.Name ?? type.Name);
                     if (!string.IsNullOrEmpty(nameOverride))
                     {
                         tableName = nameOverride;
@@ -460,26 +460,6 @@ namespace Cave.Data
             }
 
             return type.IsEnum ? DataType.Enum : DataType.User;
-        }
-
-        /// <summary>Builds a new name matching the the specified <paramref name="namingStrategy"/>.</summary>
-        /// <param name="namingStrategy">Naming strategy to use.</param>
-        /// <param name="name">Original name.</param>
-        /// <returns>A new string containing the new name.</returns>
-        public static string GetNameByStrategy(NamingStrategy namingStrategy, string name)
-        {
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
-            return namingStrategy switch
-            {
-                NamingStrategy.Exact => name,
-                NamingStrategy.CamelCase => name.GetCamelCaseName(),
-                NamingStrategy.SnakeCase => name.GetSnakeCaseName(),
-                _ => throw new NotImplementedException()
-            };
         }
 
         /// <summary>Loads the row layout from the specified reader.</summary>

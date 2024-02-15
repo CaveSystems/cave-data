@@ -9,7 +9,7 @@ namespace Cave.Data
     /// <summary>Provides extension functions for ITable instances.</summary>
     public static class ITableExtensions
     {
-        #region Static
+        #region Public Methods
 
         /// <summary>Counts the rows with specified field value combination.</summary>
         /// <param name="table">The table.</param>
@@ -49,15 +49,14 @@ namespace Cave.Data
         /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
         /// <returns>Returns a string containing csharp code.</returns>
         [Obsolete("Use TableInterfaceGenerator.GenerateStruct instead")]
-        public static GenerateTableCodeResult GenerateStruct(this ITable table, string databaseName, string tableName, string className,
-            NamingStrategy namingStrategy) => new TableInterfaceGenerator()
-            {
-                Layout = table?.Layout ?? throw new ArgumentNullException(nameof(table)),
-                TableName = tableName ?? table.Name,
-                DatabaseName = databaseName ?? table.Database.Name,
-                ClassName = className,
-                NamingStrategy = namingStrategy
-            }.GenerateStruct();
+        public static GenerateTableCodeResult GenerateStruct(this ITable table, string databaseName, string tableName, string className, NamingStrategy namingStrategy) => new TableInterfaceGenerator()
+        {
+            Layout = table?.Layout ?? throw new ArgumentNullException(nameof(table)),
+            TableName = tableName ?? table.Name,
+            DatabaseName = databaseName ?? table.Database.Name,
+            ClassName = className,
+            NamingStrategy = namingStrategy
+        }.GenerateStruct();
 
         /// <summary>Builds the csharp code containing the row layout structure.</summary>
         /// <param name="table">The table to use.</param>
@@ -68,17 +67,15 @@ namespace Cave.Data
         /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
         /// <returns>Returns a string containing csharp code.</returns>
         [Obsolete("Use TableInterfaceGenerator.GenerateStruct instead")]
-        public static GenerateTableCodeResult GenerateStruct(this ITable table, string databaseName = null, string tableName = null, string className = null,
-            string nameSpace = null, NamingStrategy namingStrategy = NamingStrategy.CamelCase)
-            => new TableInterfaceGenerator()
-            {
-                Layout = table?.Layout ?? throw new ArgumentNullException(nameof(table)),
-                TableName = tableName ?? table.Name,
-                DatabaseName = databaseName ?? table.Database.Name,
-                ClassName = className,
-                NameSpace = nameSpace,
-                NamingStrategy = namingStrategy
-            }.GenerateStruct();
+        public static GenerateTableCodeResult GenerateStruct(this ITable table, string databaseName = null, string tableName = null, string className = null, string nameSpace = null, NamingStrategy namingStrategy = NamingStrategy.PascalCase) => new TableInterfaceGenerator()
+        {
+            Layout = table?.Layout ?? throw new ArgumentNullException(nameof(table)),
+            TableName = tableName ?? table.Name,
+            DatabaseName = databaseName ?? table.Database.Name,
+            ClassName = className,
+            NameSpace = nameSpace,
+            NamingStrategy = namingStrategy
+        }.GenerateStruct();
 
         /// <summary>Builds the csharp code containing the row layout structure.</summary>
         /// <param name="layout">The layout to use.</param>
@@ -88,16 +85,14 @@ namespace Cave.Data
         /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
         /// <returns>Returns a string containing csharp code.</returns>
         [Obsolete("Use TableInterfaceGenerator.GenerateStruct instead")]
-        public static GenerateTableCodeResult GenerateStruct(this RowLayout layout, string databaseName, string tableName, string className,
-            NamingStrategy namingStrategy)
-            => new TableInterfaceGenerator()
-            {
-                Layout = layout ?? throw new ArgumentNullException(nameof(layout)),
-                TableName = tableName ?? layout.Name,
-                DatabaseName = databaseName ?? throw new ArgumentNullException(nameof(databaseName)),
-                ClassName = className,
-                NamingStrategy = namingStrategy
-            }.GenerateStruct();
+        public static GenerateTableCodeResult GenerateStruct(this RowLayout layout, string databaseName, string tableName, string className, NamingStrategy namingStrategy) => new TableInterfaceGenerator()
+        {
+            Layout = layout ?? throw new ArgumentNullException(nameof(layout)),
+            TableName = tableName ?? layout.Name,
+            DatabaseName = databaseName ?? throw new ArgumentNullException(nameof(databaseName)),
+            ClassName = className,
+            NamingStrategy = namingStrategy
+        }.GenerateStruct();
 
         /// <summary>Builds the csharp code containing the row layout structure.</summary>
         /// <param name="layout">The layout to use.</param>
@@ -108,17 +103,15 @@ namespace Cave.Data
         /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
         /// <returns>Returns a string containing csharp code.</returns>
         [Obsolete("Use TableInterfaceGenerator.GenerateStruct instead")]
-        public static GenerateTableCodeResult GenerateStruct(this RowLayout layout, string databaseName, string tableName = null, string className = null,
-            string nameSpace = null, NamingStrategy namingStrategy = NamingStrategy.CamelCase)
-             => new TableInterfaceGenerator()
-             {
-                 Layout = layout ?? throw new ArgumentNullException(nameof(layout)),
-                 TableName = tableName ?? layout.Name,
-                 DatabaseName = databaseName ?? throw new ArgumentNullException(nameof(databaseName)),
-                 ClassName = className,
-                 NameSpace = nameSpace,
-                 NamingStrategy = namingStrategy
-             }.GenerateStruct();
+        public static GenerateTableCodeResult GenerateStruct(this RowLayout layout, string databaseName, string tableName = null, string className = null, string nameSpace = null, NamingStrategy namingStrategy = NamingStrategy.PascalCase) => new TableInterfaceGenerator()
+        {
+            Layout = layout ?? throw new ArgumentNullException(nameof(layout)),
+            TableName = tableName ?? layout.Name,
+            DatabaseName = databaseName ?? throw new ArgumentNullException(nameof(databaseName)),
+            ClassName = className,
+            NameSpace = nameSpace,
+            NamingStrategy = namingStrategy
+        }.GenerateStruct();
 
         /// <summary>Builds the csharp code file containing the row layout structure.</summary>
         /// <param name="table">The table to use.</param>
@@ -129,10 +122,8 @@ namespace Cave.Data
         /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
         /// <returns>The struct file name.</returns>
         [Obsolete("Use TableInterfaceGenerator.GenerateStructFile instead")]
-        public static GenerateTableCodeResult GenerateStructFile(this ITable table, string databaseName, string tableName,
-            string className, string structFile, NamingStrategy namingStrategy)
-            => GenerateStruct(table.Layout, databaseName, tableName, className, namingStrategy)
-                .SaveStructFile(structFile);
+        public static GenerateTableCodeResult GenerateStructFile(this ITable table, string databaseName, string tableName, string className, string structFile, NamingStrategy namingStrategy)
+            => GenerateStruct(table.Layout, databaseName, tableName, className, namingStrategy).SaveStructFile(structFile);
 
         /// <summary>Builds the csharp code file containing the row layout structure.</summary>
         /// <param name="table">The table to use.</param>
@@ -144,10 +135,8 @@ namespace Cave.Data
         /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
         /// <returns>The struct file name.</returns>
         [Obsolete("Use TableInterfaceGenerator.GenerateStructFile instead")]
-        public static GenerateTableCodeResult GenerateStructFile(this ITable table, string databaseName = null, string tableName = null,
-            string className = null, string structFile = null, string nameSpace = null, NamingStrategy namingStrategy = NamingStrategy.CamelCase)
-            => GenerateStruct(table.Layout, databaseName ?? table.Database.Name, tableName, className, nameSpace, namingStrategy)
-               .SaveStructFile(structFile);
+        public static GenerateTableCodeResult GenerateStructFile(this ITable table, string databaseName = null, string tableName = null, string className = null, string structFile = null, string nameSpace = null, NamingStrategy namingStrategy = NamingStrategy.PascalCase)
+            => GenerateStruct(table.Layout, databaseName ?? table.Database.Name, tableName, className, nameSpace, namingStrategy).SaveStructFile(structFile);
 
         /// <summary>Builds the csharp code file containing the row layout structure.</summary>
         /// <param name="layout">The layout to use.</param>
@@ -158,10 +147,8 @@ namespace Cave.Data
         /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
         /// <returns>The struct file name.</returns>
         [Obsolete("Use TableInterfaceGenerator.GenerateStructFile instead")]
-        public static GenerateTableCodeResult GenerateStructFile(this RowLayout layout, string databaseName, string tableName, string className,
-            string structFile, NamingStrategy namingStrategy)
-            => GenerateStruct(layout, databaseName, tableName, className, namingStrategy)
-                .SaveStructFile(structFile);
+        public static GenerateTableCodeResult GenerateStructFile(this RowLayout layout, string databaseName, string tableName, string className, string structFile, NamingStrategy namingStrategy)
+            => GenerateStruct(layout, databaseName, tableName, className, namingStrategy).SaveStructFile(structFile);
 
         /// <summary>Builds the csharp code file containing the row layout structure.</summary>
         /// <param name="layout">The layout to use.</param>
@@ -173,19 +160,17 @@ namespace Cave.Data
         /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
         /// <returns>The struct file name.</returns>
         [Obsolete("Use TableInterfaceGenerator.GenerateStructFile instead")]
-        public static GenerateTableCodeResult GenerateStructFile(this RowLayout layout, string databaseName = null, string tableName = null,
-            string className = null, string structFile = null, string nameSpace = null, NamingStrategy namingStrategy = NamingStrategy.CamelCase)
-            => GenerateStruct(layout, databaseName, tableName, className, nameSpace, namingStrategy)
-                .SaveStructFile(structFile);
+        public static GenerateTableCodeResult GenerateStructFile(this RowLayout layout, string databaseName = null, string tableName = null, string className = null, string structFile = null, string nameSpace = null, NamingStrategy namingStrategy = NamingStrategy.PascalCase)
+            => GenerateStruct(layout, databaseName, tableName, className, nameSpace, namingStrategy).SaveStructFile(structFile);
 
         /// <summary>Gets the string comparison to use for field name comparison.</summary>
         /// <param name="tableFlags">Flags to use for setting.</param>
-        /// <returns>Returns a <see cref="StringComparison" /> value.</returns>
+        /// <returns>Returns a <see cref="StringComparison"/> value.</returns>
         public static StringComparison GetFieldNameComparison(this TableFlags tableFlags) => tableFlags.HasFlag(TableFlags.FieldNamesCaseInsensitive) ? StringComparison.InvariantCultureIgnoreCase : StringComparison.Ordinal;
 
         /// <summary>Gets the string comparison to use for field name comparison.</summary>
         /// <param name="table">Flags to use for setting.</param>
-        /// <returns>Returns a <see cref="StringComparison" /> value.</returns>
+        /// <returns>Returns a <see cref="StringComparison"/> value.</returns>
         public static StringComparison GetFieldNameComparison(this ITable table) => GetFieldNameComparison(table.Flags);
 
         /// <summary>Searches the table for a single row with given field value combination.</summary>
@@ -345,7 +330,7 @@ namespace Cave.Data
         /// <param name="table">The table.</param>
         /// <param name="id">The identifier.</param>
         /// <returns>Returns true if the data set was removed, false otherwise.</returns>
-        /// <typeparam name="TIdentifier">Identifier type. This has to be convertible to the database <see cref="DataType" />.</typeparam>
+        /// <typeparam name="TIdentifier">Identifier type. This has to be convertible to the database <see cref="DataType"/>.</typeparam>
         public static bool TryDelete<TIdentifier>(this ITable table, TIdentifier id)
         {
             if (table == null)
@@ -362,7 +347,7 @@ namespace Cave.Data
         /// <param name="table">The table.</param>
         /// <param name="ids">The identifiers.</param>
         /// <returns>The number of data sets removed, 0 if the database does not support deletion count or no data set was removed.</returns>
-        /// <typeparam name="TIdentifier">Identifier type. This has to be convertible to the database <see cref="DataType" />.</typeparam>
+        /// <typeparam name="TIdentifier">Identifier type. This has to be convertible to the database <see cref="DataType"/>.</typeparam>
         public static int TryDelete<TIdentifier>(this ITable table, IEnumerable<TIdentifier> ids)
         {
             if (table == null)
@@ -390,7 +375,7 @@ namespace Cave.Data
             return table.TryDelete(Search.FieldEquals(field, value));
         }
 
-        /// <summary>Tries to get the row with the specified <paramref name="value" /> from <paramref name="table" />.</summary>
+        /// <summary>Tries to get the row with the specified <paramref name="value"/> from <paramref name="table"/>.</summary>
         /// <typeparam name="TStruct">The row structure type.</typeparam>
         /// <param name="table">The table.</param>
         /// <param name="field">The fieldname to match.</param>
@@ -417,11 +402,9 @@ namespace Cave.Data
             return false;
         }
 
-        /// <summary>Tries to get the row with the specified <paramref name="key" /> from <paramref name="table" />.</summary>
-        /// <typeparam name="TKey">The identifier field type.</typeparam>
-        /// <typeparam name="TStruct">The row structure type.</typeparam>
+        /// <summary>Tries to get the row with the specified <paramref name="key"/> from <paramref name="table"/>.</summary>
         /// <param name="table">The table.</param>
-        /// <param name="key">The identifier value.</param>
+        /// <param name="key">The key to match.</param>
         /// <param name="row">Returns the result row.</param>
         /// <returns>Returns true on success, false otherwise.</returns>
         /// <exception cref="InvalidOperationException">The result sequence contains more than one element.</exception>
@@ -539,6 +522,6 @@ namespace Cave.Data
             }
         }
 
-        #endregion
+        #endregion Public Methods
     }
 }

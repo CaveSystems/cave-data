@@ -117,26 +117,25 @@ namespace Cave
         #region IFieldProperties
 
         /// <inheritdoc/>
-        public FieldProperties Clone() =>
-            new()
-            {
-                Index = Index,
-                ValueType = ValueType,
-                DataType = DataType,
-                Flags = Flags,
-                Name = Name,
-                NameAtDatabase = NameAtDatabase,
-                TypeAtDatabase = TypeAtDatabase,
-                DateTimeKind = DateTimeKind,
-                DateTimeType = DateTimeType,
-                StringEncoding = StringEncoding,
-                MaximumLength = MaximumLength,
-                Description = Description,
-                DisplayFormat = DisplayFormat,
-                AlternativeNames = AlternativeNames,
-                FieldInfo = FieldInfo,
-                DefaultValue = DefaultValue
-            };
+        public FieldProperties Clone() => new()
+        {
+            Index = Index,
+            ValueType = ValueType,
+            DataType = DataType,
+            Flags = Flags,
+            Name = Name,
+            NameAtDatabase = NameAtDatabase,
+            TypeAtDatabase = TypeAtDatabase,
+            DateTimeKind = DateTimeKind,
+            DateTimeType = DateTimeType,
+            StringEncoding = StringEncoding,
+            MaximumLength = MaximumLength,
+            Description = Description,
+            DisplayFormat = DisplayFormat,
+            AlternativeNames = AlternativeNames,
+            FieldInfo = FieldInfo,
+            DefaultValue = DefaultValue
+        };
 
         #endregion IFieldProperties
 
@@ -433,8 +432,7 @@ namespace Cave
         }
 
         /// <inheritdoc/>
-        public string GetString(object value, string stringMarker = null, IFormatProvider provider = null) =>
-            Fields.GetString(value, DataType, DateTimeKind, DateTimeType, stringMarker, provider);
+        public string GetString(object value, string stringMarker = null, IFormatProvider provider = null) => Fields.GetString(value, DataType, DateTimeKind, DateTimeType, stringMarker, provider);
 
         /// <inheritdoc/>
         public object EnumValue(long value)
@@ -662,7 +660,7 @@ namespace Cave
                 TypeAtDatabase = DataType;
             }
 
-            NameAtDatabase ??= RowLayout.GetNameByStrategy(namingStrategy, fieldInfo.Name);
+            NameAtDatabase ??= namingStrategy.GetNameByStrategy(fieldInfo.Name);
 
             Validate();
         }
