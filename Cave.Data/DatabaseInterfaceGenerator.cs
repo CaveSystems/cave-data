@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Text;
 using Cave.Collections.Generic;
 
@@ -46,12 +45,7 @@ namespace Cave.Data
 
         #region Static
 
-        static string GetName(string text)
-        {
-            text = text.ReplaceInvalidChars(ASCII.Strings.Letters + ASCII.Strings.Digits, "_");
-            var parts = text.Split('_').SelectMany(s => s.SplitCamelCase());
-            return parts.ToArray().JoinCamelCase();
-        }
+        string GetName(string text) => NamingStrategy.GetNameByStrategy(text);
 
         #endregion
 
@@ -136,7 +130,7 @@ namespace Cave.Data
         public string NameSpace { get; }
 
         /// <summary>Naming strategy for classes, properties, structures and fields.</summary>
-        public NamingStrategy NamingStrategy { get; set; } = NamingStrategy.CamelCase;
+        public NamingStrategy NamingStrategy { get; set; } = NamingStrategy.PascalCase;
 
         #endregion
 

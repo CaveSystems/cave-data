@@ -33,9 +33,9 @@ namespace Cave.Data
         public string? ClassName { get; set; }
 
         /// <summary>
-        /// Gets or sets the naming strategy for classes, properties, structures and fields. Optional. Default = <see cref="NamingStrategy.CamelCase"/>.
+        /// Gets or sets the naming strategy for classes, properties, structures and fields. Optional. Default = <see cref="NamingStrategy.PascalCase"/>.
         /// </summary>
-        public NamingStrategy NamingStrategy { get; set; } = NamingStrategy.CamelCase;
+        public NamingStrategy NamingStrategy { get; set; } = NamingStrategy.PascalCase;
 
         /// <summary>
         /// Gets or sets the <see cref="RowLayout"/> to be used for the structure. Required!
@@ -51,20 +51,7 @@ namespace Cave.Data
             }
             var generator = typeof(TableInterfaceGenerator);
 
-            #region GetName()
-
-            string[] GetNameParts(string text) => text.ReplaceInvalidChars(ASCII.Strings.Letters + ASCII.Strings.Digits, "_").Split('_').SelectMany(s => s.SplitCamelCase()).ToArray();
-
-            string GetName(string text) =>
-                NamingStrategy switch
-                {
-                    NamingStrategy.CamelCase => GetNameParts(text).JoinCamelCase(),
-                    NamingStrategy.SnakeCase => GetNameParts(text).JoinSnakeCase(),
-                    NamingStrategy.Exact => text,
-                    _ => throw new NotImplementedException($"Unknown NamingStrategy {NamingStrategy}.")
-                };
-
-            #endregion
+            string GetName(string text) => NamingStrategy.GetNameByStrategy(text);
 
             if (DatabaseName == null)
             {
