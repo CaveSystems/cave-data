@@ -418,6 +418,12 @@ namespace Cave.Data.Sql
                 return null;
             }
 
+            if (field.DataType != field.TypeAtDatabase)
+            {
+                //local type does not match database.... try to convert...
+                return Convert.ChangeType(databaseValue, field.ValueType);
+            }
+
             switch (field.DataType)
             {
                 case DataType.Double: return (double)databaseValue;

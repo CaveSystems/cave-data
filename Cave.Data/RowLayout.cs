@@ -628,17 +628,40 @@ namespace Cave.Data
 
             var comparison = flags.GetFieldNameComparison();
             var result = new List<IFieldProperties>();
-            foreach (var field in this)
+            foreach (var typedField in this)
             {
-                var match = baseTableLayout.FirstOrDefault(f => f.Equals(field, comparison));
-                if (match == null)
+                var index = baseTableLayout.GetFieldIndex(typedField.NameAtDatabase, false);
+                if (index < 0)
                 {
-                    if (flags.HasFlag(TableFlags.IgnoreMissingFields)) continue;
-                    throw new InvalidDataException($"Field {field} cannot be found at table {baseTableLayout}");
+                    index = baseTableLayout.GetFieldIndex(typedField.Name, false);
+                    if (index < 0)
+                    {
+                        index = baseTableLayout.GetFieldIndex(typedField.NameAtDatabase, StringComparison.OrdinalIgnoreCase, false);
+                        if (index < 0)
+                        {
+                            index = baseTableLayout.GetFieldIndex(typedField.Name, StringComparison.OrdinalIgnoreCase, false);
+                            if (index < 0)
+                            {
+                                if (flags.HasFlag(TableFlags.IgnoreMissingFields))
+                                {
+                                    Trace.TraceWarning($"Ignoring missing field {typedField} at table {baseTableLayout}!");
+                                    continue;
+                                }
+                                throw new InvalidDataException($"Field {typedField} cannot be found at table {baseTableLayout}");
+                            }
+                        }
+                    }
                 }
+                var untypedField = baseTableLayout[index];
 
-                var target = field.Clone();
-                target.Index = match.Index;
+                var target = typedField.Clone();
+                target.Index = index;
+                target.NameAtDatabase = untypedField.NameAtDatabase;
+                target.TypeAtDatabase = untypedField.TypeAtDatabase;
+                if (target.Flags != untypedField.Flags)
+                {
+                    Trace.TraceWarning($"Database table flags {untypedField.Flags} do not match typed flags {typedField.Flags}!");
+                }
                 result.Add(target);
             }
 
@@ -647,7 +670,7 @@ namespace Cave.Data
                 throw new("Index assignment is not distinct!");
             }
 
-            return new(Name, result.OrderBy(i => i.Index).ToArray(), RowType);
+            return new(baseTableLayout.Name, result.OrderBy(i => i.Index).ToArray(), RowType);
         }
 
         /// <summary>Gets the name of the field with the given number.</summary>
