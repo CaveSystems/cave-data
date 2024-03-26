@@ -92,6 +92,13 @@ namespace Cave.Data
         /// <summary>
         /// Initializes a new instance of the <see cref="MemoryTable"/> class.
         /// </summary>
+        /// <typeparam name="TStruct">Row layout.</typeparam>
+        /// <returns>Returns a new <see cref="MemoryTable"/> instance.</returns>
+        public static ITable<TStruct> Create<TStruct>() where TStruct : struct => new Table<TStruct>(Create(typeof(TStruct)));
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MemoryTable"/> class.
+        /// </summary>
         /// <param name="type">Table layout.</param>
         /// <returns>Returns a new <see cref="MemoryTable"/> instance.</returns>
         public static MemoryTable Create(Type type) => Create(RowLayout.CreateTyped(type));
