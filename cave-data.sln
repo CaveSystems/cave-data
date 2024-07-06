@@ -30,6 +30,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "net_5+", "Test\net_5+.cspro
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "netcore_3.1", "Test\netcore_3.1.csproj", "{576C0DFC-34DF-4CF2-8027-E62FAE99BCAE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dbstructs", "dbstructs\dbstructs.csproj", "{A9D8595B-7F32-4288-9C15-142EED01E49E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -56,6 +58,10 @@ Global
 		{576C0DFC-34DF-4CF2-8027-E62FAE99BCAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{576C0DFC-34DF-4CF2-8027-E62FAE99BCAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{576C0DFC-34DF-4CF2-8027-E62FAE99BCAE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9D8595B-7F32-4288-9C15-142EED01E49E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9D8595B-7F32-4288-9C15-142EED01E49E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9D8595B-7F32-4288-9C15-142EED01E49E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9D8595B-7F32-4288-9C15-142EED01E49E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

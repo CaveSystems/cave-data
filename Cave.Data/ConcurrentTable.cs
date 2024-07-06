@@ -5,9 +5,7 @@ using System.Threading;
 
 namespace Cave.Data
 {
-    /// <summary>
-    /// Provides a thread safe table stored completely in memory.
-    /// </summary>
+    /// <summary>Provides a thread safe table stored completely in memory.</summary>
     [DebuggerDisplay("{Name}")]
     public class ConcurrentTable : ITable
     {
@@ -139,9 +137,7 @@ namespace Cave.Data
 
         #region Public Constructors
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ConcurrentTable"/> class.
-        /// </summary>
+        /// <summary>Initializes a new instance of the <see cref="ConcurrentTable"/> class.</summary>
         /// <param name="table">The table to synchronize.</param>
         public ConcurrentTable(ITable table) => BaseTable = table is not ConcurrentTable ? table : throw new ArgumentException("Table is already synchronized!");
 
@@ -149,20 +145,8 @@ namespace Cave.Data
 
         #region Public Properties
 
-        /// <summary>
-        /// Gets the base table used.
-        /// </summary>
+        /// <summary>Gets the base table used.</summary>
         public ITable BaseTable { get; }
-
-        /// <summary>
-        /// Gets or sets the maximum wait time (milliseconds) while waiting for a write lock.
-        /// </summary>
-        /// <value>The maximum wait time (milliseconds) while waiting for a write lock.</value>
-        /// <remarks>
-        /// By default the maximum wait time is set to 100 milliseconds in release builds. Disabling the maximum wait time results in writing operations blocked
-        /// forever if there are no gaps between reading operations.
-        /// </remarks>
-        public int MaxWaitTime { get; set; } = 100;
 
         /// <inheritdoc/>
         public IDatabase Database => BaseTable.Database;
@@ -173,15 +157,21 @@ namespace Cave.Data
         /// <inheritdoc/>
         public RowLayout Layout => BaseTable.Layout;
 
+        /// <summary>Gets or sets the maximum wait time (milliseconds) while waiting for a write lock.</summary>
+        /// <value>The maximum wait time (milliseconds) while waiting for a write lock.</value>
+        /// <remarks>
+        /// By default the maximum wait time is set to 100 milliseconds in release builds. Disabling the maximum wait time results in writing operations blocked
+        /// forever if there are no gaps between reading operations.
+        /// </remarks>
+        public int MaxWaitTime { get; set; } = 100;
+
         /// <inheritdoc/>
         public string Name => BaseTable.Name;
 
         /// <inheritdoc/>
         public long RowCount => ReadLockedFunc(() => BaseTable.RowCount);
 
-        /// <summary>
-        /// Gets the sequence number.
-        /// </summary>
+        /// <summary>Gets the sequence number.</summary>
         /// <value>The sequence number.</value>
         public int SequenceNumber => BaseTable.SequenceNumber;
 
@@ -267,9 +257,7 @@ namespace Cave.Data
         /// <inheritdoc/>
         public double Sum(string fieldName, Search search = null) => ReadLockedFunc(() => BaseTable.Sum(fieldName, search));
 
-        /// <summary>
-        /// Returns a <see cref="string"/> that represents this instance.
-        /// </summary>
+        /// <summary>Returns a <see cref="string"/> that represents this instance.</summary>
         /// <returns>A <see cref="string"/> that represents this instance.</returns>
         public override string ToString() => $"Table {Database.Name}.{Name} [{RowCount} Rows]";
 

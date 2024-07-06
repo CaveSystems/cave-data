@@ -22,15 +22,8 @@ namespace Cave.Data
 
         #region Public Properties
 
-        /// <summary>
-        /// The backing table containing the cached rows.
-        /// </summary>
+        /// <summary>The backing table containing the cached rows.</summary>
         public MemoryTable Cache { get; }
-
-        /// <summary>
-        /// Table to run queries on.
-        /// </summary>
-        public ITable Table { get; }
 
         /// <inheritdoc/>
         public IDatabase Database => Table.Database;
@@ -52,6 +45,9 @@ namespace Cave.Data
 
         /// <inheritdoc/>
         public IStorage Storage => Table.Storage;
+
+        /// <summary>Table to run queries on.</summary>
+        public ITable Table { get; }
 
         #endregion Public Properties
 
@@ -120,9 +116,7 @@ namespace Cave.Data
             return row;
         }
 
-        /// <summary>
-        /// Creates a <see cref="RowCache{TKey, TStruct}"/> using <see cref="Table"/>.
-        /// </summary>
+        /// <summary>Creates a <see cref="RowCache{TKey, TStruct}"/> using <see cref="Table"/>.</summary>
         /// <typeparam name="TKey">Key identifier type.</typeparam>
         /// <typeparam name="TStruct">Row structure type.</typeparam>
         /// <returns>Returns a new instance using <see cref="Table"/> as datasource.</returns>
@@ -130,9 +124,7 @@ namespace Cave.Data
             where TKey : IComparable<TKey> where TStruct : struct
             => new(Table);
 
-        /// <summary>
-        /// Creates a <see cref="RowCache{TKey, TStruct, TTarget}"/> using <see cref="Table"/>.
-        /// </summary>
+        /// <summary>Creates a <see cref="RowCache{TKey, TStruct, TTarget}"/> using <see cref="Table"/>.</summary>
         /// <typeparam name="TKey">Key identifier type.</typeparam>
         /// <typeparam name="TStruct">Row structure type.</typeparam>
         /// <typeparam name="TTarget">Result and cache item type.</typeparam>

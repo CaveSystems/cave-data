@@ -207,6 +207,7 @@ namespace Cave.Data
 
             var result = new TableInterfaceGenerator()
             {
+                Layout = table.Layout,
                 DatabaseName = databaseName ?? table.Database.Name,
                 TableName = tableName ?? table.Name,
                 ClassName = className,

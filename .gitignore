@@ -107,3 +107,4 @@ Backup*/
 UpgradeLog*.XML
 
 /.vs
+/dbstructs/Properties/launchSettings.json

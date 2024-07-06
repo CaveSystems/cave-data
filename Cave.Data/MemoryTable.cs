@@ -8,41 +8,29 @@ using Cave.Collections.Generic;
 
 namespace Cave.Data
 {
-    /// <summary>
-    /// Provides a table stored completely in memory.
-    /// </summary>
+    /// <summary>Provides a table stored completely in memory.</summary>
     [DebuggerDisplay("{Name}")]
     public class MemoryTable : Table
     {
         #region constructors
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MemoryTable"/> class.
-        /// </summary>
+        /// <summary>Initializes a new instance of the <see cref="MemoryTable"/> class.</summary>
         protected MemoryTable() { }
 
         #endregion constructors
 
         #region fields
 
-        /// <summary>
-        /// Gets a value indicating whether this instance is readonly.
-        /// </summary>
+        /// <summary>Gets a value indicating whether this instance is readonly.</summary>
         bool isReadonly;
 
-        /// <summary>
-        /// The rows (id, row) dictionary.
-        /// </summary>
+        /// <summary>The rows (id, row) dictionary.</summary>
         Dictionary<Identifier, object[]> rows = new();
 
-        /// <summary>
-        /// The indices for fast lookups.
-        /// </summary>
+        /// <summary>The indices for fast lookups.</summary>
         FieldIndex[] indices;
 
-        /// <summary>
-        /// The memory table options.
-        /// </summary>
+        /// <summary>The memory table options.</summary>
         MemoryTableOptions memoryTableOptions;
 
         #endregion fields
@@ -51,9 +39,7 @@ namespace Cave.Data
 
         #region IsReadonly
 
-        /// <summary>
-        /// Gets or sets a value indicating whether this instance is readonly.
-        /// </summary>
+        /// <summary>Gets or sets a value indicating whether this instance is readonly.</summary>
         /// <value><c>true</c> if this instance is readonly; otherwise, <c>false</c>.</value>
         /// <exception cref="ReadOnlyException">Table {0} is readonly!.</exception>
         /// <remarks>
@@ -89,30 +75,22 @@ namespace Cave.Data
 
         #region public static Create()
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MemoryTable"/> class.
-        /// </summary>
+        /// <summary>Initializes a new instance of the <see cref="MemoryTable"/> class.</summary>
         /// <typeparam name="TStruct">Row layout.</typeparam>
         /// <returns>Returns a new <see cref="MemoryTable"/> instance.</returns>
         public static ITable<TStruct> Create<TStruct>() where TStruct : struct => new Table<TStruct>(Create(typeof(TStruct)));
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MemoryTable"/> class.
-        /// </summary>
+        /// <summary>Initializes a new instance of the <see cref="MemoryTable"/> class.</summary>
         /// <param name="type">Table layout.</param>
         /// <returns>Returns a new <see cref="MemoryTable"/> instance.</returns>
         public static MemoryTable Create(Type type) => Create(RowLayout.CreateTyped(type));
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MemoryTable"/> class.
-        /// </summary>
+        /// <summary>Initializes a new instance of the <see cref="MemoryTable"/> class.</summary>
         /// <param name="layout">Table layout.</param>
         /// <returns>Returns a new <see cref="MemoryTable"/> instance.</returns>
         public static MemoryTable Create(RowLayout layout) => Create(MemoryDatabase.Default, layout);
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MemoryTable"/> class.
-        /// </summary>
+        /// <summary>Initializes a new instance of the <see cref="MemoryTable"/> class.</summary>
         /// <param name="database">The database the.</param>
         /// <param name="layout">The layout of the table.</param>
         /// <param name="options">The options.</param>
@@ -128,9 +106,7 @@ namespace Cave.Data
 
         #region public static CreateIndex()
 
-        /// <summary>
-        /// Creates a memory index for the specified layout.
-        /// </summary>
+        /// <summary>Creates a memory index for the specified layout.</summary>
         /// <param name="layout">The layout.</param>
         /// <param name="options">The options.</param>
         /// <returns>Returns a field index array or null.</returns>
@@ -179,9 +155,7 @@ namespace Cave.Data
 
         #region Load Table
 
-        /// <summary>
-        /// Replaces all data present with the data at the given table.
-        /// </summary>
+        /// <summary>Replaces all data present with the data at the given table.</summary>
         /// <param name="table">The table to load.</param>
         /// <param name="search">The search.</param>
         /// <param name="callback">The callback.</param>
@@ -244,9 +218,7 @@ namespace Cave.Data
 
         #region SetRows
 
-        /// <summary>
-        /// Replaces the whole data at the table with the specified one.
-        /// </summary>
+        /// <summary>Replaces the whole data at the table with the specified one.</summary>
         /// <param name="rows">The rows to insert.</param>
         /// <exception cref="ReadOnlyException">Table {0} is readonly!.</exception>
         /// <exception cref="ArgumentNullException">rows.</exception>
@@ -462,9 +434,7 @@ namespace Cave.Data
             }
         }
 
-        /// <summary>
-        /// Removes all rows from the table matching the specified search.
-        /// </summary>
+        /// <summary>Removes all rows from the table matching the specified search.</summary>
         /// <param name="search">The Search used to identify rows for removal.</param>
         /// <returns>The number of dataset deleted.</returns>
         public override int TryDelete(Search search)
@@ -536,23 +506,17 @@ namespace Cave.Data
 
         #region additional functionality
 
-        /// <summary>
-        /// Checks an identififer for existance.
-        /// </summary>
+        /// <summary>Checks an identififer for existance.</summary>
         /// <param name="id">The identifier.</param>
         /// <returns>True if the id is found at the table, false otherwise.</returns>
         public bool Exist(Identifier id) => rows.ContainsKey(id);
 
-        /// <summary>
-        /// Gets a row from the table.
-        /// </summary>
+        /// <summary>Gets a row from the table.</summary>
         /// <param name="id">The identifier of the row to be fetched.</param>
         /// <returns>The row.</returns>
         public Row GetRow(Identifier id) => new(Layout, rows[id], true);
 
-        /// <summary>
-        /// Obtains the rows with the given ids.
-        /// </summary>
+        /// <summary>Obtains the rows with the given ids.</summary>
         /// <param name="ids">Identifiers of the rows to fetch from the table.</param>
         /// <returns>The rows.</returns>
         public IList<Row> GetRows(IEnumerable<Identifier> ids)
@@ -571,9 +535,7 @@ namespace Cave.Data
             return result;
         }
 
-        /// <summary>
-        /// Searches the table for rows with given field value combinations.
-        /// </summary>
+        /// <summary>Searches the table for rows with given field value combinations.</summary>
         /// <param name="search">The search.</param>
         /// <param name="resultOption">The result option.</param>
         /// <param name="skipSearch">if set to <c>true</c> [skip search].</param>

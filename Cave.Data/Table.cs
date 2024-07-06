@@ -8,9 +8,7 @@ using Cave.Collections.Generic;
 
 namespace Cave.Data
 {
-    /// <summary>
-    /// Provides a base class implementing the <see cref="ITable"/> interface.
-    /// </summary>
+    /// <summary>Provides a base class implementing the <see cref="ITable"/> interface.</summary>
     [DebuggerDisplay("{Name}[{RowCount} Rows]")]
     public abstract class Table : ITable
     {
@@ -32,13 +30,13 @@ namespace Cave.Data
         public RowLayout Layout { get; private set; }
 
         /// <inheritdoc/>
+        public string Name => Layout.Name;
+
+        /// <inheritdoc/>
         public abstract long RowCount { get; }
 
         /// <inheritdoc/>
         public int SequenceNumber => sequenceNumber;
-
-        /// <inheritdoc/>
-        public string Name => Layout.Name;
 
         /// <inheritdoc/>
         public IStorage Storage => Database.Storage;
@@ -183,9 +181,7 @@ namespace Cave.Data
             return result.AsList();
         }
 
-        /// <summary>
-        /// Increases the sequence number.
-        /// </summary>
+        /// <summary>Increases the sequence number.</summary>
         /// <returns>The increased sequence number.</returns>
         public int IncreaseSequenceNumber() => Interlocked.Increment(ref sequenceNumber);
 
@@ -302,9 +298,7 @@ namespace Cave.Data
             return sum;
         }
 
-        /// <summary>
-        /// Returns a <see cref="string"/> that represents this instance.
-        /// </summary>
+        /// <summary>Returns a <see cref="string"/> that represents this instance.</summary>
         /// <returns>A <see cref="string"/> that represents this instance.</returns>
         public override string ToString() => $"Table {Database.Name}.{Name}";
 

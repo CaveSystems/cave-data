@@ -131,10 +131,12 @@ namespace Cave.Data
             foreach (var field in Layout)
             {
                 code.AppendLine();
-                code.AppendLine($"\t\t/// <summary>{field} {field.Description}.</summary>");
+                code.AppendLine($"\t\t/// <summary>{field}</summary>");
                 if (!string.IsNullOrEmpty(field.Description))
                 {
-                    code.AppendLine($"\t\t[Description(\"{field} {field.Description}\")]");
+                    var description = $"{field.Description}".Replace("&", "&amp;").Replace("<", "&gt;").Replace(">", "&lt;").Replace("\"", "&quot;");
+                    code.AppendLine($"\t\t/// <remarks>{description}</remarks>");
+                    code.AppendLine($"\t\t[Description(\"{field.Description.EscapeUtf8()}\")]");
                 }
 
                 code.Append("\t\t[Field(");

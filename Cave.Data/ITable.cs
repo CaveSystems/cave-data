@@ -6,7 +6,7 @@ namespace Cave.Data
     /// <summary>Provides an interface for database tables.</summary>
     public interface ITable
     {
-        #region Properties
+        #region Public Properties
 
         /// <summary>Gets the database the table belongs to.</summary>
         IDatabase Database { get; }
@@ -22,8 +22,7 @@ namespace Cave.Data
 
         /// <summary>Gets the RowCount.</summary>
         /// <returns>
-        /// Returns a value &gt;= 0 representing the number of rows available at the table. If the table does not exist or cannot be read a
-        /// value &lt; 0 is returned.
+        /// Returns a value &gt;= 0 representing the number of rows available at the table. If the table does not exist or cannot be read a value &lt; 0 is returned.
         /// </returns>
         long RowCount { get; }
 
@@ -34,9 +33,9 @@ namespace Cave.Data
         /// <summary>Gets the storage engine the database belongs to.</summary>
         IStorage Storage { get; }
 
-        #endregion
+        #endregion Public Properties
 
-        #region Members
+        #region Public Methods
 
         /// <summary>Clears all rows of the table.</summary>
         void Clear();
@@ -71,7 +70,7 @@ namespace Cave.Data
         /// <typeparam name="TValue">The returned value type.</typeparam>
         /// <param name="fieldName">The fieldName.</param>
         /// <param name="search">The search.</param>
-        /// <returns>A new <see cref="List{TValue}" />.</returns>
+        /// <returns>A new <see cref="List{TValue}"/>.</returns>
         IList<TValue> Distinct<TValue>(string fieldName, Search search = null)
             where TValue : struct, IComparable;
 
@@ -92,8 +91,8 @@ namespace Cave.Data
         Row GetRow(Search search = default, ResultOption resultOption = default);
 
         /// <summary>
-        /// This function does a lookup on the ids of the table and returns the row with the n-th ID where n is the given index. Note that
-        /// indices may change on each update, insert, delete and sorting is not garanteed!.
+        /// This function does a lookup on the ids of the table and returns the row with the n-th ID where n is the given index. Note that indices may change on
+        /// each update, insert, delete and sorting is not garanteed!.
         /// </summary>
         /// <param name="index">The index of the row to be fetched.</param>
         /// <returns>The row.</returns>
@@ -113,7 +112,7 @@ namespace Cave.Data
         /// <typeparam name="TValue">The returned value type.</typeparam>
         /// <param name="fieldName">The fieldName.</param>
         /// <param name="search">The search.</param>
-        /// <returns>A new <see cref="List{TValue}" />.</returns>
+        /// <returns>A new <see cref="List{TValue}"/>.</returns>
         IList<TValue> GetValues<TValue>(string fieldName, Search search = null)
             where TValue : struct, IComparable;
 
@@ -178,6 +177,6 @@ namespace Cave.Data
         /// <param name="layout">The new layout.</param>
         void UseLayout(RowLayout layout);
 
-        #endregion
+        #endregion Public Methods
     }
 }

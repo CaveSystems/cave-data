@@ -10,9 +10,7 @@ using Cave.Collections.Generic;
 
 namespace Cave.Data.Sql
 {
-    /// <summary>
-    /// Provides a table implementation for generic sql92 databases.
-    /// </summary>
+    /// <summary>Provides a table implementation for generic sql92 databases.</summary>
     public abstract class SqlTable : Table
     {
         #region Private Methods
@@ -141,9 +139,7 @@ namespace Cave.Data.Sql
 
         #region Protected Methods
 
-        /// <summary>
-        /// Creates the insert command.
-        /// </summary>
+        /// <summary>Creates the insert command.</summary>
         /// <param name="commandBuilder">The command builder.</param>
         /// <param name="row">The row.</param>
         /// <param name="useParameters">Use databaseName parameters instead of escaped command string.</param>
@@ -225,16 +221,12 @@ namespace Cave.Data.Sql
             return usesAutoIncrement;
         }
 
-        /// <summary>
-        /// Gets the command to retrieve the last inserted row.
-        /// </summary>
+        /// <summary>Gets the command to retrieve the last inserted row.</summary>
         /// <param name="commandBuilder">The command builder to append to.</param>
         /// <param name="row">The row to retrieve.</param>
         protected abstract void CreateLastInsertedRowCommand(SqlCommandBuilder commandBuilder, Row row);
 
-        /// <summary>
-        /// Creates a replace command.
-        /// </summary>
+        /// <summary>Creates a replace command.</summary>
         /// <param name="commandBuilder">The command builder.</param>
         /// <param name="row">The row.</param>
         /// <param name="useParameters">Use databaseName parameters instead of escaped command string.</param>
@@ -282,9 +274,7 @@ namespace Cave.Data.Sql
             commandBuilder.AppendLine(");");
         }
 
-        /// <summary>
-        /// Creates an update command.
-        /// </summary>
+        /// <summary>Creates an update command.</summary>
         /// <param name="commandBuilder">The command builder.</param>
         /// <param name="row">The row.</param>
         /// <param name="useParameters">Use databaseName parameters instead of escaped command string.</param>
@@ -346,22 +336,13 @@ namespace Cave.Data.Sql
             commandBuilder.AppendLine(";");
         }
 
-        /// <summary>
-        /// Retrieves the full layout information for this table.
-        /// </summary>
+        /// <summary>Retrieves the full layout information for this table.</summary>
         /// <param name="database">Database name.</param>
         /// <param name="table">Table name.</param>
         /// <returns>Returns a new <see cref="RowLayout"/> instance.</returns>
-        protected virtual RowLayout QueryLayout(string database, string table)
-        {
-            RowLayout layout = null;
-            Storage.Query($"SELECT * FROM {Storage.FQTN(database, table)} WHERE 1 = 0", ref layout, database, table);
-            return layout;
-        }
+        protected virtual RowLayout QueryLayout(string database, string table) => Storage.QuerySchema(database, table);
 
-        /// <summary>
-        /// Converts the specified search to a <see cref="SqlSearch"/>.
-        /// </summary>
+        /// <summary>Converts the specified search to a <see cref="SqlSearch"/>.</summary>
         /// <param name="search">Search definition.</param>
         /// <returns>Returns a new <see cref="SqlSearch"/> instance.</returns>
         protected SqlSearch ToSqlSearch(Search search) => new(this, search);
@@ -370,9 +351,7 @@ namespace Cave.Data.Sql
 
         #region Protected Internal Methods
 
-        /// <summary>
-        /// Searches the table for rows with given fieldName value combinations.
-        /// </summary>
+        /// <summary>Searches the table for rows with given fieldName value combinations.</summary>
         /// <param name="search">The search to run.</param>
         /// <param name="opt">Options for the search and the result set.</param>
         /// <returns>Returns number of rows found.</returns>
@@ -416,9 +395,7 @@ namespace Cave.Data.Sql
             return Convert.ToInt64(value, Storage.Culture);
         }
 
-        /// <summary>
-        /// Searches for grouped data-sets and returns the number of items found.
-        /// </summary>
+        /// <summary>Searches for grouped data-sets and returns the number of items found.</summary>
         /// <param name="search">Search definition.</param>
         /// <param name="opt">Options for the search.</param>
         /// <returns>Number of items found.</returns>
@@ -482,9 +459,7 @@ namespace Cave.Data.Sql
             return Convert.ToInt64(value, null);
         }
 
-        /// <summary>
-        /// Searches for grouped datasets and returns the id of the first occurence (sql handles this differently).
-        /// </summary>
+        /// <summary>Searches for grouped datasets and returns the id of the first occurence (sql handles this differently).</summary>
         /// <param name="search">Search definition.</param>
         /// <param name="opt">Options for the search.</param>
         /// <returns>Returns a list of rows matching the specified criteria.</returns>
@@ -545,9 +520,7 @@ namespace Cave.Data.Sql
             return Query(new SqlCmd(command.ToString(), search.Parameters.ToArray()), ref layout);
         }
 
-        /// <summary>
-        /// Searches the table for rows with given fieldName value combinations.
-        /// </summary>
+        /// <summary>Searches the table for rows with given fieldName value combinations.</summary>
         /// <param name="search">The search to run.</param>
         /// <param name="opt">Options for the search and the result set.</param>
         /// <returns>Returns the ID of the row found or -1.</returns>
@@ -626,9 +599,7 @@ namespace Cave.Data.Sql
 
         #region Public Properties
 
-        /// <summary>
-        /// Gets the full qualified table name.
-        /// </summary>
+        /// <summary>Gets the full qualified table name.</summary>
         public string FQTN { get; private set; }
 
         /// <inheritdoc/>
@@ -641,9 +612,7 @@ namespace Cave.Data.Sql
             }
         }
 
-        /// <summary>
-        /// Gets or sets the used <see cref="Sql.SqlStorage"/> backend.
-        /// </summary>
+        /// <summary>Gets or sets the used <see cref="Sql.SqlStorage"/> backend.</summary>
         public new SqlStorage Storage { get; set; }
 
         #endregion Public Properties
@@ -778,9 +747,7 @@ namespace Cave.Data.Sql
             return result.AsList();
         }
 
-        /// <summary>
-        /// Executes a databaseName dependent sql statement silently.
-        /// </summary>
+        /// <summary>Executes a databaseName dependent sql statement silently.</summary>
         /// <param name="cmd">the databaseName dependent sql statement.</param>
         /// <returns>Number of affected rows (if supported by the databaseName).</returns>
         public int Execute(SqlCmd cmd) => Storage.Execute(cmd, Database.Name, Name);
@@ -879,9 +846,7 @@ namespace Cave.Data.Sql
             return result.AsList();
         }
 
-        /// <summary>
-        /// Initializes the interface class. This is the first method to call after create.
-        /// </summary>
+        /// <summary>Initializes the interface class. This is the first method to call after create.</summary>
         /// <param name="database">Database the table belongs to.</param>
         /// <param name="flags">Flags used to connect to the table.</param>
         /// <param name="tableName">Table name to load.</param>
@@ -950,17 +915,13 @@ namespace Cave.Data.Sql
             return value == null ? null : (TValue)value;
         }
 
-        /// <summary>
-        /// Queries for all matching datasets.
-        /// </summary>
+        /// <summary>Queries for all matching datasets.</summary>
         /// <param name="cmd">The databaseName dependent sql statement.</param>
         /// <param name="layout">The expected schema layout (if unset the layout is returned).</param>
         /// <returns>The result rows.</returns>
         public IList<Row> Query(SqlCmd cmd, ref RowLayout layout) => Storage.Query(cmd, ref layout, Database.Name, Name);
 
-        /// <summary>
-        /// Queries for all matching datasets.
-        /// </summary>
+        /// <summary>Queries for all matching datasets.</summary>
         /// <param name="cmd">The databaseName dependent sql statement.</param>
         /// <returns>The result rows.</returns>
         public IList<Row> Query(SqlCmd cmd)
@@ -969,17 +930,13 @@ namespace Cave.Data.Sql
             return Query(cmd, ref layout);
         }
 
-        /// <summary>
-        /// Queries for a dataset (selected fields, one row).
-        /// </summary>
+        /// <summary>Queries for a dataset (selected fields, one row).</summary>
         /// <param name="cmd">The databaseName dependent sql statement.</param>
         /// <param name="layout">The expected schema layout (if unset the layout is returned).</param>
         /// <returns>The result row.</returns>
         public Row QueryRow(SqlCmd cmd, ref RowLayout layout) => Query(cmd, ref layout).Single();
 
-        /// <summary>
-        /// Queries for a dataset (selected fields, one row).
-        /// </summary>
+        /// <summary>Queries for a dataset (selected fields, one row).</summary>
         /// <param name="cmd">The databaseName dependent sql statement.</param>
         /// <returns>The result row.</returns>
         public Row QueryRow(SqlCmd cmd)
@@ -988,9 +945,7 @@ namespace Cave.Data.Sql
             return QueryRow(cmd, ref layout);
         }
 
-        /// <summary>
-        /// Querys a single value with a databaseName dependent sql statement.
-        /// </summary>
+        /// <summary>Querys a single value with a databaseName dependent sql statement.</summary>
         /// <param name="cmd">The databaseName dependent sql statement.</param>
         /// <param name="value">The result.</param>
         /// <param name="fieldName">Name of the fieldName (optional, only needed if multiple columns are returned).</param>
@@ -1000,9 +955,7 @@ namespace Cave.Data.Sql
             where TValue : struct =>
             Storage.QueryValue(cmd, out value, Database.Name, Name, fieldName);
 
-        /// <summary>
-        /// Querys a single value with a databaseName dependent sql statement.
-        /// </summary>
+        /// <summary>Querys a single value with a databaseName dependent sql statement.</summary>
         /// <param name="cmd">The databaseName dependent sql statement.</param>
         /// <param name="fieldName">Name of the fieldName (optional, only needed if multiple columns are returned).</param>
         /// <returns>The result value or null.</returns>
@@ -1086,9 +1039,7 @@ namespace Cave.Data.Sql
             return result;
         }
 
-        /// <summary>
-        /// Gets the name of the table.
-        /// </summary>
+        /// <summary>Gets the name of the table.</summary>
         /// <returns>Database.Tablename.</returns>
         public override string ToString() => Storage.FQTN(Database.Name, Name);
 
