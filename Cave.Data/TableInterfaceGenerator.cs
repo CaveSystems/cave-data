@@ -73,6 +73,7 @@ namespace Cave.Data
             code.AppendLine("//-----------------------------------------------------------------------");
             code.AppendLine();
             code.AppendLine("using System;");
+            code.AppendLine("using System.ComponentModel;");
             code.AppendLine("using System.Globalization;");
             code.AppendLine("using System.CodeDom.Compiler;");
             code.AppendLine("using Cave.Data;");
@@ -134,7 +135,7 @@ namespace Cave.Data
                 code.AppendLine($"\t\t/// <summary>{field}</summary>");
                 if (!string.IsNullOrEmpty(field.Description))
                 {
-                    var description = $"{field.Description}".Replace("&", "&amp;").Replace("<", "&gt;").Replace(">", "&lt;").Replace("\"", "&quot;");
+                    var description = $"{field.Description}".Replace("&", "&amp;").Replace("<", "&gt;").Replace(">", "&lt;").Replace("\"", "&quot;").ReplaceNewLine("<br/>");
                     code.AppendLine($"\t\t/// <remarks>{description}</remarks>");
                     code.AppendLine($"\t\t[Description(\"{field.Description.EscapeUtf8()}\")]");
                 }
