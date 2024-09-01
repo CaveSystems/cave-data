@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Cave;
 using Cave.Data;
 using NUnit.Framework;
@@ -9,6 +10,8 @@ namespace Test.Cave.Data
     [TestFixture]
     public class RowLayoutTests
     {
+        #region Private Methods
+
         static void CreateField(ref List<IFieldProperties> fields, FieldFlags flags, DataType dataType, string name, Type valueType = null)
         {
             var field = new FieldProperties
@@ -21,6 +24,10 @@ namespace Test.Cave.Data
             }.Validate();
             fields.Add(field);
         }
+
+        #endregion Private Methods
+
+        #region Public Methods
 
         [Test]
         public void CheckLayout()
@@ -41,6 +48,43 @@ namespace Test.Cave.Data
         }
 
         [Test]
+        public void MissingField()
+        {
+            var layout = RowLayout.CreateTyped(typeof(TestStructClean));
+
+            var dbWithMissingField = RowLayout.CreateUntyped("TableName", layout.Fields.Where(f => !f.Name.EndsWith("B")).ToArray());
+
+            var store = new MemoryStorage();
+            var db = store.CreateDatabase("db");
+            var table = db.CreateTable(dbWithMissingField, TableFlags.IgnoreMissingFields);
+
+            var typedTable = new Table<TestStructClean>(table);
+
+            var list = new List<TestStructClean>();
+            for (int i = 0; i < 10; i++)
+            {
+                var row = TestStructClean.Create(i);
+                var insertedRow = typedTable.Insert(row);
+                row.ID = insertedRow.ID;
+                list.Add(row);
+
+                row.B = default;
+                row.SB = default;
+                Assert.AreEqual(row, insertedRow);
+            }
+
+            foreach (var row in list)
+            {
+                var rowWithMissingFields = row;
+                rowWithMissingFields.B = default;
+                rowWithMissingFields.SB = default;
+
+                var dbRow = typedTable.GetStruct(row.ID);
+                Assert.AreEqual(rowWithMissingFields, dbRow);
+            }
+        }
+
+        [Test]
         public void TypedCheck()
         {
             var layout = RowLayout.CreateTyped(typeof(TestStructClean));
@@ -49,5 +93,7 @@ namespace Test.Cave.Data
                 Assert.AreEqual(field.Name, field.NameAtDatabase);
             }
         }
+
+        #endregion Public Methods
     }
 }
