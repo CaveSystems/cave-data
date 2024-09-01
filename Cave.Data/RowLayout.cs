@@ -107,6 +107,8 @@ namespace Cave.Data
             fieldProperties = fields;
             Name = name;
             RowType = rowtype;
+            Identifier = fieldProperties.Where(p => p.Flags.HasFlag(FieldFlags.ID)).AsReadOnly();
+            SingleIdentifier = Identifier.Count() == 1 ? Identifier.Single() : null;
         }
 
         #endregion Internal Constructors
@@ -151,10 +153,13 @@ namespace Cave.Data
         public IList<IFieldProperties> Fields => new ReadOnlyCollection<IFieldProperties>(fieldProperties);
 
         /// <summary>Gets the fields marked with the <see cref="FieldFlags.ID"/>.</summary>
-        public IEnumerable<IFieldProperties> Identifier => fieldProperties.Where(p => p.Flags.HasFlag(FieldFlags.ID));
+        public IEnumerable<IFieldProperties> Identifier { get; }
 
         /// <summary>Gets a value indicating whether the layout was created from a typed struct or not.</summary>
         public bool IsTyped => RowType != null;
+
+        /// <summary>If the layout has a single id column this is represented here. If not this is null.</summary>
+        public IFieldProperties SingleIdentifier { get; }
 
         #endregion Public Properties
 
@@ -630,29 +635,22 @@ namespace Cave.Data
             var result = new List<IFieldProperties>();
             foreach (var typedField in this)
             {
-                var index = baseTableLayout.GetFieldIndex(typedField.NameAtDatabase, false);
+                var index = baseTableLayout.GetFieldIndex(typedField.NameAtDatabase, comparison, false);
                 if (index < 0)
                 {
-                    index = baseTableLayout.GetFieldIndex(typedField.Name, false);
+                    index = baseTableLayout.GetFieldIndex(typedField.Name, comparison, false);
                     if (index < 0)
                     {
-                        index = baseTableLayout.GetFieldIndex(typedField.NameAtDatabase, StringComparison.OrdinalIgnoreCase, false);
-                        if (index < 0)
+                        if (flags.HasFlag(TableFlags.IgnoreMissingFields))
                         {
-                            index = baseTableLayout.GetFieldIndex(typedField.Name, StringComparison.OrdinalIgnoreCase, false);
-                            if (index < 0)
-                            {
-                                if (flags.HasFlag(TableFlags.IgnoreMissingFields))
-                                {
-                                    Trace.TraceWarning($"Ignoring missing field {typedField} at table {baseTableLayout}!");
-                                    continue;
-                                }
-                                throw new InvalidDataException($"Field {typedField} cannot be found at table {baseTableLayout}");
-                            }
+                            Trace.TraceWarning($"Ignoring missing field {typedField} at table {baseTableLayout}!");
+                            continue;
                         }
+                        throw new InvalidDataException($"Field {typedField} cannot be found at table {baseTableLayout}");
                     }
                 }
-                var untypedField = baseTableLayout[index];
+
+                var untypedField = baseTableLayout.Fields.Single(f => f.Index == index);
 
                 var target = typedField.Clone();
                 target.Index = index;

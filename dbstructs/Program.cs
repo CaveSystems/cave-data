@@ -14,7 +14,10 @@ class Program
 
         if (!args.Any())
         {
-            Console.WriteLine("Usage:\ndbstructs <connectionstring> [parameter1 [parameter2 [..]]]");
+            Console.WriteLine("Usage: dbstructs <connectionstring> [--option [--option2 [..]]]");
+            Console.WriteLine("");
+            Console.WriteLine("Options:");
+            Console.WriteLine("  --version=1 [/-v1] writes v1 structures without simple key/identifier accessors.");
             return;
         }
         try
@@ -34,6 +37,7 @@ class Program
                 Console.WriteLine($"Database {dbname}");
                 var db = con[dbname];
                 var generatedInterface = db.GenerateInterface();
+                generatedInterface.Options.DisableKnownIdentifiers = args.Any(a => a == "--version=1" || a == "-v1");
                 foreach (var tabname in db.TableNames)
                 {
                     Console.WriteLine($"+ {tabname}");
