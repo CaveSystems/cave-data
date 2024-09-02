@@ -35,4 +35,14 @@
         <PackageReference Include="Cave.Extensions" Version="3.0.13" />
         <PackageReference Include="Cave.IO" Version="3.0.7" />
     </ItemGroup>
+    
+    <Choose>
+        <When Condition="$(TargetFramework.StartsWith('net2')) or $(TargetFramework.StartsWith('net3')) or $(TargetFramework.StartsWith('net4'))">
+            <ItemGroup>
+                <Reference Include="System.Web"/>
+            </ItemGroup>
+        </When>
+    </Choose>
+
+
 </Project>
