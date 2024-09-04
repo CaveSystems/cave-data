@@ -214,3 +214,106 @@ namespace Test.Cave
         public override int GetHashCode() => ID.GetHashCode();
     }
 }
+
+[Table("TestStructCleanMissingField")]
+public struct TestStructCleanMissingField
+{
+    public static TestStructCleanMissingField Create(int i)
+    {
+        var t = new TestStructCleanMissingField
+        {
+            Arr = BitConverterLE.Instance.GetBytes((long)i),
+            B = (byte)(i & 0xFF),
+            SB = (sbyte)(-i / 10),
+            US = (ushort)i,
+            C = (char)i,
+            F = (500 - i) * 0.5f,
+            D = (500 - i) * 0.5d,
+            Date = new DateTime(1 + Math.Abs(i), 12, 31, 23, 59, 48, i % 1000, DateTimeKind.Local),
+            Time = TimeSpan.FromSeconds(i),
+            S = (short)(i - 500),
+            UI = (uint)i,
+            Text = i.ToString(),
+            Dec = 0.005m * (i - 500),
+            Uri = new Uri("http://localhost/" + i),
+            ConStr = "http://localhost/" + i
+        };
+        return t;
+    }
+
+    [Field(Flags = FieldFlags.AutoIncrement | FieldFlags.ID)]
+    public long ID;
+
+    [Field]
+    public byte B;
+
+    [Field]
+    public sbyte SB;
+
+    [Field]
+    public char C;
+
+    [Field]
+    public short S;
+
+    [Field]
+    public ushort US;
+
+    [Field]
+    public uint UI;
+
+    [Field]
+    public byte[] Arr;
+
+    [Field]
+    public string Text;
+
+    [Field]
+    public TimeSpan Time;
+
+    [Field]
+    public DateTime Date;
+
+    [Field]
+    public double D;
+
+    [Field]
+    public float F;
+
+    [Field]
+    public decimal Dec;
+
+    [Field]
+    public Uri Uri;
+
+    [Field]
+    public ConnectionString ConStr;
+
+    public override bool Equals(object obj)
+    {
+        if (!(obj is TestStructCleanMissingField))
+        {
+            return false;
+        }
+
+        var other = (TestStructCleanMissingField)obj;
+        return
+            DefaultComparer.Equals(Arr, other.Arr) &&
+            Equals(B, other.B) &&
+            Equals(C, other.C) &&
+            Equals(ConStr, other.ConStr) &&
+            Equals(D, other.D) &&
+            Equals(Date, other.Date) &&
+            Equals(Dec, other.Dec) &&
+            Equals(F, other.F) &&
+            Equals(S, other.S) &&
+            Equals(SB, other.SB) &&
+            Equals(Text, other.Text) &&
+            Equals(Time, other.Time) &&
+            Equals(UI, other.UI) &&
+            Equals(Uri, other.Uri) &&
+            Equals(US, other.US);
+    }
+
+    public override int GetHashCode() => ID.GetHashCode();
+}

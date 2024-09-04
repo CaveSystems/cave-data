@@ -316,7 +316,14 @@ public static class ITableExtensions
     /// <summary>Caches the whole table into memory and provides a new ITable instance.</summary>
     /// <param name="table">The table.</param>
     /// <returns>Returns a new memory table.</returns>
-    public static MemoryTable ToMemory(this ITable table)
+    public static MemoryTable ToMemory(this ITable table) => ToMemory(table, 0, 0);
+
+    /// <summary>Caches the whole table into memory and provides a new ITable instance.</summary>
+    /// <param name="table">The table.</param>
+    /// <param name="flags">Flags for the new memory table</param>
+    /// <param name="options">Options for the new memory table</param>
+    /// <returns>Returns a new memory table.</returns>
+    public static MemoryTable ToMemory(this ITable table, TableFlags flags = 0, MemoryTableOptions options = 0)
     {
         if (table == null)
         {
@@ -324,7 +331,7 @@ public static class ITableExtensions
         }
 
         Trace.TraceInformation("Copy {0} rows to memory table", table.RowCount);
-        var result = MemoryTable.Create(table.Layout);
+        var result = MemoryTable.Create(table.Layout, flags, options);
         result.LoadTable(table);
         return result;
     }
@@ -333,7 +340,15 @@ public static class ITableExtensions
     /// <typeparam name="TStruct">Structure type.</typeparam>
     /// <param name="table">The table.</param>
     /// <returns>Returns a new memory table.</returns>
-    public static ITable<TStruct> ToMemory<TStruct>(this ITable<TStruct> table)
+    public static ITable<TStruct> ToMemory<TStruct>(this ITable<TStruct> table) where TStruct : struct => ToMemory(table, 0, 0);
+
+    /// <summary>Caches the whole table into memory and provides a new ITable{TStruct} instance.</summary>
+    /// <typeparam name="TStruct">Structure type.</typeparam>
+    /// <param name="table">The table.</param>
+    /// <param name="flags">Flags for the new memory table</param>
+    /// <param name="options">Options for the new memory table</param>
+    /// <returns>Returns a new memory table.</returns>
+    public static ITable<TStruct> ToMemory<TStruct>(this ITable<TStruct> table, TableFlags flags = 0, MemoryTableOptions options = 0)
         where TStruct : struct
     {
         if (table == null)
@@ -342,7 +357,7 @@ public static class ITableExtensions
         }
 
         Trace.TraceInformation("Copy {0} rows to memory table", table.RowCount);
-        var result = MemoryTable.Create(table.Layout);
+        var result = MemoryTable.Create(table.Layout, flags, options);
         result.LoadTable(table);
         return new Table<TStruct>(result);
     }
@@ -352,7 +367,16 @@ public static class ITableExtensions
     /// <typeparam name="TStruct">Row structure type.</typeparam>
     /// <param name="table">The table.</param>
     /// <returns>Returns a new memory table.</returns>
-    public static ITable<TKey, TStruct> ToMemory<TKey, TStruct>(this ITable<TKey, TStruct> table)
+    public static ITable<TKey, TStruct> ToMemory<TKey, TStruct>(this ITable<TKey, TStruct> table) where TKey : IComparable<TKey> where TStruct : struct => ToMemory(table, 0, 0);
+
+    /// <summary>Caches the whole table into memory and provides a new ITable{TStruct} instance.</summary>
+    /// <typeparam name="TKey">Key identifier type.</typeparam>
+    /// <typeparam name="TStruct">Row structure type.</typeparam>
+    /// <param name="table">The table.</param>
+    /// <param name="flags">Flags for the new memory table</param>
+    /// <param name="options">Options for the new memory table</param>
+    /// <returns>Returns a new memory table.</returns>
+    public static ITable<TKey, TStruct> ToMemory<TKey, TStruct>(this ITable<TKey, TStruct> table, TableFlags flags = 0, MemoryTableOptions options = 0)
         where TKey : IComparable<TKey>
         where TStruct : struct
     {
@@ -361,7 +385,7 @@ public static class ITableExtensions
             throw new ArgumentNullException(nameof(table));
         }
 
-        var result = MemoryTable.Create(table.Layout);
+        var result = MemoryTable.Create(table.Layout, flags, options);
         result.LoadTable(table);
         return new Table<TKey, TStruct>(result);
     }

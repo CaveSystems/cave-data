@@ -9,24 +9,15 @@ namespace Cave.Data
     /// <summary>Provides access to databaseName storage engines.</summary>
     public abstract class Storage : IStorage
     {
-        #region Static
-
-        /// <summary>Epoch DateTime in Ticks.</summary>
-        public const long EpochTicks = 621355968000000000;
-
-        /// <summary>Allow to load assemblies (unsafe) if desired ado connection type cannot be found in application domain.</summary>
-        public static bool AllowAssemblyLoad { get; set; }
-
-        /// <summary>Gets or sets the date time format for big int date time values.</summary>
-        public static string BigIntDateTimeFormat { get; set; } = "yyyyMMddHHmmssfff";
-
-        #endregion
+        #region Private Fields
 
         bool closed;
 
-        #region Constructors
+        #endregion Private Fields
 
-        /// <summary>Initializes a new instance of the <see cref="Storage" /> class.</summary>
+        #region Protected Constructors
+
+        /// <summary>Initializes a new instance of the <see cref="Storage"/> class.</summary>
         /// <param name="connectionString">ConnectionString of the storage.</param>
         /// <param name="flags">The connection flags.</param>
         protected Storage(ConnectionString connectionString, ConnectionFlags flags)
@@ -40,85 +31,74 @@ namespace Cave.Data
             }
         }
 
-        #endregion
+        #endregion Protected Constructors
 
-        #region Properties
+        #region Public Fields
+
+        /// <summary>Epoch DateTime in Ticks.</summary>
+        public const long EpochTicks = 621355968000000000;
+
+        #endregion Public Fields
+
+        #region Public Properties
+
+        /// <summary>Allow to load assemblies (unsafe) if desired ado connection type cannot be found in application domain.</summary>
+        public static bool AllowAssemblyLoad { get; set; }
+
+        /// <summary>Gets or sets the date time format for big int date time values.</summary>
+        public static string BigIntDateTimeFormat { get; set; } = "yyyyMMddHHmmssfff";
+
+        /// <inheritdoc/>
+        public bool AllowUnsafeConnections { get; }
+
+        /// <inheritdoc/>
+        public virtual bool Closed => closed;
+
+        /// <inheritdoc/>
+        public virtual ConnectionString ConnectionString { get; }
 
         /// <summary>Gets or sets the storage culture.</summary>
         public CultureInfo Culture { get; set; }
 
-        #endregion
-
-        #region IStorage Member
-
-        #region properties
-
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public abstract IList<string> DatabaseNames { get; }
 
-        /// <inheritdoc />
-        public virtual ConnectionString ConnectionString { get; }
-
-        /// <inheritdoc />
-        public virtual bool Closed => closed;
-
-        /// <inheritdoc />
-        public virtual float FloatPrecision => 0;
-
-        /// <inheritdoc />
-        public virtual double DoublePrecision => 0;
-
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public virtual TimeSpan DateTimePrecision => TimeSpan.FromMilliseconds(0);
 
-        /// <inheritdoc />
-        public virtual TimeSpan TimeSpanPrecision => new(0);
+        /// <inheritdoc/>
+        public virtual double DoublePrecision => 0;
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
+        public virtual float FloatPrecision => 0;
+
+        /// <inheritdoc/>
         public bool LogVerboseMessages { get; set; }
 
-        /// <inheritdoc />
-        public bool AllowUnsafeConnections { get; }
-
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public abstract bool SupportsNativeTransactions { get; }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
+        public virtual TimeSpan TimeSpanPrecision => new(0);
+
+        /// <inheritdoc/>
         public int TransactionRowCount { get; set; } = 5000;
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         string IStorage.BigIntDateTimeFormat => BigIntDateTimeFormat;
 
-        /// <inheritdoc />
+        #endregion Public Properties
+
+        #region Public Indexers
+
+        /// <inheritdoc/>
         public IDatabase this[string databaseName] => GetDatabase(databaseName);
 
-        #endregion
+        #endregion Public Indexers
 
-        #region functions
+        #region Public Methods
 
-        /// <inheritdoc />
-        public virtual IFieldProperties GetDatabaseFieldProperties(IFieldProperties field) => field;
-
-        /// <inheritdoc />
-        public virtual void Close() => closed = true;
-
-        /// <inheritdoc />
-        public virtual IDatabase GetDatabase(string databaseName, bool createIfNotExists)
-        {
-            if (HasDatabase(databaseName))
-            {
-                return GetDatabase(databaseName);
-            }
-
-            if (createIfNotExists)
-            {
-                return CreateDatabase(databaseName);
-            }
-
-            throw new ArgumentException($"The requested databaseName '{databaseName}' was not found!");
-        }
-
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public virtual void CheckLayout(RowLayout databaseLayout, RowLayout localLayout, TableFlags flags)
         {
             if (databaseLayout == null)
@@ -143,10 +123,6 @@ namespace Cave.Data
                 throw new InvalidDataException($"Field.Count of table {localLayout.Name} != {databaseLayout.Name} differs (found {localLayout.FieldCount} databaseLayout {databaseLayout.FieldCount})!");
             }
 
-            if (databaseLayout.IsTyped)
-            {
-                throw new InvalidOperationException("Database Layout cannot be typed!");
-            }
             if (!Equals(databaseLayout, localLayout))
             {
                 var layout = localLayout.GetMatching(databaseLayout, flags);
@@ -157,19 +133,38 @@ namespace Cave.Data
             }
         }
 
-        /// <inheritdoc />
-        public abstract bool HasDatabase(string databaseName);
+        /// <inheritdoc/>
+        public virtual void Close() => closed = true;
 
-        /// <inheritdoc />
-        public abstract IDatabase GetDatabase(string databaseName);
-
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public abstract IDatabase CreateDatabase(string databaseName);
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public abstract void DeleteDatabase(string database);
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
+        public virtual IDatabase GetDatabase(string databaseName, bool createIfNotExists)
+        {
+            if (HasDatabase(databaseName))
+            {
+                return GetDatabase(databaseName);
+            }
+
+            if (createIfNotExists)
+            {
+                return CreateDatabase(databaseName);
+            }
+
+            throw new ArgumentException($"The requested databaseName '{databaseName}' was not found!");
+        }
+
+        /// <inheritdoc/>
+        public abstract IDatabase GetDatabase(string databaseName);
+
+        /// <inheritdoc/>
+        public virtual IFieldProperties GetDatabaseFieldProperties(IFieldProperties field) => field;
+
+        /// <inheritdoc/>
         public virtual decimal GetDecimalPrecision(float count)
         {
             if (count == 0)
@@ -188,11 +183,12 @@ namespace Cave.Data
             return result;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
+        public abstract bool HasDatabase(string databaseName);
+
+        /// <inheritdoc/>
         public override string ToString() => ConnectionString.ToString(ConnectionStringPart.NoCredentials);
 
-        #endregion
-
-        #endregion
+        #endregion Public Methods
     }
 }
