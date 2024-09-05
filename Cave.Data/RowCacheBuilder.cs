@@ -89,7 +89,7 @@ namespace Cave.Data
         }
 
         /// <inheritdoc/>
-        public IList<TValue> Distinct<TValue>(string fieldName, Search search = null) where TValue : struct, IComparable => Table.Distinct<TValue>(fieldName, search);
+        public IList<TValue> Distinct<TValue>(string fieldName, Search search = null) where TValue : IComparable => Table.Distinct<TValue>(fieldName, search);
 
         /// <inheritdoc/>
         public bool Exist(Search search) => Table.Exist(search);

@@ -11,8 +11,8 @@ using Cave.Data.Sql;
 namespace Cave.Data.Mysql
 {
     /// <summary>
-    /// Provides a mysql storage implementation. Attention: <see cref="float" /> variables stored at the mysqldatabase loose their last
-    /// precision digit (a value of 1 may differ by &lt;= 0.000001f).
+    /// Provides a mysql storage implementation. Attention: <see cref="float"/> variables stored at the mysqldatabase loose their last precision digit (a value
+    /// of 1 may differ by &lt;= 0.000001f).
     /// </summary>
     public sealed class MySqlStorage : SqlStorage
     {
@@ -20,7 +20,7 @@ namespace Cave.Data.Mysql
 
         #region Constructors
 
-        /// <summary>Initializes a new instance of the <see cref="MySqlStorage" /> class.</summary>
+        /// <summary>Initializes a new instance of the <see cref="MySqlStorage"/> class.</summary>
         /// <param name="connectionString">the connection details.</param>
         /// <param name="flags">The connection flags.</param>
         public MySqlStorage(ConnectionString connectionString, ConnectionFlags flags = default)
@@ -32,15 +32,7 @@ namespace Cave.Data.Mysql
                 throw new InvalidDataException("Could not read mysql version!");
             }
 
-            if (VersionString.IndexOf('-') > -1)
-            {
-                Version = new Version(VersionString.Substring(0, VersionString.IndexOf('-')));
-            }
-            else
-            {
-                Version = new Version(VersionString);
-            }
-
+            Version = new Version(VersionString.BeforeFirst('-'));
             if (Version < new Version(5, 5, 3))
             {
                 SupportsFullUTF8 = false;
@@ -56,7 +48,7 @@ namespace Cave.Data.Mysql
             ClearCachedConnections();
         }
 
-        #endregion
+        #endregion Constructors
 
         #region Properties
 
@@ -78,11 +70,11 @@ namespace Cave.Data.Mysql
         /// <summary>Gets the mysql storage version.</summary>
         public string VersionString { get; }
 
-        #endregion
+        #endregion Properties
 
         #region Overrides
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override IList<string> DatabaseNames
         {
             get
@@ -98,42 +90,42 @@ namespace Cave.Data.Mysql
             }
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override TimeSpan DateTimePrecision => TimeSpan.FromSeconds(1);
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override float FloatPrecision => 0.00001f;
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override TimeSpan TimeSpanPrecision => TimeSpan.FromMilliseconds(1);
 
-        #endregion
+        #endregion Overrides
 
         #region Overrides
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected internal override bool DBConnectionCanChangeDataBase => true;
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override string ParameterPrefix => "?";
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override bool SupportsAllFieldsGroupBy => true;
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override bool SupportsNamedParameters => true;
 
-        #endregion
+        #endregion Overrides
 
         #region functions
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override string EscapeFieldName(IFieldProperties field) => "`" + field.NameAtDatabase + "`";
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override string FQTN(string database, string table) => "`" + database + "`.`" + table + "`";
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override object GetLocalValue(IFieldProperties field, IDataReader reader, object databaseValue)
         {
             if ((field.DataType == DataType.DateTime) && databaseValue is not DBNull && databaseValue is not DateTime)
@@ -188,7 +180,7 @@ namespace Cave.Data.Mysql
             return base.GetDatabaseFieldProperties(field);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override object GetDatabaseValue(IFieldProperties field, object localValue)
         {
             if (field == null)
@@ -242,7 +234,7 @@ namespace Cave.Data.Mysql
             return base.GetDatabaseValue(field, localValue);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override IDbConnection CreateNewConnection(string databaseName)
         {
             var connection = base.CreateNewConnection(databaseName);
@@ -254,15 +246,15 @@ namespace Cave.Data.Mysql
                     LogQuery(command);
                 }
 
-                // return value is not globally defined. some implementations use it correctly, some dont use it, some return positive or negative result enum values
-                // so we ignore this: int affectedRows =
+                // return value is not globally defined. some implementations use it correctly, some dont use it, some return positive or negative result enum
+                // values so we ignore this: int affectedRows =
                 command.ExecuteNonQuery();
             }
 
             return connection;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override bool HasDatabase(string databaseName)
         {
             if (databaseName.HasInvalidChars(ASCII.Strings.SafeName))
@@ -276,7 +268,7 @@ namespace Cave.Data.Mysql
             return Convert.ToInt32(value, Culture) > 0;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override IDatabase GetDatabase(string databaseName)
         {
             if (!HasDatabase(databaseName))
@@ -287,7 +279,7 @@ namespace Cave.Data.Mysql
             return new MySqlDatabase(this, databaseName);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override IDatabase CreateDatabase(string databaseName)
         {
             if (databaseName.HasInvalidChars(ASCII.Strings.SafeName))
@@ -300,7 +292,7 @@ namespace Cave.Data.Mysql
             return GetDatabase(databaseName);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override void DeleteDatabase(string database)
         {
             if (database.HasInvalidChars(ASCII.Strings.SafeName))
@@ -311,7 +303,7 @@ namespace Cave.Data.Mysql
             Execute(database: "information_schema", table: "SCHEMATA", cmd: $"DROP DATABASE {database};");
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override decimal GetDecimalPrecision(float count)
         {
             if (count == 0)
@@ -322,7 +314,7 @@ namespace Cave.Data.Mysql
             return base.GetDecimalPrecision(count);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override DataType GetLocalDataType(Type fieldType, uint fieldSize)
         {
             if (fieldType == null)
@@ -345,7 +337,7 @@ namespace Cave.Data.Mysql
             return dataType;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override IDbConnection GetDbConnectionType()
         {
             var flags = AppDom.LoadFlags.NoException;
@@ -368,7 +360,7 @@ namespace Cave.Data.Mysql
                 : (IDbConnection)Activator.CreateInstance(type);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override string GetConnectionString(string database)
         {
             var requireSSL = !AllowUnsafeConnections;
@@ -393,6 +385,6 @@ namespace Cave.Data.Mysql
                 (requireSSL ? "SslMode=Required;" : "SslMode=Preferred;");
         }
 
-        #endregion
+        #endregion functions
     }
 }

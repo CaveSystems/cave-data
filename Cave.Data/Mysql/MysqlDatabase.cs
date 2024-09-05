@@ -309,7 +309,9 @@ namespace Cave.Data.Mysql
                         throw new ArgumentException("Description of field '{0}' contains invalid chars!", fieldProperties.Name);
                     }
 
-                    queryText.Append(" COMMENT '" + fieldProperties.Description.Substring(0, 60) + "'");
+                    var description = fieldProperties.Description;
+                    if (description.Length > 60) description = description[..58] + "..";
+                    queryText.Append($" COMMENT '{description}'");
                 }
             }
 

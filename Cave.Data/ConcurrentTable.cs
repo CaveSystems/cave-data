@@ -202,7 +202,7 @@ namespace Cave.Data
 
         /// <inheritdoc/>
         public IList<TValue> Distinct<TValue>(string fieldName, Search search = null)
-            where TValue : struct, IComparable =>
+            where TValue : IComparable =>
             ReadLockedFunc(() => BaseTable.Distinct<TValue>(fieldName, search));
 
         /// <inheritdoc/>

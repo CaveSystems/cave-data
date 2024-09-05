@@ -71,8 +71,7 @@ namespace Cave.Data
         /// <param name="fieldName">The fieldName.</param>
         /// <param name="search">The search.</param>
         /// <returns>A new <see cref="List{TValue}"/>.</returns>
-        IList<TValue> Distinct<TValue>(string fieldName, Search search = null)
-            where TValue : struct, IComparable;
+        IList<TValue> Distinct<TValue>(string fieldName, Search search = null) where TValue : IComparable;
 
         /// <summary>Searches the table using the specified search.</summary>
         /// <param name="search">The search to perform.</param>

@@ -9,9 +9,17 @@ namespace Cave.Data.Postgres
     /// <summary>Provides a postgre sql database implementation.</summary>
     public sealed class PgSqlDatabase : SqlDatabase
     {
-        #region Constructors
+        #region Protected Methods
 
-        /// <summary>Initializes a new instance of the <see cref="PgSqlDatabase" /> class.</summary>
+        /// <inheritdoc/>
+        protected override string[] GetTableNames() =>
+            SqlStorage.Query(database: Name, table: "pg_tables", cmd: "SELECT tablename FROM pg_tables").Select(r => r[0].ToString()).ToArray();
+
+        #endregion Protected Methods
+
+        #region Public Constructors
+
+        /// <summary>Initializes a new instance of the <see cref="PgSqlDatabase"/> class.</summary>
         /// <param name="storage">the postgre sql storage engine.</param>
         /// <param name="name">the name of the database.</param>
         public PgSqlDatabase(PgSqlStorage storage, string name)
@@ -19,14 +27,41 @@ namespace Cave.Data.Postgres
         {
         }
 
-        #endregion
+        #endregion Public Constructors
 
-        #region Overrides
+        #region Public Properties
+
+        /// <inheritdoc/>
+        public override bool IsSecure
+        {
+            get
+            {
+                var error = false;
+                var connection = SqlStorage.GetConnection(Name);
+                try
+                {
+                    return connection.ConnectionString.ToUpperInvariant().Contains("SSLMODE=REQUIRE");
+                }
+                catch
+                {
+                    error = true;
+                    throw;
+                }
+                finally
+                {
+                    SqlStorage.ReturnConnection(ref connection, error);
+                }
+            }
+        }
+
+        #endregion Public Properties
+
+        #region Public Methods
 
         /// <summary>Adds a new tableName with the specified name.</summary>
         /// <param name="layout">Layout of the tableName.</param>
         /// <param name="flags">The flags for tableName creation.</param>
-        /// <returns>Returns an <see cref="ITable" /> instance for the specified tableName.</returns>
+        /// <returns>Returns an <see cref="ITable"/> instance for the specified tableName.</returns>
         public override ITable CreateTable(RowLayout layout, TableFlags flags = default)
         {
             if (layout == null)
@@ -69,6 +104,7 @@ namespace Cave.Data.Postgres
 
                         queryText.Append("BYTEA");
                         break;
+
                     case DataType.Bool:
                         if ((fieldProperties.Flags & FieldFlags.AutoIncrement) != 0)
                         {
@@ -77,6 +113,7 @@ namespace Cave.Data.Postgres
 
                         queryText.Append("BOOL");
                         break;
+
                     case DataType.DateTime:
                         if ((fieldProperties.Flags & FieldFlags.AutoIncrement) != 0)
                         {
@@ -85,6 +122,7 @@ namespace Cave.Data.Postgres
 
                         queryText.Append("TIMESTAMP WITH TIME ZONE");
                         break;
+
                     case DataType.TimeSpan:
                         if ((fieldProperties.Flags & FieldFlags.AutoIncrement) != 0)
                         {
@@ -93,6 +131,7 @@ namespace Cave.Data.Postgres
 
                         queryText.Append("FLOAT8");
                         break;
+
                     case DataType.Int8:
                         if ((fieldProperties.Flags & FieldFlags.AutoIncrement) != 0)
                         {
@@ -101,6 +140,7 @@ namespace Cave.Data.Postgres
 
                         queryText.Append("SMALLINT");
                         break;
+
                     case DataType.Int16:
                         if ((fieldProperties.Flags & FieldFlags.AutoIncrement) != 0)
                         {
@@ -112,6 +152,7 @@ namespace Cave.Data.Postgres
                         }
 
                         break;
+
                     case DataType.Int32:
                         if ((fieldProperties.Flags & FieldFlags.AutoIncrement) != 0)
                         {
@@ -123,6 +164,7 @@ namespace Cave.Data.Postgres
                         }
 
                         break;
+
                     case DataType.Int64:
                         if ((fieldProperties.Flags & FieldFlags.AutoIncrement) != 0)
                         {
@@ -134,6 +176,7 @@ namespace Cave.Data.Postgres
                         }
 
                         break;
+
                     case DataType.Single:
                         if ((fieldProperties.Flags & FieldFlags.AutoIncrement) != 0)
                         {
@@ -142,6 +185,7 @@ namespace Cave.Data.Postgres
 
                         queryText.Append("FLOAT4");
                         break;
+
                     case DataType.Double:
                         if ((fieldProperties.Flags & FieldFlags.AutoIncrement) != 0)
                         {
@@ -150,6 +194,7 @@ namespace Cave.Data.Postgres
 
                         queryText.Append("FLOAT8");
                         break;
+
                     case DataType.Enum:
                         if ((fieldProperties.Flags & FieldFlags.AutoIncrement) != 0)
                         {
@@ -158,6 +203,7 @@ namespace Cave.Data.Postgres
 
                         queryText.Append("BIGINT");
                         break;
+
                     case DataType.UInt8:
                         if ((fieldProperties.Flags & FieldFlags.AutoIncrement) != 0)
                         {
@@ -166,6 +212,7 @@ namespace Cave.Data.Postgres
 
                         queryText.Append($"SMALLINT CHECK ({fieldName} >= 0 AND {fieldName} <= {byte.MaxValue})");
                         break;
+
                     case DataType.UInt16:
                         if ((fieldProperties.Flags & FieldFlags.AutoIncrement) != 0)
                         {
@@ -174,6 +221,7 @@ namespace Cave.Data.Postgres
 
                         queryText.Append($"INT CHECK ({fieldName} >= 0 AND {fieldName} <= {ushort.MaxValue})");
                         break;
+
                     case DataType.UInt32:
                         if ((fieldProperties.Flags & FieldFlags.AutoIncrement) != 0)
                         {
@@ -182,6 +230,7 @@ namespace Cave.Data.Postgres
 
                         queryText.Append($"BIGINT CHECK ({fieldName} >= 0 AND {fieldName} <= {uint.MaxValue})");
                         break;
+
                     case DataType.UInt64:
                         if ((fieldProperties.Flags & FieldFlags.AutoIncrement) != 0)
                         {
@@ -190,6 +239,7 @@ namespace Cave.Data.Postgres
 
                         queryText.Append($"NUMERIC(20,0) CHECK ({fieldName} >= 0 AND {fieldName} <= {ulong.MaxValue})");
                         break;
+
                     case DataType.User:
                     case DataType.String:
                         if ((fieldProperties.Flags & FieldFlags.AutoIncrement) != 0)
@@ -207,6 +257,7 @@ namespace Cave.Data.Postgres
                         }
 
                         break;
+
                     case DataType.Decimal:
                         if ((fieldProperties.Flags & FieldFlags.AutoIncrement) != 0)
                         {
@@ -231,6 +282,7 @@ namespace Cave.Data.Postgres
                         }
 
                         break;
+
                     default: throw new NotImplementedException($"Unknown DataType {fieldProperties.DataType}!");
                 }
 
@@ -261,6 +313,7 @@ namespace Cave.Data.Postgres
                         case DataType.Single:
                         case DataType.TimeSpan:
                             break;
+
                         case DataType.String:
                             if (fieldProperties.MaximumLength <= 0)
                             {
@@ -269,6 +322,7 @@ namespace Cave.Data.Postgres
                             }
 
                             break;
+
                         default: throw new NotSupportedException($"Uniqueness for tableName {layout.Name} field {fieldProperties.Name} is not supported!");
                     }
                 }
@@ -280,7 +334,9 @@ namespace Cave.Data.Postgres
                         throw new ArgumentException("Description of field '{0}' contains invalid chars!", fieldProperties.Name);
                     }
 
-                    queryText.Append(" COMMENT '" + fieldProperties.Description.Substring(0, 60) + "'");
+                    var description = fieldProperties.Description;
+                    if (description.Length > 60) description = description[..58] + "..";
+                    queryText.Append($" COMMENT '{description}'");
                 }
             }
 
@@ -305,36 +361,9 @@ namespace Cave.Data.Postgres
             return GetTable(layout);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override ITable GetTable(string tableName, TableFlags flags = default) => PgSqlTable.Connect(this, flags, tableName);
 
-        /// <inheritdoc />
-        protected override string[] GetTableNames() =>
-            SqlStorage.Query(database: Name, table: "pg_tables", cmd: "SELECT tablename FROM pg_tables").Select(r => r[0].ToString()).ToArray();
-
-        /// <inheritdoc />
-        public override bool IsSecure
-        {
-            get
-            {
-                var error = false;
-                var connection = SqlStorage.GetConnection(Name);
-                try
-                {
-                    return connection.ConnectionString.ToUpperInvariant().Contains("SSLMODE=REQUIRE");
-                }
-                catch
-                {
-                    error = true;
-                    throw;
-                }
-                finally
-                {
-                    SqlStorage.ReturnConnection(ref connection, error);
-                }
-            }
-        }
-
-        #endregion
+        #endregion Public Methods
     }
 }

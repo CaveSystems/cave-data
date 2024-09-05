@@ -133,7 +133,7 @@ namespace Cave.Data
 
         /// <inheritdoc/>
         public virtual IList<TValue> Distinct<TValue>(string fieldName, Search search = null)
-            where TValue : struct, IComparable
+            where TValue : IComparable
         {
             var index = Layout.GetFieldIndex(fieldName, true);
             var rows = GetRows(search);

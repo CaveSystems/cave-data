@@ -1,14 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
-using Cave.Collections.Generic;
 
 namespace Cave.Data;
 
 /// <summary>Code generator for IDatabase instances.</summary>
 public class DatabaseInterfaceGenerator
 {
-    record TableInfo(RowLayout Layout, string TableName, string ClassName, string GetterName, InterfaceGeneratorOptions Options) : BaseRecord;
+    record TableInfo(RowLayout Layout, string TableNameAtDatabase, string ClassName, string GetterName, InterfaceGeneratorOptions Options) : BaseRecord;
 
     #region Private Fields
 
@@ -16,7 +17,7 @@ public class DatabaseInterfaceGenerator
 
     readonly string header;
 
-    readonly Set<TableInfo> tables = new();
+    readonly Dictionary<string, TableInfo> tables = new();
 
     #endregion Private Fields
 
@@ -120,56 +121,50 @@ public class DatabaseInterfaceGenerator
     /// <param name="table">The table to add.</param>
     /// <param name="className">Name of the (table) class to use (optional).</param>
     /// <param name="getterName">Name of the getter in the resulting class (optional).</param>
+    [Obsolete("Use GenerateTableCodeResult Add(RowLayout tableLayout, GenerateTableCodeResult tableCodeResult)")]
     public void Add(ITable table, string className = null, string getterName = null)
     {
-        if (table == null)
-        {
-            throw new ArgumentNullException(nameof(table));
-        }
-
-        if (Database != table.Database)
-        {
-            throw new ArgumentOutOfRangeException(nameof(table), "Database has to match!");
-        }
-
-        Add(table.Layout, table.Name, className, getterName);
+        Add(table.Layout, table.Layout.Name, className, getterName);
     }
 
     /// <summary>Adds a table to the database interface code. This does not generate the table class!</summary>
     /// <param name="tableLayout">Layout of the table</param>
     /// <param name="tableCodeResult">The table to add.</param>
     /// <param name="getterName">Name of the getter in the resulting class (optional).</param>
-    public void Add(RowLayout tableLayout, GenerateTableCodeResult tableCodeResult, string getterName = null) =>
-        Add(tableLayout, className: tableCodeResult.ClassName, tableName: tableCodeResult.TableName, getterName: getterName);
+    public GenerateTableCodeResult Add(RowLayout tableLayout, GenerateTableCodeResult tableCodeResult, string getterName = null)
+    {
+        tableCodeResult.TableName ??= tableLayout.Name;
+        tableCodeResult.DatabaseName ??= GetName(Database.Name);
+        tableCodeResult.GetterName = getterName ?? (tableCodeResult.TableName is null ? GetName(tableLayout.Name) : GetName(tableCodeResult.TableName));
+        tableCodeResult.ClassName ??= tableCodeResult.DatabaseName + tableCodeResult.TableName + "Row";
+        tables.Add(tableLayout.Name, new TableInfo(tableLayout, tableCodeResult.TableName, tableCodeResult.ClassName, tableCodeResult.GetterName, Options));
+        return tableCodeResult;
+    }
+
 
     /// <summary>Adds a table to the code.</summary>
     /// <param name="tableLayout">Layout of the table</param>
     /// <param name="tableName">Name of the table at the database.</param>
-    /// <param name="className">Name of the (table) class to use.</param>
-    /// <param name="getterName">Name of the getter in the resulting class (optional).</param>
+    /// <param name="className">Name of the (table) class to use. (Default: DatabaseTableRow)</param>
+    /// <param name="getterName">Name of the getter in the resulting class (Default: Table).</param>
+    [Obsolete("Use GenerateTableCodeResult Add(RowLayout tableLayout, GenerateTableCodeResult tableCodeResult)")]
     public void Add(RowLayout tableLayout, string tableName = null, string className = null, string getterName = null)
-    {
-        tableName = tableName is null ? tableLayout.Name : GetName(tableName);
-        className ??= GetName(Database.Name) + GetName(tableName) + "Row";
-        getterName ??= GetName(tableName);
-        tables.Add(new TableInfo(tableLayout, tableName, className, getterName, Options));
-    }
+        => Add(tableLayout, new GenerateTableCodeResult() { ClassName = className, TableName = tableName }, getterName);
 
     /// <summary>Generates the interface code.</summary>
     /// <returns>Returns c# code.</returns>
     public string Generate()
     {
-
         var result = new StringBuilder();
         result.Append(header);
-        foreach (var table in tables)
+        foreach (var table in tables.Values.OrderBy(t => t.ClassName))
         {
             result.AppendLine();
-            var strongTypedIdentifier = table.Layout.SingleIdentifier == null && !Options.DisableKnownIdentifiers;
+            var strongTypedIdentifier = table.Layout.SingleIdentifier != null && !Options.DisableKnownIdentifiers;
             var typeString = strongTypedIdentifier ? $"{table.Layout.SingleIdentifier.DotNetTypeName}, {table.ClassName}" : table.ClassName;
             var genericString = strongTypedIdentifier ? $"TKey, TStruct" : "TStruct";
-            result.AppendLine($"\t\t/// <summary>Gets a new <see cref=\"ITable{{{genericString}}}\"/> ({typeString}) instance for accessing the <c>{table.TableName}</c> table.</summary>");
-            result.AppendLine($"\t\tpublic static ITable<{typeString}> {table.GetterName} => new Table<{typeString}>(GetTable(\"{table.TableName}\"));");
+            result.AppendLine($"\t\t/// <summary>Gets a new <see cref=\"ITable{{{genericString}}}\"/> ({typeString}) instance for accessing the <c>{table.TableNameAtDatabase}</c> table.</summary>");
+            result.AppendLine($"\t\tpublic static ITable<{typeString}> {table.GetterName} => new Table<{typeString}>(GetTable(\"{table.TableNameAtDatabase}\"));");
         }
 
         result.Append(footer);
@@ -201,7 +196,7 @@ public class DatabaseInterfaceGenerator
             NameSpace = NameSpace,
             NamingStrategy = NamingStrategy,
         }.GenerateStructFile(structFile);
-        Add(table.Layout, result, getterName);
+        result = Add(table.Layout, result, getterName);
         return result;
     }
 

@@ -18,7 +18,7 @@ using Cave.IO;
 namespace dbstructs.test
 {
     /// <summary>Table structure for sample.</summary>
-    [GeneratedCode("Cave.Data.TableInterfaceGenerator","1.0.0.0")]
+    [GeneratedCode("Cave.Data.TableInterfaceGenerator","3.99.0.0")]
     [Table("sample")]
     public partial struct DefaultSampleRow : IEquatable<DefaultSampleRow>
     {
@@ -54,18 +54,18 @@ namespace dbstructs.test
         [Field(Length = 4)]
         public bool Enabled;
 
-        /// <summary>Guid UTF_8 Guid</summary>
+        /// <summary>Guid UTF8 Guid</summary>
         [Field(Length = 0)]
-        [StringFormat(StringEncoding.UTF_8)]
+        [StringFormat(StringEncoding.UTF8)]
         public Guid Guid;
 
         /// <summary>sbyte SByte</summary>
         [Field(Name = "SByte", Length = 0)]
         public sbyte Sbyte;
 
-        /// <summary>UTF8 UTF_8 Text (30)</summary>
+        /// <summary>UTF8 UTF8 Text (30)</summary>
         [Field(Length = 30)]
-        [StringFormat(StringEncoding.UTF_8)]
+        [StringFormat(StringEncoding.UTF8)]
         public UTF8 Text;
 
         /// <summary>DateTime Native Timestamp</summary>

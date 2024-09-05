@@ -301,7 +301,7 @@ namespace Cave.Data.Microsoft
                         throw new ArgumentException("Description of field '{0}' contains invalid chars!", fieldProperties.Name);
                     }
 
-                    queryText.Append(" COMMENT '" + fieldProperties.Description.Substring(0, 60).Replace('\'', '`') + "'");
+                    queryText.Append(" COMMENT '" + fieldProperties.Description[..60].Replace('\'', '`') + "'");
                 }
             }
 
