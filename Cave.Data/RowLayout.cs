@@ -40,8 +40,7 @@ namespace Cave.Data
             writer.Write7BitEncoded32((int)field.Flags);
             writer.WritePrefixed(field.Name);
             writer.WritePrefixed(field.NameAtDatabase);
-            var typeName =
-                field.ValueType.AssemblyQualifiedName.Substring(0, field.ValueType.AssemblyQualifiedName.IndexOf(','));
+            var typeName = field.ValueType.AssemblyQualifiedName.BeforeFirst(',');
             writer.WritePrefixed(typeName);
             if (field.DataType == DataType.DateTime)
             {

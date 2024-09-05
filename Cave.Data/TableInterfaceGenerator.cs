@@ -206,7 +206,14 @@ public class TableInterfaceGenerator
                 code.AppendLine($"\t\t[StringFormat(StringEncoding.{field.StringEncoding})]");
             }
 
-            code.AppendLine($"\t\tpublic {field.DotNetTypeName} {sharpName};");
+            if (field.IsNullable)
+            {
+                code.AppendLine($"\t\tpublic {field.DotNetTypeName}? {sharpName};");
+            }
+            else
+            {
+                code.AppendLine($"\t\tpublic {field.DotNetTypeName} {sharpName};");
+            }
         }
 
         #endregion

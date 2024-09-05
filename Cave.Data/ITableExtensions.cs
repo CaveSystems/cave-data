@@ -223,14 +223,15 @@ public static class ITableExtensions
     }
 
     /// <summary>Gets a row using the id field</summary>
-    /// <typeparam name="TIdentifier"></typeparam>
+    /// <typeparam name="TKey">Identifier type</typeparam>
+    /// <typeparam name="TStruct">Structure type.</typeparam>
     /// <param name="table">The table.</param>
     /// <param name="id">The id</param>
     /// <returns>Returns the row found</returns>
-    /// <typeparam name="TStruct"></typeparam>
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="ArgumentException"></exception>
-    public static TStruct GetStruct<TStruct, TIdentifier>(this ITable<TStruct> table, TIdentifier id)
+    public static TStruct GetStruct<TKey, TStruct>(this ITable<TStruct> table, TKey id)
+        where TKey : IComparable<TKey>
         where TStruct : struct
     {
         if (table == null)
@@ -250,6 +251,25 @@ public static class ITableExtensions
     /// <param name="value">The value to match.</param>
     /// <returns>The rows found.</returns>
     public static IList<TStruct> GetStructs<TStruct>(this ITable<TStruct> table, string field, object value)
+        where TStruct : struct
+    {
+        if (table == null)
+        {
+            throw new ArgumentNullException(nameof(table));
+        }
+
+        return table.GetStructs(Search.FieldEquals(field, value));
+    }
+
+    /// <summary>Searches the table for rows with given field value combinations.</summary>
+    /// <typeparam name="TKey">Identifier type</typeparam>
+    /// <typeparam name="TStruct">Structure type.</typeparam>
+    /// <param name="table">The table.</param>
+    /// <param name="field">The fieldname to match.</param>
+    /// <param name="value">The value to match.</param>
+    /// <returns>The rows found.</returns>
+    public static IList<TStruct> GetStructs<TKey, TStruct>(this ITable<TKey, TStruct> table, string field, object value)
+        where TKey : IComparable<TKey>
         where TStruct : struct
     {
         if (table == null)

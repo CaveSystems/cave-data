@@ -17,13 +17,13 @@ namespace Cave
         /// <summary>Gets the alternative names for this field.</summary>
         IList<string> AlternativeNames { get; }
 
-        /// <summary>Gets the <see cref="DataType" /> of the field.</summary>
+        /// <summary>Gets the <see cref="DataType"/> of the field.</summary>
         DataType DataType { get; }
 
         /// <summary>Gets the date time kind used at the database.</summary>
         DateTimeKind DateTimeKind { get; }
 
-        /// <summary>Gets the date time type used at the database (has to match the <see cref="TypeAtDatabase" />).</summary>
+        /// <summary>Gets the date time type used at the database (has to match the <see cref="TypeAtDatabase"/>).</summary>
         DateTimeType DateTimeType { get; }
 
         /// <summary>Gets the default value.</summary>
@@ -41,7 +41,7 @@ namespace Cave
         /// <summary>Gets the fieldinfo used to create this instance (if any).</summary>
         FieldInfo FieldInfo { get; }
 
-        /// <summary>Gets the <see cref="FieldFlags" /> of the field.</summary>
+        /// <summary>Gets the <see cref="FieldFlags"/> of the field.</summary>
         FieldFlags Flags { get; }
 
         /// <summary>Gets the field index.</summary>
@@ -68,7 +68,7 @@ namespace Cave
         /// <summary>Gets the dotnet type of the value.</summary>
         Type ValueType { get; }
 
-        #endregion
+        #endregion Properties
 
         #region Members
 
@@ -87,23 +87,20 @@ namespace Cave
         /// <returns>Returns true if the other instance equals this one, false otherwise.</returns>
         bool Equals(IFieldProperties other, StringComparison fieldNameComparison);
 
-        /// <summary>
-        /// Retrieves a string for the specified value. The string may be parsed back to a value using
-        /// <see cref="ParseValue(string, string, IFormatProvider)" />.
-        /// </summary>
+        /// <summary>Retrieves a string for the specified value. The string may be parsed back to a value using <see cref="ParseValue(string, string, IFormatProvider)"/>.</summary>
         /// <param name="value">The value.</param>
         /// <param name="stringMarker">The string marker.</param>
-        /// <param name="provider">The format provider (optional, defaults to <see cref="CultureInfo.InvariantCulture" />).</param>
+        /// <param name="provider">The format provider (optional, defaults to <see cref="CultureInfo.InvariantCulture"/>).</param>
         /// <returns>A string containing the value.</returns>
         string GetString(object value, string stringMarker = null, IFormatProvider provider = null);
 
-        /// <summary>Parses a string and obtains the object by using the <see cref="ValueType" />s static Parse(string) method.</summary>
+        /// <summary>Parses a string and obtains the object by using the <see cref="ValueType"/> s static Parse(string) method.</summary>
         /// <param name="text">The string to parse.</param>
         /// <param name="stringMarker">The string marker.</param>
-        /// <param name="provider">The format provider (optional, defaults to <see cref="CultureInfo.InvariantCulture" />).</param>
+        /// <param name="provider">The format provider (optional, defaults to <see cref="CultureInfo.InvariantCulture"/>).</param>
         /// <returns>The native value.</returns>
         object ParseValue(string text, string stringMarker = null, IFormatProvider provider = null);
 
-        #endregion
+        #endregion Members
     }
 }

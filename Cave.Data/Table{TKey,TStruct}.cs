@@ -41,14 +41,9 @@ public class Table<TKey, TStruct> : AbstractTable<TKey, TStruct>
             tableLayout = structLayout;
         }
 
+        //test key creation
         var keyField = tableLayout.Identifier.Single();
-        var dbValue = (IConvertible)Activator.CreateInstance(keyField.ValueType);
-        var converted = (IConvertible)dbValue.ToType(typeof(TKey), CultureInfo.InvariantCulture);
-        var test = (IConvertible)converted.ToType(keyField.ValueType, CultureInfo.InvariantCulture);
-        if (!Equals(test, dbValue))
-        {
-            throw new ArgumentException($"Type (local) {nameof(TKey)} can not be converted from and to (database) {keyField.ValueType}!");
-        }
+        if (Activator.CreateInstance(keyField.ValueType) is not TKey) throw new Exception($"Could not create TKey {keyField.ValueType}!");
 
         KeyField = keyField;
         table.UseLayout(tableLayout);

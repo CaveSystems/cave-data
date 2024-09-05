@@ -90,7 +90,7 @@ namespace Cave
         public int Index { get; set; }
 
         /// <inheritdoc/>
-        public bool IsNullable { get; set; }
+        public bool IsNullable => Flags.HasFlag(FieldFlags.Nullable);
 
         /// <inheritdoc/>
         public float MaximumLength { get; set; }
@@ -567,15 +567,16 @@ namespace Cave
             Index = index;
             Name = fieldInfo.Name;
             ValueType = fieldInfo.FieldType;
+            DataType = RowLayout.DataTypeFromType(ValueType);
+            Flags = FieldFlags.None;
+
             var realType = Nullable.GetUnderlyingType(ValueType);
             if (realType != null)
             {
-                IsNullable = true;
+                Flags |= FieldFlags.Nullable;
                 ValueType = realType;
             }
 
-            DataType = RowLayout.DataTypeFromType(ValueType);
-            Flags = FieldFlags.None;
             MaximumLength = 0;
             DisplayFormat = null;
             Description = null;
@@ -602,7 +603,7 @@ namespace Cave
                         NameAtDatabase = fieldAttribute.Name;
                     }
 
-                    Flags = fieldAttribute.Flags;
+                    Flags |= fieldAttribute.Flags;
                     DisplayFormat = fieldAttribute.DisplayFormat;
                     AlternativeNames = fieldAttribute.AlternativeNames?.Split(";, \t".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
                     continue;

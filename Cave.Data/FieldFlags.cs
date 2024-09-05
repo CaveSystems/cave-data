@@ -19,6 +19,9 @@ namespace Cave.Data
         AutoIncrement = 4,
 
         /// <summary>Field has an index</summary>
-        Index = 8
+        Index = 8,
+
+        /// <summary>Field can be set to null</summary>
+        Nullable = 16,
     }
 }

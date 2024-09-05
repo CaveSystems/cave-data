@@ -15,7 +15,7 @@ using Cave.Data;
 namespace dbstructs.test
 {
 	/// <summary>Provides access to table structures for database Default.</summary>
-	[GeneratedCode("Cave.Data.DatabaseInterfaceGenerator","1.0.0.0")]
+	[GeneratedCode("Cave.Data.DatabaseInterfaceGenerator","3.99.0.0")]
 	public static partial class SampleV2
 	{
 		static IDatabase? database;
@@ -38,7 +38,7 @@ namespace dbstructs.test
 		/// <summary>Gets or sets the function used to retrieve tables from the database.</summary>
 		public static Func<string, ITable> GetTable { get; set; } = (tableName) => Database.GetTable(tableName, DefaultTableFlags);
 
-		/// <summary>Gets a new <see cref="ITable{TStruct}"/> (DefaultSampleRow) instance for accessing the <c>Sample</c> table.</summary>
-		public static ITable<DefaultSampleRow> Sample => new Table<DefaultSampleRow>(GetTable("Sample"));
+		/// <summary>Gets a new <see cref="ITable{TKey, TStruct}"/> (long, DefaultSampleRow) instance for accessing the <c>sample</c> table.</summary>
+		public static ITable<long, DefaultSampleRow> Sample => new Table<long, DefaultSampleRow>(GetTable("sample"));
 	}
 }

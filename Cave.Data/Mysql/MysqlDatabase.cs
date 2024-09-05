@@ -10,7 +10,26 @@ namespace Cave.Data.Mysql
     /// <summary>Provides a mysql database implementation.</summary>
     public sealed class MySqlDatabase : SqlDatabase
     {
-        #region Constructors
+        #region Protected Methods
+
+        /// <inheritdoc/>
+        protected override string[] GetTableNames()
+        {
+            var result = new List<string>();
+            var rows = SqlStorage.Query(database: "information_schema", table: "TABLES",
+                cmd: "SELECT table_name,table_schema,table_type FROM information_schema.TABLES where table_type='BASE TABLE' AND table_schema LIKE " +
+                SqlStorage.EscapeString(Name));
+            foreach (var row in rows)
+            {
+                result.Add((string)row[0]);
+            }
+
+            return result.ToArray();
+        }
+
+        #endregion Protected Methods
+
+        #region Public Constructors
 
         /// <summary>Initializes a new instance of the <see cref="MySqlDatabase"/> class.</summary>
         /// <param name="storage">the mysql storage engine.</param>
@@ -20,9 +39,37 @@ namespace Cave.Data.Mysql
         {
         }
 
-        #endregion Constructors
+        #endregion Public Constructors
 
-        #region Overrides
+        #region Public Properties
+
+        /// <summary>Gets a value indicating whether this instance is using a secure connection to the storage.</summary>
+        /// <value><c>true</c> if this instance is using a secure connection; otherwise, <c>false</c>.</value>
+        public override bool IsSecure
+        {
+            get
+            {
+                var error = false;
+                var connection = SqlStorage.GetConnection(Name);
+                try
+                {
+                    return connection.ConnectionString.ToUpperInvariant().Contains("SSLMODE=REQUIRED");
+                }
+                catch
+                {
+                    error = true;
+                    throw;
+                }
+                finally
+                {
+                    SqlStorage.ReturnConnection(ref connection, error);
+                }
+            }
+        }
+
+        #endregion Public Properties
+
+        #region Public Methods
 
         /// <inheritdoc/>
         public override ITable CreateTable(RowLayout layout, TableFlags flags)
@@ -206,30 +253,19 @@ namespace Cave.Data.Mysql
                         {
                             case StringEncoding.Undefined:
                             case StringEncoding.US_ASCII:
-#pragma warning disable CS0618
                             case StringEncoding.ASCII:
-#pragma warning restore CS0618
                                 queryText.Append(" CHARACTER SET latin1 COLLATE latin1_general_ci");
                                 break;
 
                             case StringEncoding.UTF_8:
-#pragma warning disable CS0618
-                            case StringEncoding.UTF8:
-#pragma warning restore CS0618
                                 queryText.Append($" CHARACTER SET utf8mb4 COLLATE {utf8Charset}_general_ci");
                                 break;
 
                             case StringEncoding.UTF_16:
-#pragma warning disable CS0618
-                            case StringEncoding.UTF16:
-#pragma warning restore CS0618
                                 queryText.Append(" CHARACTER SET ucs2 COLLATE ucs2_general_ci");
                                 break;
 
                             case StringEncoding.UTF_32:
-#pragma warning disable CS0618
-                            case StringEncoding.UTF32:
-#pragma warning restore CS0618
                                 queryText.Append(" CHARACTER SET utf32 COLLATE utf32_general_ci");
                                 break;
 
@@ -309,7 +345,9 @@ namespace Cave.Data.Mysql
                         throw new ArgumentException("Description of field '{0}' contains invalid chars!", fieldProperties.Name);
                     }
 
-                    queryText.Append(" COMMENT '" + fieldProperties.Description.Substring(0, 60) + "'");
+                    var description = fieldProperties.Description;
+                    if (description.Length > 60) description = description[..58] + "..";
+                    queryText.Append($" COMMENT '{description}'");
                 }
             }
 
@@ -404,45 +442,6 @@ namespace Cave.Data.Mysql
         /// <inheritdoc/>
         public override ITable GetTable(string tableName, TableFlags flags) => MySqlTable.Connect(this, flags, tableName);
 
-        /// <inheritdoc/>
-        protected override string[] GetTableNames()
-        {
-            var result = new List<string>();
-            var rows = SqlStorage.Query(database: "information_schema", table: "TABLES",
-                cmd: "SELECT table_name,table_schema,table_type FROM information_schema.TABLES where table_type='BASE TABLE' AND table_schema LIKE " +
-                SqlStorage.EscapeString(Name));
-            foreach (var row in rows)
-            {
-                result.Add((string)row[0]);
-            }
-
-            return result.ToArray();
-        }
-
-        /// <summary>Gets a value indicating whether this instance is using a secure connection to the storage.</summary>
-        /// <value><c>true</c> if this instance is using a secure connection; otherwise, <c>false</c>.</value>
-        public override bool IsSecure
-        {
-            get
-            {
-                var error = false;
-                var connection = SqlStorage.GetConnection(Name);
-                try
-                {
-                    return connection.ConnectionString.ToUpperInvariant().Contains("SSLMODE=REQUIRED");
-                }
-                catch
-                {
-                    error = true;
-                    throw;
-                }
-                finally
-                {
-                    SqlStorage.ReturnConnection(ref connection, error);
-                }
-            }
-        }
-
-        #endregion Overrides
+        #endregion Public Methods
     }
 }

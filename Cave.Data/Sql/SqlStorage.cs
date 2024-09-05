@@ -1168,6 +1168,12 @@ namespace Cave.Data.Sql
                     fieldFlags |= FieldFlags.Unique;
                 }
 
+                var isNullable = row["AllowDBNull"];
+                if ((isNullable != DBNull.Value) && (bool)isNullable)
+                {
+                    fieldFlags |= FieldFlags.Nullable;
+                }
+
                 // TODO detect bigint timestamps TODO detect string encoding
                 var properties = new FieldProperties
                 {
@@ -1178,7 +1184,7 @@ namespace Cave.Data.Sql
                     MaximumLength = fieldSize,
                     Name = fieldName,
                     TypeAtDatabase = dataType,
-                    NameAtDatabase = fieldName
+                    NameAtDatabase = fieldName,
                 };
                 fields[i] = GetDatabaseFieldProperties(properties);
             }
