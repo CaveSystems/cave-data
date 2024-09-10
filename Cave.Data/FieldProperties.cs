@@ -566,17 +566,19 @@ namespace Cave
             FieldInfo = fieldInfo ?? throw new ArgumentNullException(nameof(fieldInfo));
             Index = index;
             Name = fieldInfo.Name;
-            ValueType = fieldInfo.FieldType;
+
+            if (fieldInfo.FieldType.IsGenericType)
+            {
+                var nullableType = Nullable.GetUnderlyingType(fieldInfo.FieldType);
+                if (nullableType != null)
+                {
+                    Flags |= FieldFlags.Nullable;
+                    ValueType = nullableType;
+                }
+            }
+            ValueType ??= fieldInfo.FieldType;
             DataType = RowLayout.DataTypeFromType(ValueType);
             Flags = FieldFlags.None;
-
-            var realType = Nullable.GetUnderlyingType(ValueType);
-            if (realType != null)
-            {
-                Flags |= FieldFlags.Nullable;
-                ValueType = realType;
-            }
-
             MaximumLength = 0;
             DisplayFormat = null;
             Description = null;

@@ -382,7 +382,7 @@ namespace Cave.Data.Sql
                 case DataType.Single: return (float)databaseValue;
                 case DataType.User:
                 {
-                    return field.ParseValue((string)databaseValue, null, Culture);
+                    return field.ParseValue($"{databaseValue}", null, Culture);
                 }
                 case DataType.Enum:
                 {

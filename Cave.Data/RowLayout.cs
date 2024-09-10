@@ -378,92 +378,31 @@ namespace Cave.Data
                 throw new ArgumentNullException(nameof(type));
             }
 
-            if (type == typeof(sbyte))
+            if (type.IsEnum) return DataType.Enum;
+            if (type.IsGenericType)
             {
-                return DataType.Int8;
+                var nullable = Nullable.GetUnderlyingType(type);
+                if (nullable == null) return DataType.User;
+                type = nullable;
             }
-
-            if (type == typeof(byte))
-            {
-                return DataType.UInt8;
-            }
-
-            if (type == typeof(short))
-            {
-                return DataType.Int16;
-            }
-
-            if (type == typeof(ushort))
-            {
-                return DataType.UInt16;
-            }
-
-            if (type == typeof(int))
-            {
-                return DataType.Int32;
-            }
-
-            if (type == typeof(uint))
-            {
-                return DataType.UInt32;
-            }
-
-            if (type == typeof(long))
-            {
-                return DataType.Int64;
-            }
-
-            if (type == typeof(ulong))
-            {
-                return DataType.UInt64;
-            }
-
-            if (type == typeof(char))
-            {
-                return DataType.Char;
-            }
-
-            if (type == typeof(string))
-            {
-                return DataType.String;
-            }
-
-            if (type == typeof(float))
-            {
-                return DataType.Single;
-            }
-
-            if (type == typeof(double))
-            {
-                return DataType.Double;
-            }
-
-            if (type == typeof(bool))
-            {
-                return DataType.Bool;
-            }
-
-            if (type == typeof(decimal))
-            {
-                return DataType.Decimal;
-            }
-
-            if (type == typeof(byte[]))
-            {
-                return DataType.Binary;
-            }
-
-            if (type == typeof(TimeSpan))
-            {
-                return DataType.TimeSpan;
-            }
-
-            if (type == typeof(DateTime))
-            {
-                return DataType.DateTime;
-            }
-
-            return type.IsEnum ? DataType.Enum : DataType.User;
+            if (type == typeof(sbyte)) { return DataType.Int8; }
+            if (type == typeof(byte)) { return DataType.UInt8; }
+            if (type == typeof(short)) { return DataType.Int16; }
+            if (type == typeof(ushort)) { return DataType.UInt16; }
+            if (type == typeof(int)) { return DataType.Int32; }
+            if (type == typeof(uint)) { return DataType.UInt32; }
+            if (type == typeof(long)) { return DataType.Int64; }
+            if (type == typeof(ulong)) { return DataType.UInt64; }
+            if (type == typeof(char)) { return DataType.Char; }
+            if (type == typeof(string)) { return DataType.String; }
+            if (type == typeof(float)) { return DataType.Single; }
+            if (type == typeof(double)) { return DataType.Double; }
+            if (type == typeof(bool)) { return DataType.Bool; }
+            if (type == typeof(decimal)) { return DataType.Decimal; }
+            if (type == typeof(byte[])) { return DataType.Binary; }
+            if (type == typeof(TimeSpan)) { return DataType.TimeSpan; }
+            if (type == typeof(DateTime)) { return DataType.DateTime; }
+            return DataType.User;
         }
 
         /// <summary>Loads the row layout from the specified reader.</summary>
