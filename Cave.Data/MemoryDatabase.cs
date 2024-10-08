@@ -9,7 +9,7 @@ public sealed class MemoryDatabase : Database
 {
     #region Private Fields
 
-    Dictionary<string, ITable> tables = new();
+    readonly Dictionary<string, ITable> tables = new();
 
     #endregion Private Fields
 
@@ -63,7 +63,6 @@ public sealed class MemoryDatabase : Database
         }
 
         tables.Clear();
-        tables = null;
     }
 
     /// <inheritdoc/>

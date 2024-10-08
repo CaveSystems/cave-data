@@ -12,13 +12,14 @@ using System.ComponentModel;
 using System.Globalization;
 using System.CodeDom.Compiler;
 using Cave;
+using Cave.Collections;
 using Cave.Data;
 using Cave.IO;
 
 namespace dbstructs.test
 {
     /// <summary>Table structure for sample.</summary>
-    [GeneratedCode("Cave.Data.TableInterfaceGenerator","3.99.0.0")]
+    [GeneratedCode("Cave.Data.TableInterfaceGenerator", null)]
     [Table("sample")]
     public partial struct DefaultSampleRow : IEquatable<DefaultSampleRow>
     {
@@ -111,7 +112,7 @@ namespace dbstructs.test
         {
             return
                 Equals(other.Id, Id) &&
-                Equals(other.Blob, Blob) &&
+                DefaultComparer.Equals(other.Blob, Blob) &&
                 Equals(other.Byte, Byte) &&
                 Equals(other.Duration, Duration) &&
                 Equals(other.Enabled, Enabled) &&

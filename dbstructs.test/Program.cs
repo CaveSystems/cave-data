@@ -22,16 +22,18 @@ class Program
         Directory.CreateDirectory(dir);
         Console.WriteLine($"Create test db structures at {dir}");
 
-        var table = MemoryDatabase.Default.CreateTable<SampleRow>("sample");
-        var db = table.Database;
-
+        var db = MemoryDatabase.Default;
+        db.CreateTable<SampleRow>("sample");
         {
             var interfaceV1 = db.GenerateInterface(nameSpace: "dbstructs.test", className: "SampleV1");
             interfaceV1.Options.OutputDirectory = dir;
             interfaceV1.Options.DisableKnownIdentifiers = true;
             interfaceV1.Options.IdentifierHashCode = true;
-            var result = interfaceV1.GenerateTableStructFile(table);
-            Console.WriteLine($"+ {result.FileName}");
+            foreach (var table in db)
+            {
+                var result = interfaceV1.GenerateTableStructFile(table);
+                Console.WriteLine($"+ {result.FileName}");
+            }
             interfaceV1.Save();
             Console.WriteLine($"+ {interfaceV1.FileName}");
         }
@@ -39,8 +41,11 @@ class Program
         {
             var interfaceV2 = db.GenerateInterface(nameSpace: "dbstructs.test", className: "SampleV2");
             interfaceV2.Options.OutputDirectory = dir;
-            var result = interfaceV2.GenerateTableStructFile(table);
-            Console.WriteLine($"+ {result.FileName}");
+            foreach (var table in db)
+            {
+                var result = interfaceV2.GenerateTableStructFile(table);
+                Console.WriteLine($"+ {result.FileName}");
+            }
             interfaceV2.Save();
             Console.WriteLine($"+ {interfaceV2.FileName}");
         }

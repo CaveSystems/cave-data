@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+
+		<!--project-->
+        <RootNamespace>Cave.Data</RootNamespace>
+        <AssemblyOriginatorKeyFile>Cave.Data.snk</AssemblyOriginatorKeyFile>
+        <Product>CaveSystems Database Library</Product>
+        <PackageTags>CaveSystems Database</PackageTags>
+        <Description>CaveSystems Database Library. Provides simple, fast and typesafe access to ADO.NET based databases. This package supports database first development.</Description>
+        <PackageProjectUrl>https://github.com/CaveSystems/cave-data</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/CaveSystems/cave-data</RepositoryUrl>
+        <!--settings-->
+        <PackageReleaseNotes />
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <SignAssembly>true</SignAssembly>
+        <NeutralLanguage />
+        <DelaySign>false</DelaySign>
+    </PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\cave-extensions\Cave.Extensions\Cave.Extensions.Latest.csproj" />
+		<ProjectReference Include="..\..\cave-io\Cave.IO\Cave.IO.Latest.csproj" />
+	</ItemGroup>
+
+</Project>
