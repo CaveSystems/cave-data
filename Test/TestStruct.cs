@@ -8,7 +8,7 @@ using Cave.IO;
 
 #pragma warning disable CS0618
 
-namespace Test.Cave
+namespace Test
 {
     public enum TestEnum
     {
@@ -113,7 +113,7 @@ namespace Test.Cave
         {
             var t = new TestStructClean
             {
-                Arr = BitConverterLE.Instance.GetBytes((long)i),
+                Arr = BitConverter.GetBytes((long)i),
                 B = (byte)(i & 0xFF),
                 SB = (sbyte)(-i / 10),
                 US = (ushort)i,
@@ -222,7 +222,7 @@ public struct TestStructCleanMissingField
     {
         var t = new TestStructCleanMissingField
         {
-            Arr = BitConverterLE.Instance.GetBytes((long)i),
+            Arr = BitConverter.GetBytes((long)i),
             B = (byte)(i & 0xFF),
             SB = (sbyte)(-i / 10),
             US = (ushort)i,

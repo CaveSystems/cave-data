@@ -41,10 +41,12 @@ public class Table<TKey, TStruct> : AbstractTable<TKey, TStruct>
             tableLayout = structLayout;
         }
 
-        //test key creation
+        //test key creation for value type
         var keyField = tableLayout.Identifier.Single();
-        if (Activator.CreateInstance(keyField.ValueType) is not TKey) throw new Exception($"Could not create TKey {keyField.ValueType}!");
-
+        if (keyField.ValueType?.IsValueType == true)
+        {
+            if (Activator.CreateInstance(keyField.ValueType) is not TKey) throw new Exception($"Could not create TKey {keyField.ValueType}!");
+        }
         KeyField = keyField;
         table.UseLayout(tableLayout);
         Layout = tableLayout;

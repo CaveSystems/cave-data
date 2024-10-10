@@ -41,127 +41,20 @@ public static class ITableExtensions
         return table.Exist(Search.FieldEquals(field, value));
     }
 
-    /// <summary>Builds the csharp code containing the row layout structure.</summary>
-    /// <param name="table">The table to use.</param>
-    /// <param name="databaseName">The database name (only used for the structure name).</param>
-    /// <param name="tableName">The table name (only used for the structure name).</param>
-    /// <param name="className">The name of the class to generate.</param>
-    /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
-    /// <returns>Returns a string containing csharp code.</returns>
-    [Obsolete("Use TableInterfaceGenerator.GenerateStruct instead")]
-    public static GenerateTableCodeResult GenerateStruct(this ITable table, string databaseName, string tableName, string className, NamingStrategy namingStrategy) => new TableInterfaceGenerator()
+    /// <summary>Searches for datasets matching the specified <paramref name="search"/>.</summary>
+    /// <typeparam name="TKey"></typeparam>
+    /// <typeparam name="TStruct"></typeparam>
+    /// <param name="table">Table to search at</param>
+    /// <param name="search">The search.</param>
+    /// <param name="resultOption">Options for the search and the result set.</param>
+    /// <returns>Returns a list of identifiers.</returns>
+    public static IList<TKey> Find<TKey, TStruct>(this ITable<TKey, TStruct> table, Search? search, ResultOption? resultOption = null)
+        where TKey : IComparable<TKey>
+        where TStruct : struct
     {
-        Layout = table?.Layout ?? throw new ArgumentNullException(nameof(table)),
-        TableName = tableName ?? table.Name,
-        DatabaseName = databaseName ?? table.Database.Name,
-        ClassName = className,
-        NamingStrategy = namingStrategy
-    }.GenerateStruct();
-
-    /// <summary>Builds the csharp code containing the row layout structure.</summary>
-    /// <param name="table">The table to use.</param>
-    /// <param name="databaseName">The database name (only used for the structure name).</param>
-    /// <param name="tableName">The table name (only used for the structure name).</param>
-    /// <param name="className">The name of the class to generate.</param>
-    /// <param name="nameSpace">The namespace to use for the class (defaults to "Database").</param>
-    /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
-    /// <returns>Returns a string containing csharp code.</returns>
-    [Obsolete("Use TableInterfaceGenerator.GenerateStruct instead")]
-    public static GenerateTableCodeResult GenerateStruct(this ITable table, string databaseName = null, string tableName = null, string className = null, string nameSpace = null, NamingStrategy namingStrategy = NamingStrategy.PascalCase) => new TableInterfaceGenerator()
-    {
-        Layout = table?.Layout ?? throw new ArgumentNullException(nameof(table)),
-        TableName = tableName ?? table.Name,
-        DatabaseName = databaseName ?? table.Database.Name,
-        ClassName = className,
-        NameSpace = nameSpace,
-        NamingStrategy = namingStrategy
-    }.GenerateStruct();
-
-    /// <summary>Builds the csharp code containing the row layout structure.</summary>
-    /// <param name="layout">The layout to use.</param>
-    /// <param name="databaseName">The database name (only used for the structure name).</param>
-    /// <param name="tableName">The table name (only used for the structure name).</param>
-    /// <param name="className">The name of the class to generate.</param>
-    /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
-    /// <returns>Returns a string containing csharp code.</returns>
-    [Obsolete("Use TableInterfaceGenerator.GenerateStruct instead")]
-    public static GenerateTableCodeResult GenerateStruct(this RowLayout layout, string databaseName, string tableName, string className, NamingStrategy namingStrategy) => new TableInterfaceGenerator()
-    {
-        Layout = layout ?? throw new ArgumentNullException(nameof(layout)),
-        TableName = tableName ?? layout.Name,
-        DatabaseName = databaseName ?? throw new ArgumentNullException(nameof(databaseName)),
-        ClassName = className,
-        NamingStrategy = namingStrategy
-    }.GenerateStruct();
-
-    /// <summary>Builds the csharp code containing the row layout structure.</summary>
-    /// <param name="layout">The layout to use.</param>
-    /// <param name="databaseName">The database name (only used for the structure name).</param>
-    /// <param name="tableName">The table name (only used for the structure name).</param>
-    /// <param name="className">The name of the class to generate.</param>
-    /// <param name="nameSpace">The namespace to use for the class (defaults to "Database").</param>
-    /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
-    /// <returns>Returns a string containing csharp code.</returns>
-    [Obsolete("Use TableInterfaceGenerator.GenerateStruct instead")]
-    public static GenerateTableCodeResult GenerateStruct(this RowLayout layout, string databaseName, string tableName = null, string className = null, string nameSpace = null, NamingStrategy namingStrategy = NamingStrategy.PascalCase) => new TableInterfaceGenerator()
-    {
-        Layout = layout ?? throw new ArgumentNullException(nameof(layout)),
-        TableName = tableName ?? layout.Name,
-        DatabaseName = databaseName ?? throw new ArgumentNullException(nameof(databaseName)),
-        ClassName = className,
-        NameSpace = nameSpace,
-        NamingStrategy = namingStrategy
-    }.GenerateStruct();
-
-    /// <summary>Builds the csharp code file containing the row layout structure.</summary>
-    /// <param name="table">The table to use.</param>
-    /// <param name="databaseName">The database name (only used for the structure name).</param>
-    /// <param name="tableName">The table name (only used for the structure name).</param>
-    /// <param name="className">The name of the class to generate.</param>
-    /// <param name="structFile">The struct file name (defaults to classname.cs).</param>
-    /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
-    /// <returns>The struct file name.</returns>
-    [Obsolete("Use TableInterfaceGenerator.GenerateStructFile instead")]
-    public static GenerateTableCodeResult GenerateStructFile(this ITable table, string databaseName, string tableName, string className, string structFile, NamingStrategy namingStrategy)
-        => GenerateStruct(table.Layout, databaseName, tableName, className, namingStrategy).SaveStructFile(structFile);
-
-    /// <summary>Builds the csharp code file containing the row layout structure.</summary>
-    /// <param name="table">The table to use.</param>
-    /// <param name="databaseName">The database name (only used for the structure name).</param>
-    /// <param name="tableName">The table name (only used for the structure name).</param>
-    /// <param name="className">The name of the class to generate.</param>
-    /// <param name="structFile">The struct file name (defaults to classname.cs).</param>
-    /// <param name="nameSpace">The namespace to use for the class (defaults to "Database").</param>
-    /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
-    /// <returns>The struct file name.</returns>
-    [Obsolete("Use TableInterfaceGenerator.GenerateStructFile instead")]
-    public static GenerateTableCodeResult GenerateStructFile(this ITable table, string databaseName = null, string tableName = null, string className = null, string structFile = null, string nameSpace = null, NamingStrategy namingStrategy = NamingStrategy.PascalCase)
-        => GenerateStruct(table.Layout, databaseName ?? table.Database.Name, tableName, className, nameSpace, namingStrategy).SaveStructFile(structFile);
-
-    /// <summary>Builds the csharp code file containing the row layout structure.</summary>
-    /// <param name="layout">The layout to use.</param>
-    /// <param name="databaseName">The database name (only used for the structure name).</param>
-    /// <param name="tableName">The table name (only used for the structure name).</param>
-    /// <param name="className">The name of the class to generate.</param>
-    /// <param name="structFile">The struct file name (defaults to classname.cs).</param>
-    /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
-    /// <returns>The struct file name.</returns>
-    [Obsolete("Use TableInterfaceGenerator.GenerateStructFile instead")]
-    public static GenerateTableCodeResult GenerateStructFile(this RowLayout layout, string databaseName, string tableName, string className, string structFile, NamingStrategy namingStrategy)
-        => GenerateStruct(layout, databaseName, tableName, className, namingStrategy).SaveStructFile(structFile);
-
-    /// <summary>Builds the csharp code file containing the row layout structure.</summary>
-    /// <param name="layout">The layout to use.</param>
-    /// <param name="databaseName">The database name (only used for the structure name).</param>
-    /// <param name="tableName">The table name (only used for the structure name).</param>
-    /// <param name="className">The name of the class to generate.</param>
-    /// <param name="structFile">The struct file name (defaults to classname.cs).</param>
-    /// <param name="nameSpace">The namespace to use for the class (defaults to "Database").</param>
-    /// <param name="namingStrategy">Naming strategy for classes, properties, structures and fields.</param>
-    /// <returns>The struct file name.</returns>
-    [Obsolete("Use TableInterfaceGenerator.GenerateStructFile instead")]
-    public static GenerateTableCodeResult GenerateStructFile(this RowLayout layout, string databaseName = null, string tableName = null, string className = null, string structFile = null, string nameSpace = null, NamingStrategy namingStrategy = NamingStrategy.PascalCase)
-        => GenerateStruct(layout, databaseName, tableName, className, nameSpace, namingStrategy).SaveStructFile(structFile);
+        if (table.Layout.SingleIdentifier is null) throw new InvalidOperationException("Table.Layout.SingleIdentifier needs to be set!");
+        return table.GetValues<TKey>(table.Layout.SingleIdentifier.Name, search, resultOption);
+    }
 
     /// <summary>Gets the string comparison to use for field name comparison.</summary>
     /// <param name="tableFlags">Flags to use for setting.</param>
@@ -197,13 +90,9 @@ public static class ITableExtensions
     /// <exception cref="ArgumentException"></exception>
     public static Row GetRow<TIdentifier>(this ITable table, TIdentifier id)
     {
-        if (table == null)
-        {
-            throw new ArgumentNullException(nameof(table));
-        }
-
-        var idField = table.Layout.SingleIdentifier;
-        if (idField is null) throw new ArgumentException("Table has no single unique id field!");
+        if (table == null) throw new ArgumentNullException(nameof(table));
+        if (id is null) throw new ArgumentNullException(nameof(id));
+        var idField = table.Layout.SingleIdentifier ?? throw new ArgumentException("Table has no single unique id field!");
         return GetRow(table, idField.Name, id);
     }
 
@@ -212,13 +101,10 @@ public static class ITableExtensions
     /// <param name="field">The field name to match.</param>
     /// <param name="value">The value to match.</param>
     /// <returns>The rows found.</returns>
-    public static IList<Row> GetRows(this ITable table, string field, object value)
+    public static IList<Row> GetRows(this ITable table, string field, object? value)
     {
-        if (table == null)
-        {
-            throw new ArgumentNullException(nameof(table));
-        }
-
+        if (table == null) throw new ArgumentNullException(nameof(table));
+        if (field is null) throw new ArgumentNullException(nameof(field));
         return table.GetRows(Search.FieldEquals(field, value));
     }
 
@@ -239,8 +125,7 @@ public static class ITableExtensions
             throw new ArgumentNullException(nameof(table));
         }
 
-        var idField = table.Layout.SingleIdentifier;
-        if (idField is null) throw new ArgumentException("Table has no single unique id field!");
+        var idField = table.Layout.SingleIdentifier ?? throw new ArgumentException("Table has no single unique id field!");
         return table.GetStruct(Search.FieldEquals(idField.Name, id));
     }
 
@@ -250,7 +135,7 @@ public static class ITableExtensions
     /// <param name="field">The fieldname to match.</param>
     /// <param name="value">The value to match.</param>
     /// <returns>The rows found.</returns>
-    public static IList<TStruct> GetStructs<TStruct>(this ITable<TStruct> table, string field, object value)
+    public static IList<TStruct> GetStructs<TStruct>(this ITable<TStruct> table, string field, object? value)
         where TStruct : struct
     {
         if (table == null)
@@ -268,7 +153,7 @@ public static class ITableExtensions
     /// <param name="field">The fieldname to match.</param>
     /// <param name="value">The value to match.</param>
     /// <returns>The rows found.</returns>
-    public static IList<TStruct> GetStructs<TKey, TStruct>(this ITable<TKey, TStruct> table, string field, object value)
+    public static IList<TStruct> GetStructs<TKey, TStruct>(this ITable<TKey, TStruct> table, string field, object? value)
         where TKey : IComparable<TKey>
         where TStruct : struct
     {
@@ -278,29 +163,6 @@ public static class ITableExtensions
         }
 
         return table.GetStructs(Search.FieldEquals(field, value));
-    }
-
-    /// <summary>Saves the generated code to a file and returns the updated result.</summary>
-    /// <param name="result">Result to update.</param>
-    /// <param name="structFile">Name of the file to write to (optional).</param>
-    /// <returns>Returns an updated result instance.</returns>
-    [Obsolete("Use TableInterfaceGenerator.SaveStructFile instead")]
-    public static GenerateTableCodeResult SaveStructFile(this GenerateTableCodeResult result, string structFile = null)
-    {
-        if (result.FileName == null)
-        {
-            if (structFile == null)
-            {
-                result.FileName = result.ClassName + ".cs";
-            }
-            else
-            {
-                result.FileName = structFile;
-            }
-        }
-
-        File.WriteAllText(result.FileName, result.Code);
-        return result;
     }
 
     /// <summary>Saves the table to a dat stream.</summary>
@@ -422,8 +284,7 @@ public static class ITableExtensions
             throw new ArgumentNullException(nameof(table));
         }
 
-        var idField = table.Layout.SingleIdentifier;
-        if (idField is null) throw new ArgumentException("Table has no single unique id field!");
+        var idField = table.Layout.SingleIdentifier ?? throw new ArgumentException("Table has no single unique id field!");
         return table.TryDelete(idField.Name, id) > 0;
     }
 
@@ -439,8 +300,7 @@ public static class ITableExtensions
             throw new ArgumentNullException(nameof(table));
         }
 
-        var idField = table.Layout.SingleIdentifier;
-        if (idField is null) throw new ArgumentException("Table has no single unique id field!");
+        var idField = table.Layout.SingleIdentifier ?? throw new ArgumentException("Table has no single unique id field!");
         return table.TryDelete(Search.FieldIn(idField.Name, ids));
     }
 
@@ -449,7 +309,7 @@ public static class ITableExtensions
     /// <param name="field">The field name to match.</param>
     /// <param name="value">The value to match.</param>
     /// <returns>The number of data sets deleted.</returns>
-    public static int TryDelete(this ITable table, string field, object value)
+    public static int TryDelete(this ITable table, string field, object? value)
     {
         if (table == null)
         {
@@ -467,7 +327,7 @@ public static class ITableExtensions
     /// <param name="row">Returns the result row.</param>
     /// <returns>Returns true on success, false otherwise.</returns>
     /// <exception cref="InvalidOperationException">The result sequence contains more than one element.</exception>
-    public static bool TryGetStruct<TStruct>(this ITable<TStruct> table, string field, object value, out TStruct row)
+    public static bool TryGetStruct<TStruct>(this ITable<TStruct> table, string field, object? value, out TStruct row)
         where TStruct : struct
     {
         if (table == null)
@@ -501,8 +361,7 @@ public static class ITableExtensions
             throw new ArgumentNullException(nameof(table));
         }
 
-        var idField = table.Layout.SingleIdentifier;
-        if (idField is null) throw new ArgumentException("Table has no single unique id field!");
+        var idField = table.Layout.SingleIdentifier ?? throw new ArgumentException("Table has no single unique id field!");
         var result = table.GetStructs(idField.Name, key);
         if (result.Count > 0)
         {
@@ -529,7 +388,7 @@ public static class ITableExtensions
             throw new ArgumentNullException(nameof(table));
         }
 
-        var result = table.GetStructs(new[] { key });
+        var result = table.GetStructs([key]);
         if (result.Count > 0)
         {
             row = result.Single();

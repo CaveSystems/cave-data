@@ -1,24 +1,23 @@
 ﻿using System;
 
-namespace Cave.Data
+namespace Cave.Data;
+
+/// <summary>Provides an <see cref="Attribute"/> for configuring timespan fields.</summary>
+[AttributeUsage(AttributeTargets.Field)]
+public sealed class TimeSpanFormatAttribute : Attribute
 {
-    /// <summary>Provides an <see cref="Attribute" /> for configuring timespan fields.</summary>
-    [AttributeUsage(AttributeTargets.Field)]
-    public sealed class TimeSpanFormatAttribute : Attribute
-    {
-        #region Constructors
+    #region Public Constructors
 
-        /// <summary>Initializes a new instance of the <see cref="TimeSpanFormatAttribute" /> class.</summary>
-        /// <param name="type"><see cref="DateTimeType" />.</param>
-        public TimeSpanFormatAttribute(DateTimeType type) => Type = type;
+    /// <summary>Initializes a new instance of the <see cref="TimeSpanFormatAttribute"/> class.</summary>
+    /// <param name="type"><see cref="DateTimeType"/>.</param>
+    public TimeSpanFormatAttribute(DateTimeType type) => Type = type;
 
-        #endregion
+    #endregion Public Constructors
 
-        #region Properties
+    #region Public Properties
 
-        /// <summary>Gets the <see cref="DateTimeType" />.</summary>
-        public DateTimeType Type { get; }
+    /// <summary>Gets the <see cref="DateTimeType"/>.</summary>
+    public DateTimeType Type { get; }
 
-        #endregion
-    }
+    #endregion Public Properties
 }

@@ -15,7 +15,7 @@ using Cave.Data;
 namespace dbstructs.test
 {
 	/// <summary>Provides access to table structures for database Default.</summary>
-	[GeneratedCode("Cave.Data.DatabaseInterfaceGenerator","3.99.0.0")]
+	[GeneratedCode("Cave.Data.DatabaseInterfaceGenerator", null)]
 	public static partial class SampleV2
 	{
 		static IDatabase? database;

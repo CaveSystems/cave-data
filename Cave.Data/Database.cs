@@ -1,144 +1,145 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace Cave.Data
+namespace Cave.Data;
+
+/// <summary>Provides a base class implementing the <see cref="IDatabase"/> interface.</summary>
+public abstract class Database : IDatabase
 {
-    /// <summary>Provides a base class implementing the <see cref="IDatabase" /> interface.</summary>
-    public abstract class Database : IDatabase
+    #region Protected Constructors
+
+    /// <summary>Initializes a new instance of the <see cref="Database"/> class.</summary>
+    /// <param name="storage">The storage engine.</param>
+    /// <param name="name">The name of the database.</param>
+    protected Database(IStorage storage, string name)
     {
-        #region Constructors
+        Name = name ?? throw new ArgumentNullException(nameof(name));
+        Storage = storage ?? throw new ArgumentNullException(nameof(storage));
+    }
 
-        /// <summary>Initializes a new instance of the <see cref="Database" /> class.</summary>
-        /// <param name="storage">The storage engine.</param>
-        /// <param name="name">The name of the database.</param>
-        protected Database(IStorage storage, string name)
+    #endregion Protected Constructors
+
+    #region Protected Methods
+
+    /// <summary>Gets the tableName names present at the database.</summary>
+    /// <returns>Returns a list of tableName names.</returns>
+    protected abstract string[] GetTableNames();
+
+    /// <summary>Logs the tableName layout.</summary>
+    /// <param name="layout">The layout.</param>
+    protected void LogCreateTable(RowLayout layout)
+    {
+        if (layout == null)
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
-            Storage = storage ?? throw new ArgumentNullException(nameof(storage));
+            throw new ArgumentNullException(nameof(layout));
         }
 
-        #endregion
-
-        #region Properties
-
-        /// <summary>Gets or sets the tableName name cache time.</summary>
-        public TimeSpan TableNameCacheTime { get; set; }
-
-        #endregion
-
-        #region Overrides
-
-        /// <inheritdoc />
-        public override string ToString() => Storage.ConnectionString.ChangePath(Name).ToString(ConnectionStringPart.NoCredentials);
-
-        #endregion
-
-        #region Members
-
-        /// <summary>Gets the tableName names present at the database.</summary>
-        /// <returns>Returns a list of tableName names.</returns>
-        protected abstract string[] GetTableNames();
-
-        /// <summary>Logs the tableName layout.</summary>
-        /// <param name="layout">The layout.</param>
-        protected void LogCreateTable(RowLayout layout)
+        Trace.TraceInformation("Creating tableName <cyan>{0}.{1}<default> with <cyan>{2}<default> fields.", Name, layout.Name, layout.FieldCount);
+        if (Storage.LogVerboseMessages)
         {
-            if (layout == null)
+            for (var i = 0; i < layout.FieldCount; i++)
             {
-                throw new ArgumentNullException(nameof(layout));
-            }
-
-            Trace.TraceInformation("Creating tableName <cyan>{0}.{1}<default> with <cyan>{2}<default> fields.", Name, layout.Name, layout.FieldCount);
-            if (Storage.LogVerboseMessages)
-            {
-                for (var i = 0; i < layout.FieldCount; i++)
-                {
-                    Trace.TraceInformation(layout[i].ToString());
-                }
+                Trace.TraceInformation(layout[i].ToString());
             }
         }
+    }
 
-        #endregion
+    #endregion Protected Methods
 
-        #region IDatabase properties
+    #region Public Properties
 
-        /// <inheritdoc />
-        public StringComparison TableNameComparison { get; protected set; } = StringComparison.InvariantCultureIgnoreCase;
+    /// <summary>Empty invalid database instance. Used for uninitalized objects.</summary>
+    public static IDatabase None { get; } = new NoDatabase();
 
-        /// <inheritdoc />
-        public abstract bool IsSecure { get; }
+    /// <inheritdoc/>
+    public abstract bool IsClosed { get; }
 
-        /// <inheritdoc />
-        public IStorage Storage { get; }
+    /// <inheritdoc/>
+    public abstract bool IsSecure { get; }
 
-        /// <inheritdoc />
-        public string Name { get; }
+    /// <inheritdoc/>
+    public string Name { get; }
 
-        /// <inheritdoc />
-        public IList<string> TableNames => GetTableNames();
+    /// <inheritdoc/>
+    public IStorage Storage { get; }
 
-        /// <inheritdoc />
-        public abstract bool IsClosed { get; }
+    /// <summary>Gets or sets the tableName name cache time.</summary>
+    public TimeSpan TableNameCacheTime { get; set; }
 
-        /// <inheritdoc />
-        public ITable this[string tableName] => GetTable(tableName);
+    /// <inheritdoc/>
+    public StringComparison TableNameComparison { get; protected set; } = StringComparison.InvariantCultureIgnoreCase;
 
-        #endregion
+    /// <inheritdoc/>
+    public IList<string> TableNames => GetTableNames();
 
-        #region IDatabase functions
+    #endregion Public Properties
 
-        /// <inheritdoc />
-        public virtual bool HasTable(string tableName) => TableNames.Any(t => string.Equals(tableName, t, TableNameComparison));
+    #region Public Indexers
 
-        #region GetTable functions
+    /// <inheritdoc/>
+    public ITable this[string tableName] => GetTable(tableName);
 
-        /// <inheritdoc />
-        public abstract ITable GetTable(string tableName, TableFlags flags = default);
+    #endregion Public Indexers
 
-        /// <inheritdoc />
-        public ITable GetTable(RowLayout layout, TableFlags flags = default)
+    #region Public Methods
+
+    /// <inheritdoc/>
+    public abstract void Close();
+
+    /// <inheritdoc/>
+    public abstract ITable CreateTable(RowLayout layout, TableFlags flags = default);
+
+    /// <inheritdoc/>
+    public abstract void DeleteTable(string tableName);
+
+    /// <inheritdoc/>
+    public IEnumerator<ITable> GetEnumerator() => this.GetTableEnumerator();
+
+    /// <inheritdoc/>
+    public abstract ITable GetTable(string tableName, TableFlags flags = default);
+
+    /// <inheritdoc/>
+    public ITable GetTable(RowLayout layout, TableFlags flags = default)
+    {
+        if (layout == null)
         {
-            if (layout == null)
+            throw new ArgumentNullException(nameof(layout));
+        }
+
+        if ((flags & TableFlags.CreateNew) != 0)
+        {
+            if (HasTable(layout.Name))
             {
-                throw new ArgumentNullException(nameof(layout));
+                DeleteTable(layout.Name);
             }
 
-            if ((flags & TableFlags.CreateNew) != 0)
-            {
-                if (HasTable(layout.Name))
-                {
-                    DeleteTable(layout.Name);
-                }
+            return CreateTable(layout, flags);
+        }
 
+        if ((flags & TableFlags.AllowCreate) != 0)
+        {
+            if (!HasTable(layout.Name))
+            {
                 return CreateTable(layout, flags);
             }
-
-            if ((flags & TableFlags.AllowCreate) != 0)
-            {
-                if (!HasTable(layout.Name))
-                {
-                    return CreateTable(layout, flags);
-                }
-            }
-
-            var table = GetTable(layout.Name);
-            table.UseLayout(layout);
-            return table;
         }
 
-        #endregion
-
-        /// <inheritdoc />
-        public abstract ITable CreateTable(RowLayout layout, TableFlags flags = default);
-
-        /// <inheritdoc />
-        public abstract void DeleteTable(string tableName);
-
-        /// <inheritdoc />
-        public abstract void Close();
-
-        #endregion
+        var table = GetTable(layout.Name);
+        table.UseLayout(layout);
+        return table;
     }
+
+    /// <inheritdoc/>
+    public virtual bool HasTable(string tableName) => TableNames.Any(t => string.Equals(tableName, t, TableNameComparison));
+
+    /// <inheritdoc/>
+    public override string ToString() => Storage.ConnectionString.ChangePath(Name).ToString(ConnectionStringPart.NoCredentials);
+
+    /// <inheritdoc/>
+    IEnumerator IEnumerable.GetEnumerator() => this.GetTableEnumerator();
+
+    #endregion Public Methods
 }
