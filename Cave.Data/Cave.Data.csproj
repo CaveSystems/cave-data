@@ -30,7 +30,7 @@
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Cave.Extensions" Version="4.0.1" />
-        <PackageReference Include="Cave.IO" Version="4.0.0" />
+        <PackageReference Include="Cave.IO" Version="4.0.1" />
     </ItemGroup>
     
     <Choose>
