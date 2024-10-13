@@ -4,6 +4,7 @@ using Cave;
 using Cave.Collections.Generic;
 using Cave.Data;
 using Cave.IO;
+using Cave.Security;
 using NUnit.Framework;
 
 namespace Test.Cave.Data
@@ -80,7 +81,7 @@ namespace Test.Cave.Data
                 var content = string.Empty;
                 while (content.Length == 0)
                 {
-                    content = DefaultRNG.GetPassword(DefaultRNG.UInt8 % 16, ASCII.Strings.Letters);
+                    content = RNG.GetPassword(RNG.UInt8 % 16, ASCII.Strings.Letters);
                 }
 
                 var integer = content.GetHashCode();
@@ -120,7 +121,7 @@ namespace Test.Cave.Data
                 var content = string.Empty;
                 while (content.Length == 0)
                 {
-                    content = DefaultRNG.GetPassword(DefaultRNG.UInt8 % 16, ASCII.Strings.Letters);
+                    content = RNG.GetPassword(RNG.UInt8 % 16, ASCII.Strings.Letters);
                 }
 
                 var integer = content.GetHashCode();
@@ -163,7 +164,7 @@ namespace Test.Cave.Data
                 var content = string.Empty;
                 while (content.Length == 0)
                 {
-                    content = DefaultRNG.GetPassword(DefaultRNG.UInt8 % 16, ASCII.Strings.Letters);
+                    content = RNG.GetPassword(RNG.UInt8 % 16, ASCII.Strings.Letters);
                 }
 
                 typed.Insert(new TestStructClean

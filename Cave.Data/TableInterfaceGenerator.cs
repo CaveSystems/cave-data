@@ -2,18 +2,19 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Text;
 using System.Web;
+using System.Collections;
 using Cave.Collections.Generic;
+using System.Reflection;
 
-#nullable enable
 
 namespace Cave.Data;
 
 /// <summary>Code generator for ITable or RowLayout instances.</summary>
 public class TableInterfaceGenerator
 {
+
     #region Private Methods
 
     string GetName(string text) => NamingStrategy.GetNameByStrategy(text);
@@ -76,6 +77,7 @@ public class TableInterfaceGenerator
         code.AppendLine("using System.Globalization;");
         code.AppendLine("using System.CodeDom.Compiler;");
         code.AppendLine("using Cave;");
+        code.AppendLine("using Cave.Collections;");
         code.AppendLine("using Cave.Data;");
         code.AppendLine("using Cave.IO;");
 
@@ -113,7 +115,14 @@ public class TableInterfaceGenerator
         code.AppendLine($"namespace {NameSpace}");
         code.AppendLine("{");
         code.AppendLine($"\t/// <summary>Table structure for {Layout.Name}.</summary>");
-        code.AppendLine($"\t[GeneratedCode(\"{generator.FullName}\",\"{generator.Assembly.GetName().Version}\")]");
+        if (Options.VersionHeader)
+        {
+            code.AppendLine($"\t[GeneratedCode(\"{generator.FullName}\", \"{generator.Assembly.GetName().Version}\")]");
+        }
+        else
+        {
+            code.AppendLine($"\t[GeneratedCode(\"{generator.FullName}\", null)]");
+        }
         code.AppendLine($"\t[Table(\"{Layout.Name}\")]");
         code.AppendLine($"\tpublic partial struct {ClassName} : IEquatable<{ClassName}>");
         code.AppendLine("\t{");
@@ -135,7 +144,9 @@ public class TableInterfaceGenerator
 
         #region Add fields
 
-        foreach (var field in Layout)
+        IEnumerable<IFieldProperties> fields = Layout;
+        if (Options.FieldConverter is not null) fields = fields.Select(Options.FieldConverter);
+        foreach (var field in fields)
         {
             code.AppendLine();
             code.AppendLine($"\t\t/// <summary>{field}</summary>");
@@ -143,7 +154,7 @@ public class TableInterfaceGenerator
             {
                 var description = HttpUtility.HtmlEncode(field.Description).ReplaceNewLine("<br/>");
                 code.AppendLine($"\t\t/// <remarks>{description}</remarks>");
-                code.AppendLine($"\t\t[Description(\"{field.Description.EscapeUtf8()}\")]");
+                code.AppendLine($"\t\t[Description(\"{field.Description!.EscapeUtf8()}\")]");
             }
 
             code.Append("\t\t[Field(");
@@ -194,7 +205,7 @@ public class TableInterfaceGenerator
             }
 
             AddAttribute(field.AlternativeNames, () => $"AlternativeNames = \"{field.AlternativeNames.Join(", ")}\"");
-            AddAttribute(field.DisplayFormat, () => $"DisplayFormat = \"{field.DisplayFormat.EscapeUtf8()}\"");
+            AddAttribute(field.DisplayFormat, () => $"DisplayFormat = \"{field.DisplayFormat?.EscapeUtf8()}\"");
             code.AppendLine(")]");
             if ((field.DateTimeKind != DateTimeKind.Unspecified) || (field.DateTimeType != DateTimeType.Undefined))
             {
@@ -206,13 +217,15 @@ public class TableInterfaceGenerator
                 code.AppendLine($"\t\t[StringFormat(StringEncoding.{field.StringEncoding})]");
             }
 
+            var visibility = Options.FieldVisibility?.Invoke(field) ?? FieldVisibility.Public;
+            var visibilityString = visibility.GetFlags().Join(" ").ToLowerInvariant();
             if (field.IsNullable)
             {
-                code.AppendLine($"\t\tpublic {field.DotNetTypeName}? {sharpName};");
+                code.AppendLine($"\t\t{visibilityString} {field.DotNetTypeName}? {sharpName};");
             }
             else
             {
-                code.AppendLine($"\t\tpublic {field.DotNetTypeName} {sharpName};");
+                code.AppendLine($"\t\t{visibilityString} {field.DotNetTypeName} {sharpName};");
             }
         }
 
@@ -306,7 +319,14 @@ public class TableInterfaceGenerator
                     }
 
                     var name = fieldNameLookup[field.Index];
-                    code.Append($"\t\t\t\tEquals(other.{name}, {name})");
+                    if (typeof(IEnumerable).IsAssignableFrom(field.ValueType))
+                    {
+                        code.Append($"\t\t\t\tDefaultComparer.Equals(other.{name}, {name})");
+                    }
+                    else
+                    {
+                        code.Append($"\t\t\t\tEquals(other.{name}, {name})");
+                    }
                 }
 
                 code.AppendLine(";");

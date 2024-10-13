@@ -1,16 +1,15 @@
-namespace Cave.Data
+namespace Cave.Data;
+
+/// <summary>Provides an interface to database parameters.</summary>
+public interface IDatabaseParameter
 {
-    /// <summary>Provides an interface to database parameters.</summary>
-    public interface IDatabaseParameter
-    {
-        #region Properties
+    #region Public Properties
 
-        /// <summary>Gets the name of the <see cref="IDatabaseParameter" />.</summary>
-        string Name { get; }
+    /// <summary>Gets the name of the <see cref="IDatabaseParameter"/>.</summary>
+    string Name { get; }
 
-        /// <summary>Gets the value of the <see cref="IDatabaseParameter" />.</summary>
-        object Value { get; }
+    /// <summary>Gets the value of the <see cref="IDatabaseParameter"/>.</summary>
+    object Value { get; }
 
-        #endregion
-    }
+    #endregion Public Properties
 }

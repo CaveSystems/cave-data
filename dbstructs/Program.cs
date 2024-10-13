@@ -23,7 +23,7 @@ class Program
         try
         {
             using var mysql = new MySqlConnection();
-            ConnectionString conStr = args.FirstOrDefault();
+            ConnectionString conStr = args.FirstOrDefault() ?? string.Empty;
             Console.WriteLine($"Connecting to {conStr.ToString(ConnectionStringPart.NoCredentials)}");
             var con = Connector.ConnectStorage(conStr, ConnectionFlags.AllowUnsafeConnections);
 

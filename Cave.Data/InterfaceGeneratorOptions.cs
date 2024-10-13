@@ -1,4 +1,7 @@
-﻿namespace Cave.Data;
+﻿using System;
+
+namespace Cave.Data;
+
 
 /// <summary>Options for <see cref="DatabaseInterfaceGenerator"/> and <see cref="TableInterfaceGenerator"/>.</summary>
 public record InterfaceGeneratorOptions : BaseRecord
@@ -14,4 +17,13 @@ public record InterfaceGeneratorOptions : BaseRecord
 
     /// <summary>Generate GetHashCode() using only the identifier fields.</summary>
     public bool IdentifierHashCode { get; set; }
+
+    /// <summary>Put the assembly version into the generated files at the [GeneratedCode] Attribute.</summary>
+    public bool VersionHeader { get; set; }
+
+    /// <summary>Provides a converter function for user defined field conversion. (E.g.: change type of specific field, modify settings or csharp name.)</summary>
+    public Func<IFieldProperties, IFieldProperties>? FieldConverter { get; set; }
+
+    /// <summary>Provides a function for user defined field visibility at generated structures.</summary>
+    public Func<IFieldProperties, FieldVisibility>? FieldVisibility { get; set; }
 }

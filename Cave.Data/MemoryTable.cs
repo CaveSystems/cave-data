@@ -18,10 +18,10 @@ public class MemoryTable : Table
     bool isReadonly;
 
     /// <summary>The rows (id, row) dictionary.</summary>
-    Dictionary<Identifier, object[]> rows = new();
+    Dictionary<Identifier, object?[]> rows = new();
 
     /// <summary>The indices for fast lookups.</summary>
-    FieldIndex[] indices;
+    FieldIndex[] indices = [];
 
     /// <summary>The memory table options.</summary>
     MemoryTableOptions memoryTableOptions;
@@ -153,7 +153,7 @@ public class MemoryTable : Table
             }
         }
 
-        return null;
+        return [];
     }
 
     #endregion public static CreateIndex()
@@ -178,7 +178,7 @@ public class MemoryTable : Table
     /// <param name="userItem">The user item.</param>
     /// <exception cref="ArgumentNullException">Table.</exception>
     /// <exception cref="ReadOnlyException">Table {0} is readonly!.</exception>
-    public void LoadTable(ITable table, Search search = null, ProgressCallback callback = null, object userItem = null)
+    public void LoadTable(ITable table, Search? search = null, ProgressCallback? callback = null, object? userItem = null)
     {
         Trace.TraceInformation("Loading table {0}", table);
         if (table == null)
@@ -274,7 +274,7 @@ public class MemoryTable : Table
     #region Exist
 
     /// <inheritdoc/>
-    public override bool Exist(Search search)
+    public override bool Exist(Search? search)
     {
         if (search == null)
         {
@@ -282,7 +282,7 @@ public class MemoryTable : Table
         }
 
         search.LoadLayout(Layout, this.GetFieldNameComparison());
-        return rows.Values.Any(row => search.Check(row));
+        return rows.Values.Any(search.Check);
     }
 
     /// <inheritdoc/>
@@ -453,7 +453,7 @@ public class MemoryTable : Table
     /// <summary>Removes all rows from the table matching the specified search.</summary>
     /// <param name="search">The Search used to identify rows for removal.</param>
     /// <returns>The number of dataset deleted.</returns>
-    public override int TryDelete(Search search)
+    public override int TryDelete(Search? search)
     {
         search ??= Search.None;
 
@@ -485,7 +485,7 @@ public class MemoryTable : Table
             Trace.TraceInformation("Clear {0}", this);
         }
 
-        rows = new Dictionary<Identifier, object[]>();
+        rows = new Dictionary<Identifier, object?[]>();
         indices = CreateIndex(Layout, memoryTableOptions);
         IncreaseSequenceNumber();
     }
@@ -495,7 +495,7 @@ public class MemoryTable : Table
     #region Count
 
     /// <inheritdoc/>
-    public override long Count(Search search = default, ResultOption resultOption = null) => GetRows(search, resultOption).Count;
+    public override long Count(Search? search = null, ResultOption? resultOption = null) => GetRows(search, resultOption).Count;
 
     #endregion Count
 
@@ -509,14 +509,14 @@ public class MemoryTable : Table
     #region GetRows
 
     /// <inheritdoc/>
-    public override IList<Row> GetRows(Search search = default, ResultOption resultOption = null) => GetRows(search, resultOption);
+    public override IList<Row> GetRows(Search? search = null, ResultOption? resultOption = null) => GetRows(search, resultOption);
 
     #endregion GetRows
 
     #region GetRow
 
     /// <inheritdoc/>
-    public override Row GetRow(Search search = default, ResultOption resultOption = null) => GetRows(search, resultOption).Single();
+    public override Row GetRow(Search? search = null, ResultOption? resultOption = null) => GetRows(search, resultOption).Single();
 
     #endregion GetRow
 
@@ -559,13 +559,9 @@ public class MemoryTable : Table
     /// <exception cref="ArgumentException">Field '{Parameter}' is not present!.</exception>
     /// <exception cref="InvalidOperationException">Cannot set two different limits or offsets!.</exception>
     /// <exception cref="NotSupportedException">Option {option.Mode} is not supported!.</exception>
-    IList<Row> GetRows(Search search, ResultOption resultOption, bool skipSearch = false)
+    IList<Row> GetRows(Search? search, ResultOption? resultOption = null, bool skipSearch = false)
     {
-        if (resultOption == null)
-        {
-            resultOption = ResultOption.None;
-        }
-
+        resultOption ??= ResultOption.None;
         if ((search == null) || (search.Mode == SearchMode.None))
         {
             skipSearch = true;
@@ -575,12 +571,12 @@ public class MemoryTable : Table
             search.LoadLayout(Layout, this.GetFieldNameComparison());
         }
 
-        List<int> grouping = null;
-        Set<int, ResultOptionMode> sorting = null;
+        List<int>? grouping = null;
+        Set<int, ResultOptionMode>? sorting = null;
         var limit = -1;
         var offset = -1;
 
-        if (resultOption != null)
+        if (resultOption is not null)
         {
             foreach (var option in resultOption.ToArray())
             {
@@ -589,6 +585,7 @@ public class MemoryTable : Table
                     case ResultOptionMode.None: break;
                     case ResultOptionMode.Group:
                     {
+                        if (option.Parameter is null) throw new InvalidOperationException($"Option {option} parameter unset!");
                         var fieldIndex = Layout.GetFieldIndex(option.Parameter, true);
                         grouping ??= new();
                         grouping.Add(fieldIndex);
@@ -598,6 +595,7 @@ public class MemoryTable : Table
                     case ResultOptionMode.SortAsc:
                     case ResultOptionMode.SortDesc:
                     {
+                        if (option.Parameter is null) throw new InvalidOperationException($"Option {option} parameter unset!");
                         var fieldIndex = Layout.GetFieldIndex(option.Parameter, true);
                         sorting ??= new();
                         sorting.Add(fieldIndex, option.Mode);
@@ -610,7 +608,7 @@ public class MemoryTable : Table
                         {
                             throw new InvalidOperationException("Cannot set two different limits!");
                         }
-
+                        if (option.Parameter is null) throw new InvalidOperationException($"Option {option} parameter unset!");
                         limit = Math.Abs(int.Parse(option.Parameter, null));
                         break;
                     }
@@ -620,7 +618,7 @@ public class MemoryTable : Table
                         {
                             throw new InvalidOperationException("Cannot set two different offsets!");
                         }
-
+                        if (option.Parameter is null) throw new InvalidOperationException($"Option {option} parameter unset!");
                         offset = Math.Abs(int.Parse(option.Parameter, null));
                         break;
                     }
@@ -637,7 +635,7 @@ public class MemoryTable : Table
         else
         {
             // simple ungrouped search
-            result = search.Scan(null, Layout, indices, this);
+            result = search!.Scan(null, Layout, indices, this);
         }
 
         // group by ?
@@ -657,7 +655,7 @@ public class MemoryTable : Table
             result = groupedRows;
         }
 
-        List<Row> sorted = null;
+        List<Row>? sorted = null;
         if (sorting != null && sorting.Count > 0)
         {
             sorted = result.ToList();

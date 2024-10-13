@@ -4,19 +4,18 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
+
 namespace Cave.Data;
 
 /// <summary>Code generator for IDatabase instances.</summary>
 public class DatabaseInterfaceGenerator
 {
-    record TableInfo(RowLayout Layout, string TableNameAtDatabase, string ClassName, string GetterName, InterfaceGeneratorOptions Options) : BaseRecord;
+    sealed record TableInfo(RowLayout Layout, string TableNameAtDatabase, string ClassName, string GetterName, InterfaceGeneratorOptions Options) : BaseRecord;
 
     #region Private Fields
 
-    readonly string footer;
-
-    readonly string header;
-
+    string? footer;
+    string? header;
     readonly Dictionary<string, TableInfo> tables = new();
 
     #endregion Private Fields
@@ -32,18 +31,47 @@ public class DatabaseInterfaceGenerator
     /// <summary>Initializes a new instance of the <see cref="DatabaseInterfaceGenerator" /> class.</summary>
     /// <param name="database">Database to use.</param>
     /// <param name="className">Name of the class to generate (optional).</param>
-    public DatabaseInterfaceGenerator(IDatabase database, string className = null) : this(database, className, null) { }
+    public DatabaseInterfaceGenerator(IDatabase database, string? className = null) : this(database, className, null) { }
 
     /// <summary>Initializes a new instance of the <see cref="DatabaseInterfaceGenerator" /> class.</summary>
     /// <param name="database">Database to use.</param>
     /// <param name="className">Name of the class to generate (optional).</param>
     /// <param name="nameSpace">The namespace to use for all classes (defaults to "Database").</param>
-    public DatabaseInterfaceGenerator(IDatabase database, string className = null, string nameSpace = null)
+    public DatabaseInterfaceGenerator(IDatabase database, string? className = null, string? nameSpace = null)
     {
-        var generator = typeof(DatabaseInterfaceGenerator);
         Database = database ?? throw new ArgumentNullException(nameof(database));
         ClassName = className ?? GetName(database.Name) + "Db";
         NameSpace = nameSpace ?? "Database";
+    }
+
+    #endregion Public Constructors
+
+    #region Public Properties
+
+    /// <summary>Gets the name of the generated class.</summary>
+    public string ClassName { get; set; }
+
+    /// <summary>Gets the used database instance.</summary>
+    public IDatabase Database { get; }
+
+    /// <summary>Gets the filename used at <see cref="Save(string)"/>.</summary>
+    public string? FileName { get; set; }
+    /// <summary>Gets the namespace of the generated class.</summary>
+    public string NameSpace { get; set; }
+
+    /// <summary>Naming strategy for classes, properties, structures and fields.</summary>
+    public NamingStrategy NamingStrategy { get; set; } = NamingStrategy.PascalCase;
+
+    /// <summary>Options for code generation.</summary>
+    public InterfaceGeneratorOptions Options { get; } = new();
+
+    #endregion Public Properties
+
+    #region Public Methods
+
+    void WriteHeaderAndFooter()
+    {
+        var generator = typeof(DatabaseInterfaceGenerator);
         var code = new StringBuilder();
         code.AppendLine("//-----------------------------------------------------------------------");
         code.AppendLine("// <summary>");
@@ -61,8 +89,15 @@ public class DatabaseInterfaceGenerator
         code.AppendLine();
         code.AppendLine($"namespace {NameSpace}");
         code.AppendLine("{");
-        code.AppendLine($"\t/// <summary>Provides access to table structures for database {database.Name}.</summary>");
-        code.AppendLine($"\t[GeneratedCode(\"{generator.FullName}\",\"{generator.Assembly.GetName().Version}\")]");
+        code.AppendLine($"\t/// <summary>Provides access to table structures for database {Database.Name}.</summary>");
+        if (Options.VersionHeader)
+        {
+            code.AppendLine($"\t[GeneratedCode(\"{generator.FullName}\", \"{generator.Assembly.GetName().Version}\")]");
+        }
+        else
+        {
+            code.AppendLine($"\t[GeneratedCode(\"{generator.FullName}\", null)]");
+        }
         code.AppendLine($"\tpublic static partial class {ClassName}");
         code.AppendLine("\t{");
         code.AppendLine("\t\tstatic IDatabase? database;");
@@ -73,18 +108,17 @@ public class DatabaseInterfaceGenerator
         code.AppendLine("\t\t/// <summary>Gets or sets the flags used when accessing table instances.</summary>");
         code.AppendLine("\t\tpublic static TableFlags DefaultTableFlags { get; set; }");
         code.AppendLine();
-        code.AppendLine($"\t\t/// <summary>Connects to the {database.Name} database.</summary>");
+        code.AppendLine($"\t\t/// <summary>Connects to the {Database.Name} database.</summary>");
         code.AppendLine("\t\t/// <param name=\"storage\">IStorage instance to use.</param>");
         code.AppendLine("\t\t/// <param name=\"createIfNotExists\">Create the databaseName if its not already present.</param>");
         code.AppendLine("\t\t/// <returns>A new <see cref=\"IDatabase\" /> instance.</returns>");
         code.AppendLine("\t\tpublic static void Connect(IStorage storage, bool createIfNotExists = false)");
         code.AppendLine("\t\t{");
-        code.AppendLine($"\t\t\tdatabase = storage.GetDatabase(\"{database.Name}\", createIfNotExists);");
+        code.AppendLine($"\t\t\tdatabase = storage.GetDatabase(\"{Database.Name}\", createIfNotExists);");
         code.AppendLine("\t\t}");
         code.AppendLine();
         code.AppendLine("\t\t/// <summary>Gets or sets the function used to retrieve tables from the database.</summary>");
         code.AppendLine("\t\tpublic static Func<string, ITable> GetTable { get; set; } = (tableName) => Database.GetTable(tableName, DefaultTableFlags);");
-
         header = code.ToString();
         code = new StringBuilder();
         code.AppendLine("\t}");
@@ -92,76 +126,35 @@ public class DatabaseInterfaceGenerator
         footer = code.ToString();
     }
 
-    #endregion Public Constructors
-
-    #region Public Properties
-
-    /// <summary>Gets the name of the generated class.</summary>
-    public string ClassName { get; }
-
-    /// <summary>Gets the used database instance.</summary>
-    public IDatabase Database { get; }
-
-    /// <summary>Gets the filename used at <see cref="Save(string)"/>.</summary>
-    public string FileName { get; private set; }
-    /// <summary>Gets the namespace of the generated class.</summary>
-    public string NameSpace { get; }
-
-    /// <summary>Naming strategy for classes, properties, structures and fields.</summary>
-    public NamingStrategy NamingStrategy { get; set; } = NamingStrategy.PascalCase;
-
-    /// <summary>Options for code generation.</summary>
-    public InterfaceGeneratorOptions Options { get; } = new();
-
-    #endregion Public Properties
-
-    #region Public Methods
-
-    /// <summary>Adds a table to the database interface code. This does not generate the table class!</summary>
-    /// <param name="table">The table to add.</param>
-    /// <param name="className">Name of the (table) class to use (optional).</param>
-    /// <param name="getterName">Name of the getter in the resulting class (optional).</param>
-    [Obsolete("Use GenerateTableCodeResult Add(RowLayout tableLayout, GenerateTableCodeResult tableCodeResult)")]
-    public void Add(ITable table, string className = null, string getterName = null)
-    {
-        Add(table.Layout, table.Layout.Name, className, getterName);
-    }
-
     /// <summary>Adds a table to the database interface code. This does not generate the table class!</summary>
     /// <param name="tableLayout">Layout of the table</param>
     /// <param name="tableCodeResult">The table to add.</param>
     /// <param name="getterName">Name of the getter in the resulting class (optional).</param>
-    public GenerateTableCodeResult Add(RowLayout tableLayout, GenerateTableCodeResult tableCodeResult, string getterName = null)
+    public GenerateTableCodeResult Add(RowLayout tableLayout, GenerateTableCodeResult tableCodeResult, string? getterName = null)
     {
         tableCodeResult.TableName ??= tableLayout.Name;
+        if (tableCodeResult.TableName is null) throw new InvalidOperationException("One of tableCodeResult.TableName or tableLayout.Name has to be set!");
         tableCodeResult.DatabaseName ??= GetName(Database.Name);
-        tableCodeResult.GetterName = getterName ?? (tableCodeResult.TableName is null ? GetName(tableLayout.Name) : GetName(tableCodeResult.TableName));
+        tableCodeResult.GetterName = getterName ?? GetName(tableCodeResult.TableName);
         tableCodeResult.ClassName ??= tableCodeResult.DatabaseName + tableCodeResult.TableName + "Row";
         tables.Add(tableLayout.Name, new TableInfo(tableLayout, tableCodeResult.TableName, tableCodeResult.ClassName, tableCodeResult.GetterName, Options));
         return tableCodeResult;
     }
 
-
-    /// <summary>Adds a table to the code.</summary>
-    /// <param name="tableLayout">Layout of the table</param>
-    /// <param name="tableName">Name of the table at the database.</param>
-    /// <param name="className">Name of the (table) class to use. (Default: DatabaseTableRow)</param>
-    /// <param name="getterName">Name of the getter in the resulting class (Default: Table).</param>
-    [Obsolete("Use GenerateTableCodeResult Add(RowLayout tableLayout, GenerateTableCodeResult tableCodeResult)")]
-    public void Add(RowLayout tableLayout, string tableName = null, string className = null, string getterName = null)
-        => Add(tableLayout, new GenerateTableCodeResult() { ClassName = className, TableName = tableName }, getterName);
-
     /// <summary>Generates the interface code.</summary>
     /// <returns>Returns c# code.</returns>
     public string Generate()
     {
+        WriteHeaderAndFooter();
+
         var result = new StringBuilder();
         result.Append(header);
         foreach (var table in tables.Values.OrderBy(t => t.ClassName))
         {
             result.AppendLine();
-            var strongTypedIdentifier = table.Layout.SingleIdentifier != null && !Options.DisableKnownIdentifiers;
-            var typeString = strongTypedIdentifier ? $"{table.Layout.SingleIdentifier.DotNetTypeName}, {table.ClassName}" : table.ClassName;
+            var singleIdentifier = table.Layout.SingleIdentifier;
+            var strongTypedIdentifier = singleIdentifier != null && !Options.DisableKnownIdentifiers;
+            var typeString = strongTypedIdentifier ? $"{singleIdentifier!.DotNetTypeName}, {table.ClassName}" : table.ClassName;
             var genericString = strongTypedIdentifier ? $"TKey, TStruct" : "TStruct";
             result.AppendLine($"\t\t/// <summary>Gets a new <see cref=\"ITable{{{genericString}}}\"/> ({typeString}) instance for accessing the <c>{table.TableNameAtDatabase}</c> table.</summary>");
             result.AppendLine($"\t\tpublic static ITable<{typeString}> {table.GetterName} => new Table<{typeString}>(GetTable(\"{table.TableNameAtDatabase}\"));");
@@ -178,8 +171,8 @@ public class DatabaseInterfaceGenerator
     /// <param name="className">The name of the class to generate.</param>
     /// <param name="structFile">The table struct file name (defaults to classname.cs).</param>
     /// <param name="getterName">Name of the table getter (optional).</param>
-    public GenerateTableCodeResult GenerateTableStructFile(ITable table, string databaseName = null, string tableName = null, string className = null,
-        string structFile = null, string getterName = null)
+    public GenerateTableCodeResult GenerateTableStructFile(ITable table, string? databaseName = null, string? tableName = null, string? className = null,
+        string? structFile = null, string? getterName = null)
     {
         if (table == null)
         {
@@ -202,10 +195,13 @@ public class DatabaseInterfaceGenerator
 
     /// <summary>Saves the output of <see cref="Generate" /> to the specified filename.</summary>
     /// <param name="fileName">Filename to save to.</param>
-    public void Save(string fileName = null)
+    public void Save(string? fileName = null)
     {
-        FileName = fileName ?? ClassName + ".cs";
-        FileName = Path.Combine(Options.OutputDirectory, FileName);
+        if (fileName is not null || FileName is null)
+        {
+            FileName = fileName ?? ClassName + ".cs";
+            FileName = Path.Combine(Options.OutputDirectory, FileName);
+        }
         File.WriteAllText(FileName, Generate());
     }
 
