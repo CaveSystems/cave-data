@@ -42,10 +42,10 @@ public class PgsqlTable : SqlTable
     /// <param name="flags">Flags used to connect to the table.</param>
     /// <param name="tableName">The table to connect to.</param>
     /// <returns>Returns a new <see cref="PgsqlTable"/> instance.</returns>
-    public static PgsqlTable Connect(PgsqlDatabase database, TableFlags flags, string tableName)
+    public static ITable Connect(PgsqlDatabase database, TableFlags flags, string tableName)
     {
-        var table = new PgsqlTable();
-        table.Initialize(database, flags, tableName);
+        SqlTable table = new PgsqlTable();
+        table.Connect(database, flags, tableName);
         return table;
     }
 
@@ -54,10 +54,10 @@ public class PgsqlTable : SqlTable
     /// <param name="flags">Flags used to connect to the table.</param>
     /// <param name="layout">The table layout.</param>
     /// <returns>Returns a new <see cref="PgsqlTable"/> instance.</returns>
-    public static PgsqlTable Connect(PgsqlDatabase database, TableFlags flags, RowLayout layout)
+    public static ITable Connect(PgsqlDatabase database, TableFlags flags, RowLayout layout)
     {
-        var table = new PgsqlTable();
-        table.Connect((IDatabase)database, flags, layout);
+        ITable table = new PgsqlTable();
+        table.Connect(database, flags, layout);
         return table;
     }
 

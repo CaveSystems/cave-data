@@ -42,10 +42,10 @@ public class SqliteTable : SqlTable
     /// <param name="flags">Flags used to connect to the table.</param>
     /// <param name="tableName">The table to connect to.</param>
     /// <returns>Returns a new <see cref="SqliteTable"/> instance.</returns>
-    public static SqliteTable Connect(SqliteDatabase database, TableFlags flags, string tableName)
+    public static ITable Connect(SqliteDatabase database, TableFlags flags, string tableName)
     {
-        var table = new SqliteTable();
-        table.Initialize(database, flags, tableName);
+        SqlTable table = new SqliteTable();
+        table.Connect(database, flags, tableName);
         return table;
     }
 

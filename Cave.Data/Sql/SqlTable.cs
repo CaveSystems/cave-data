@@ -14,6 +14,12 @@ namespace Cave.Data.Sql;
 /// <summary>Provides a table implementation for generic sql92 databases.</summary>
 public abstract class SqlTable : Table
 {
+    #region Private Fields
+
+    SqlStorage? storage;
+
+    #endregion Private Fields
+
     #region Private Methods
 
     void AppendWhereClause(SqlCommandBuilder commandBuilder, Row row, bool useParameters)
@@ -606,8 +612,8 @@ public abstract class SqlTable : Table
         }
     }
 
-    /// <summary>Gets or sets the used <see cref="Sql.SqlStorage"/> backend.</summary>
-    public new SqlStorage Storage { get; set; } = SqlStorage.None;
+    /// <summary>Gets or sets the used <see cref="SqlStorage"/> backend.</summary>
+    public new SqlStorage Storage => storage ?? (SqlStorage)base.Storage;
 
     #endregion Public Properties
 
@@ -645,6 +651,23 @@ public abstract class SqlTable : Table
         }
     }
 
+    /// <summary>Initializes the interface class. This is the first method to call after create.</summary>
+    /// <remarks>Use this to connect to tables with unknown layout.</remarks>
+    /// <param name="database">Database the table belongs to.</param>
+    /// <param name="flags">Flags used to connect to the table.</param>
+    /// <param name="tableName">Table name to load.</param>
+    public void Connect(IDatabase database, TableFlags flags, string tableName)
+    {
+        if (database is null || database.Storage is not SqlStorage sqlStorage)
+        {
+            throw new InvalidOperationException("Database has to be a SqlDatabase!");
+        }
+        storage = sqlStorage;
+        FQTN = storage.FQTN(database.Name, tableName);
+        var schema = QueryLayout(database.Name, tableName);
+        base.Connect(database, flags, schema);
+    }
+
     /// <inheritdoc/>
     public override void Connect(IDatabase database, TableFlags flags, RowLayout layout)
     {
@@ -658,7 +681,7 @@ public abstract class SqlTable : Table
             throw new ArgumentNullException(nameof(layout));
         }
 
-        Storage = (database.Storage as SqlStorage) ?? throw new InvalidOperationException("Database has to be a SqlDatabase!");
+        storage = (database.Storage as SqlStorage) ?? throw new InvalidOperationException("Database has to be a SqlDatabase!");
         FQTN = Storage.FQTN(database.Name, layout.Name);
         var schema = QueryLayout(database.Name, layout.Name);
         Storage.CheckLayout(schema, layout, flags);
@@ -815,22 +838,6 @@ public abstract class SqlTable : Table
         }
 
         return result.AsList();
-    }
-
-    /// <summary>Initializes the interface class. This is the first method to call after create.</summary>
-    /// <param name="database">Database the table belongs to.</param>
-    /// <param name="flags">Flags used to connect to the table.</param>
-    /// <param name="tableName">Table name to load.</param>
-    public void Initialize(IDatabase database, TableFlags flags, string tableName)
-    {
-        if (database is null || database.Storage is not SqlStorage storage)
-        {
-            throw new InvalidOperationException("Database has to be a SqlDatabase!");
-        }
-        Storage = storage;
-        FQTN = Storage.FQTN(database.Name, tableName);
-        var schema = QueryLayout(database.Name, tableName);
-        base.Connect(database, flags, schema);
     }
 
     /// <inheritdoc/>

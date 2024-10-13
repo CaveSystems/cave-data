@@ -388,7 +388,7 @@ public static class ITableExtensions
             throw new ArgumentNullException(nameof(table));
         }
 
-        var result = table.GetStructs([key]);
+        var result = table.GetStructs(new[] { key });
         if (result.Count > 0)
         {
             row = result.Single();

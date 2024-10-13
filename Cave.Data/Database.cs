@@ -51,9 +51,6 @@ public abstract class Database : IDatabase
 
     #region Public Properties
 
-    /// <summary>Empty invalid database instance. Used for uninitalized objects.</summary>
-    public static IDatabase None { get; } = new NoDatabase();
-
     /// <inheritdoc/>
     public abstract bool IsClosed { get; }
 

@@ -12,7 +12,7 @@ public sealed class ResultOption : IEnumerable<ResultOption>, IEquatable<ResultO
 {
     #region Private Fields
 
-    readonly IEnumerable<ResultOption> list;
+    readonly IEnumerable<ResultOption>? list;
 
     #endregion Private Fields
 
@@ -30,7 +30,6 @@ public sealed class ResultOption : IEnumerable<ResultOption>, IEquatable<ResultO
     {
         Mode = mode;
         Parameter = parameter;
-        list = [];
     }
 
     #endregion Private Constructors

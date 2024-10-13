@@ -303,9 +303,6 @@ public abstract class SqlStorage : Storage, IDisposable
 
     #region Public Properties
 
-    /// <summary>Empty or invalid storage. This is used for objects with lazy initialization.</summary>
-    public static new SqlStorage None { get; } = (SqlStorage)Storage.None;
-
     /// <summary>Gets or sets command timeout for all sql commands.</summary>
     public TimeSpan CommandTimeout { get; set; } = TimeSpan.FromMinutes(1);
 

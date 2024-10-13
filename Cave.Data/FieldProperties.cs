@@ -106,8 +106,14 @@ public class FieldProperties : IFieldProperties
     /// <inheritdoc/>
     public string Name { get; set; } = string.Empty;
 
+    string? nameAtDatabase;
+
     /// <inheritdoc/>
-    public string NameAtDatabase { get; set; } = string.Empty;
+    public string NameAtDatabase
+    {
+        get => nameAtDatabase ?? Name;
+        set => nameAtDatabase = value;
+    }
 
     /// <inheritdoc/>
     public StringEncoding StringEncoding { get; set; }

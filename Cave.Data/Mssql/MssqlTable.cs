@@ -42,10 +42,10 @@ public class MssqlTable : SqlTable
     /// <param name="flags">Flags used to connect to the table.</param>
     /// <param name="tableName">The table to connect to.</param>
     /// <returns>Returns a new <see cref="MssqlTable"/> instance.</returns>
-    public static MssqlTable Connect(MssqlDatabase database, TableFlags flags, string tableName)
+    public static ITable Connect(MssqlDatabase database, TableFlags flags, string tableName)
     {
-        var table = new MssqlTable();
-        table.Initialize(database, flags, tableName);
+        SqlTable table = new MssqlTable();
+        table.Connect(database, flags, tableName);
         return table;
     }
 

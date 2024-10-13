@@ -68,10 +68,10 @@ public class MysqlTable : SqlTable
     /// <param name="flags">Flags used to connect to the table.</param>
     /// <param name="tableName">The table to connect to.</param>
     /// <returns>Returns a new <see cref="MysqlTable"/> instance.</returns>
-    public static MysqlTable Connect(MysqlDatabase database, TableFlags flags, string tableName)
+    public static ITable Connect(MysqlDatabase database, TableFlags flags, string tableName)
     {
-        var table = new MysqlTable();
-        table.Initialize(database, flags, tableName);
+        SqlTable table = new MysqlTable();
+        table.Connect(database, flags, tableName);
         return table;
     }
 

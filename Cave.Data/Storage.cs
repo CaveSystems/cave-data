@@ -48,9 +48,6 @@ public abstract class Storage : IStorage
     /// <summary>Gets or sets the date time format for big int date time values.</summary>
     public static string BigIntDateTimeFormat { get; set; } = "yyyyMMddHHmmssfff";
 
-    /// <summary>Empty or invalid storage. This is used for objects with lazy initialization.</summary>
-    public static IStorage None { get; } = new NoStorage();
-
     /// <inheritdoc/>
     public bool AllowUnsafeConnections { get; }
 

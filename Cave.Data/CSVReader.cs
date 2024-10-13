@@ -10,7 +10,7 @@ public class CsvReader : IDisposable
 {
     #region Private Fields
 
-    readonly int[] fieldNumberMatching = [];
+    readonly int[]? fieldNumberMatching;
     int currentRowNumber;
     DataReader? reader;
 

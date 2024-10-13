@@ -19,7 +19,7 @@ public sealed class RowLayout : IEquatable<RowLayout>, IEnumerable<IFieldPropert
     #region Private Fields
 
     static readonly Dictionary<string, RowLayout> LayoutCache = new();
-    readonly IFieldProperties[] fieldProperties;
+    readonly IList<IFieldProperties> fieldProperties;
 
     #endregion Private Fields
 
@@ -320,7 +320,7 @@ public sealed class RowLayout : IEquatable<RowLayout>, IEnumerable<IFieldPropert
                 var tableName = tableAttribute.NamingStrategy.GetNameByStrategy(tableAttribute.Name ?? type.Name);
                 if (!string.IsNullOrEmpty(nameOverride))
                 {
-                    tableName = nameOverride;
+                    tableName = nameOverride ?? type.Name;
                 }
 
                 if (tableName.HasInvalidChars(ASCII.Strings.SafeName))
@@ -512,7 +512,7 @@ public sealed class RowLayout : IEquatable<RowLayout>, IEnumerable<IFieldPropert
     }
 
     /// <inheritdoc/>
-    public IEnumerator<IFieldProperties> GetEnumerator() => (IEnumerator<IFieldProperties>)fieldProperties.GetEnumerator();
+    public IEnumerator<IFieldProperties> GetEnumerator() => fieldProperties.GetEnumerator();
 
     /// <summary>Gets the field index of the specified field name.</summary>
     /// <param name="fieldName">The field name to search for.</param>

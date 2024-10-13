@@ -11,8 +11,8 @@
     <ProjectReference Include="..\Cave.Data\Cave.Data.csproj" />
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="dotnet $(TargetPath)" WorkingDirectory="$(OutDir)" />
-  </Target>
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)' == 'Release'">
+		<Exec Command="dotnet $(TargetPath)" WorkingDirectory="$(OutDir)" />
+	</Target>
 
 </Project>

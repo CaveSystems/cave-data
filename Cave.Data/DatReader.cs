@@ -333,7 +333,7 @@ public sealed class DatReader : IDisposable
         }
 
         version = reader.Read7BitEncodedInt32();
-        if (version is < 1 or > 4)
+        if (version is < 1 or > 5)
         {
             throw new InvalidDataException("Unknown Table version!");
         }
@@ -454,6 +454,8 @@ public sealed class DatReader : IDisposable
                 case DataType.UInt16: values[i] = ReadUInt16(version, reader, nullable); break;
                 case DataType.Int32: values[i] = ReadInt32(version, reader, nullable); break;
                 case DataType.UInt32: values[i] = ReadUInt32(version, reader, nullable); break;
+                case DataType.Int64: values[i] = ReadInt64(version, reader, nullable); break;
+                case DataType.UInt64: values[i] = ReadUInt64(version, reader, nullable); break;
                 case DataType.Char: values[i] = ReadChar(version, reader, nullable); break;
                 case DataType.Single: values[i] = ReadFloat(version, reader, nullable); break;
                 case DataType.Double: values[i] = ReadDouble(version, reader, nullable); break;

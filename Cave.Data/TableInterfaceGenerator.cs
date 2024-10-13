@@ -154,7 +154,7 @@ public class TableInterfaceGenerator
             {
                 var description = HttpUtility.HtmlEncode(field.Description).ReplaceNewLine("<br/>");
                 code.AppendLine($"\t\t/// <remarks>{description}</remarks>");
-                code.AppendLine($"\t\t[Description(\"{field.Description.EscapeUtf8()}\")]");
+                code.AppendLine($"\t\t[Description(\"{field.Description!.EscapeUtf8()}\")]");
             }
 
             code.Append("\t\t[Field(");

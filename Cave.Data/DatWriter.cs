@@ -27,9 +27,9 @@ public sealed class DatWriter : IDisposable
             throw new ArgumentOutOfRangeException(nameof(version));
         }
 
-        if (version > 4)
+        if (version > 5)
         {
-            throw new NotSupportedException("Version not supported!");
+            throw new NotSupportedException($"Version {version} not supported!");
         }
 
         try

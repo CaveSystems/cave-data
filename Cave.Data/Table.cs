@@ -14,6 +14,8 @@ public abstract class Table : ITable
 {
     #region Private Fields
 
+    IDatabase? database;
+
     int sequenceNumber;
 
     #endregion Private Fields
@@ -21,7 +23,7 @@ public abstract class Table : ITable
     #region Public Properties
 
     /// <inheritdoc/>
-    public IDatabase Database { get; private set; } = Cave.Data.Database.None;
+    public IDatabase Database => database ?? throw new InvalidOperationException("Database not connected.");
 
     /// <inheritdoc/>
     public TableFlags Flags { get; private set; }
@@ -107,7 +109,7 @@ public abstract class Table : ITable
     /// <inheritdoc/>
     public virtual void Connect(IDatabase database, TableFlags flags, RowLayout layout)
     {
-        if (Database != null)
+        if (this.database != null)
         {
             throw new InvalidOperationException("Already initialized!");
         }
@@ -118,7 +120,7 @@ public abstract class Table : ITable
         }
 
         Flags = flags;
-        Database = database ?? throw new ArgumentNullException(nameof(database));
+        this.database = database ?? throw new ArgumentNullException(nameof(database));
         Layout = layout ?? throw new ArgumentNullException(nameof(layout));
     }
 
