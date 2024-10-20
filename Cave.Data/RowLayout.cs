@@ -63,6 +63,7 @@ public sealed class RowLayout : IEquatable<RowLayout>, IEnumerable<IFieldPropert
             var valueText = value.ToString() ?? throw new InvalidOperationException($"Could not get string of {value.GetType()}!");
             value = field.DataType switch
             {
+                DataType.Guid => Guid.Parse(valueText),
                 DataType.User => field.ParseValue(valueText),
                 DataType.Enum => Enum.Parse(field.ValueType, valueText, true),
                 _ => Convert.ChangeType(value, field.ValueType, culture)
@@ -221,10 +222,10 @@ public sealed class RowLayout : IEquatable<RowLayout>, IEnumerable<IFieldPropert
                 currentField = fieldPropertiesConversion(currentField);
             }
 
-            if (!expectedField.Equals(currentField))
+            /*if (!expectedField.IsCompatible(currentField))
             {
                 throw new InvalidDataException($"Fieldproperties of table {current.Name} differ! (found {currentField} expected {expectedField})!");
-            }
+            }*/
         }
     }
 
@@ -298,12 +299,13 @@ public sealed class RowLayout : IEquatable<RowLayout>, IEnumerable<IFieldPropert
     /// <param name="storage">The Storage engine to use.</param>
     /// <param name="excludedFields">The excluded fields.</param>
     /// <returns>A new <see cref="RowLayout"/> instance.</returns>
-    public static RowLayout CreateTyped(Type type, string? nameOverride = null, IStorage? storage = null, params string[] excludedFields)
+    public static RowLayout CreateTyped(Type type, string? nameOverride = null, IStorage? storage = null, params string[]? excludedFields)
     {
         if (type == null)
         {
             throw new ArgumentNullException(nameof(type));
         }
+        if (excludedFields?.Length == 0) excludedFields = null;
 
         lock (LayoutCache)
         {
@@ -409,6 +411,7 @@ public sealed class RowLayout : IEquatable<RowLayout>, IEnumerable<IFieldPropert
         if (type == typeof(byte[])) { return DataType.Binary; }
         if (type == typeof(TimeSpan)) { return DataType.TimeSpan; }
         if (type == typeof(DateTime)) { return DataType.DateTime; }
+        if (type == typeof(Guid)) { return DataType.Guid; }
         return DataType.User;
     }
 
@@ -461,7 +464,7 @@ public sealed class RowLayout : IEquatable<RowLayout>, IEnumerable<IFieldPropert
 
         for (var i = 0; i < FieldCount; i++)
         {
-            if (!other.fieldProperties[i].Equals(fieldProperties[i]))
+            if (!other.fieldProperties[i].IsCompatible(fieldProperties[i]))
             {
                 return false;
             }

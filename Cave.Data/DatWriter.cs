@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
@@ -121,6 +122,7 @@ public sealed class DatWriter : IDisposable
                 case DataType.UInt64: Write(version, w, value as ulong?, nullable); break;
                 case DataType.Char: Write(version, w, value as char?, nullable); break;
                 case DataType.Enum: WriteEnum(version, w, value, nullable); break;
+                case DataType.Guid: WriteGuid(version, w, value as Guid?, nullable); break;
                 case DataType.String:
                 case DataType.User: WriteString(version, w, value, nullable); break;
                 default: throw new NotImplementedException($"Datatype {fieldProperties.DataType} not implemented!");
@@ -414,6 +416,12 @@ public sealed class DatWriter : IDisposable
         }
 
         w.Write7BitEncoded64(enumValue);
+    }
+
+    void WriteGuid(int version, DataWriter w, Guid? value, bool allowNull)
+    {
+        if (!allowNull) value ??= Guid.Empty;
+        WriteString(version, w, value?.ToString("D"), allowNull);
     }
 
     void WriteString(int version, DataWriter w, object? value, bool allowNull)

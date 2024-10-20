@@ -110,42 +110,16 @@ public sealed class MssqlDatabase : SqlDatabase
                     break;
 
                 case DataType.DateTime:
-                    switch (fieldProperties.DateTimeType)
-                    {
-                        case DateTimeType.Undefined:
-                        case DateTimeType.Native:
-                            queryText.Append("DATETIME");
-                            break;
-
-                        case DateTimeType.DoubleSeconds:
-                        case DateTimeType.DoubleEpoch:
-                            queryText.Append("FLOAT(53)");
-                            break;
-
-                        case DateTimeType.DecimalSeconds:
-                            queryText.Append("NUMERIC(28,8)");
-                            break;
-
-                        case DateTimeType.BigIntHumanReadable:
-                        case DateTimeType.BigIntTicks:
-                            queryText.Append("BIGINT");
-                            break;
-
-                        default: throw new NotImplementedException();
-                    }
-
-                    break;
-
                 case DataType.TimeSpan:
                     switch (fieldProperties.DateTimeType)
                     {
                         case DateTimeType.Undefined:
                         case DateTimeType.Native:
-                            queryText.Append("TIMESPAN");
+                            queryText.Append(fieldProperties.DataType.ToString().ToUpperInvariant());
                             break;
 
-                        case DateTimeType.DoubleEpoch:
                         case DateTimeType.DoubleSeconds:
+                        case DateTimeType.DoubleEpoch:
                             queryText.Append("FLOAT(53)");
                             break;
 
@@ -155,12 +129,14 @@ public sealed class MssqlDatabase : SqlDatabase
 
                         case DateTimeType.BigIntHumanReadable:
                         case DateTimeType.BigIntTicks:
+                        case DateTimeType.BigIntMilliSeconds:
+                        case DateTimeType.BigIntSeconds:
+                        case DateTimeType.BigIntEpoch:
                             queryText.Append("BIGINT");
                             break;
 
                         default: throw new NotImplementedException();
                     }
-
                     break;
 
                 case DataType.Int8:
@@ -189,6 +165,10 @@ public sealed class MssqlDatabase : SqlDatabase
 
                 case DataType.Enum:
                     queryText.Append("BIGINT");
+                    break;
+
+                case DataType.Guid:
+                    queryText.Append("UNIQUEIDENTIFIER");
                     break;
 
                 case DataType.User:
@@ -279,6 +259,7 @@ public sealed class MssqlDatabase : SqlDatabase
                     case DataType.UInt64:
                     case DataType.Single:
                     case DataType.TimeSpan:
+                    case DataType.Guid:
                         break;
 
                     case DataType.String:
@@ -292,6 +273,11 @@ public sealed class MssqlDatabase : SqlDatabase
 
                     default: throw new NotSupportedException($"Uniqueness for tableName {layout.Name} field {fieldProperties.Name} is not supported!");
                 }
+            }
+
+            if (!fieldProperties.Flags.HasFlag(FieldFlags.Nullable))
+            {
+                queryText.Append(" NOT NULL");
             }
 
             if (fieldProperties.Description != null)

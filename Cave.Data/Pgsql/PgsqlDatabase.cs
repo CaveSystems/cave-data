@@ -204,6 +204,15 @@ public sealed class PgsqlDatabase : SqlDatabase
                     queryText.Append("BIGINT");
                     break;
 
+                case DataType.Guid:
+                    if ((fieldProperties.Flags & FieldFlags.AutoIncrement) != 0)
+                    {
+                        throw new NotSupportedException($"AutoIncrement is not supported on data type {fieldProperties.TypeAtDatabase}");
+                    }
+
+                    queryText.Append("UUID");
+                    break;
+
                 case DataType.UInt8:
                     if ((fieldProperties.Flags & FieldFlags.AutoIncrement) != 0)
                     {
@@ -312,6 +321,7 @@ public sealed class PgsqlDatabase : SqlDatabase
                     case DataType.UInt64:
                     case DataType.Single:
                     case DataType.TimeSpan:
+                    case DataType.Guid:
                         break;
 
                     case DataType.String:
@@ -325,6 +335,11 @@ public sealed class PgsqlDatabase : SqlDatabase
 
                     default: throw new NotSupportedException($"Uniqueness for tableName {layout.Name} field {fieldProperties.Name} is not supported!");
                 }
+            }
+
+            if (!fieldProperties.Flags.HasFlag(FieldFlags.Nullable))
+            {
+                queryText.Append(" NOT NULL");
             }
 
             if (fieldProperties.Description != null)

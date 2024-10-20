@@ -136,7 +136,7 @@ public sealed class SqliteStorage : SqlStorage
     {
         DataType.Binary => SqliteValueType.BLOB,
         DataType.Bool or DataType.Enum or DataType.Int8 or DataType.Int16 or DataType.Int32 or DataType.Int64 or DataType.UInt8 or DataType.UInt16 or DataType.UInt32 or DataType.UInt64 => SqliteValueType.INTEGER,
-        DataType.DateTime or DataType.Char or DataType.String or DataType.User => SqliteValueType.TEXT,
+        DataType.DateTime or DataType.Char or DataType.String or DataType.User or DataType.Guid => SqliteValueType.TEXT,
         DataType.TimeSpan or DataType.Decimal or DataType.Double or DataType.Single => SqliteValueType.REAL,
         _ => throw new NotImplementedException($"DataType {dataType} is not implemented!"),
     };

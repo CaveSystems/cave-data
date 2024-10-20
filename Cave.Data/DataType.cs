@@ -57,6 +57,9 @@ public enum DataType
     /// <summary>Binary data <br/> Array of bytes</summary>
     Binary = 0x27,
 
+    /// <summary>Uuid / guid value</summary>
+    Guid = 0x28,
+
     #region DataTypes that need value type informations
 
     /// <summary>Mask to check if value type informations are needed to deserialize the type</summary>

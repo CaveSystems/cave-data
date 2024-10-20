@@ -78,7 +78,7 @@ public interface ITable
     /// <returns>True if a matching dataset exists.</returns>
     bool Exist(Search? search);
 
-    /// <summary>Searches the table for a raw with the same identifiers.</summary>
+    /// <summary>Searches the table for a row with the same identifiers.</summary>
     /// <param name="row">The row to search.</param>
     /// <returns>True if a matching dataset exists.</returns>
     bool Exist(Row row);

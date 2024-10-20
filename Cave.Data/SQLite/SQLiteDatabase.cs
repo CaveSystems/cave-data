@@ -111,6 +111,11 @@ public sealed class SqliteDatabase : SqlDatabase
             {
                 queryText.Append(" UNIQUE");
             }
+
+            if (!fieldProperties.Flags.HasFlag(FieldFlags.Nullable))
+            {
+                queryText.Append(" NOT NULL");
+            }
         }
 
         queryText.Append(')');

@@ -355,7 +355,7 @@ public sealed class MysqlStorage : SqlStorage
     /// <inheritdoc/>
     public override object? GetLocalValue(IFieldProperties field, IDataReader reader, object? databaseValue)
     {
-        if ((field.DataType == DataType.DateTime) && databaseValue is not null or DBNull or DateTime)
+        if ((field.DataType == DataType.DateTime) && databaseValue is not (null or DBNull or DateTime))
         {
             if (isValidDateTimeProperty == null)
             {

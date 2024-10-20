@@ -147,6 +147,9 @@ public sealed class MysqlDatabase : SqlDatabase
 
                         case DateTimeType.BigIntHumanReadable:
                         case DateTimeType.BigIntTicks:
+                        case DateTimeType.BigIntMilliSeconds:
+                        case DateTimeType.BigIntSeconds:
+                        case DateTimeType.BigIntEpoch:
                             queryText.Append("BIGINT");
                             break;
 
@@ -158,12 +161,16 @@ public sealed class MysqlDatabase : SqlDatabase
                 case DataType.TimeSpan:
                     switch (fieldProperties.DateTimeType)
                     {
+                        case DateTimeType.BigIntEpoch:
+                        case DateTimeType.DoubleEpoch:
+                            throw new NotSupportedException("Seconds till epoch does not make sense for a timespan field!");
+
                         case DateTimeType.Undefined:
                         case DateTimeType.Native:
                             queryText.Append("TIME");
                             break;
 
-                        case DateTimeType.DoubleEpoch:
+                        
                         case DateTimeType.DoubleSeconds:
                             queryText.Append("DOUBLE");
                             break;
@@ -174,6 +181,8 @@ public sealed class MysqlDatabase : SqlDatabase
 
                         case DateTimeType.BigIntHumanReadable:
                         case DateTimeType.BigIntTicks:
+                        case DateTimeType.BigIntMilliSeconds:
+                        case DateTimeType.BigIntSeconds:                        
                             queryText.Append("BIGINT");
                             break;
 
@@ -224,6 +233,10 @@ public sealed class MysqlDatabase : SqlDatabase
 
                 case DataType.UInt64:
                     queryText.Append("BIGINT UNSIGNED");
+                    break;
+
+                case DataType.Guid:
+                    queryText.Append("UUID");
                     break;
 
                 case DataType.User:
@@ -323,6 +336,7 @@ public sealed class MysqlDatabase : SqlDatabase
                     case DataType.UInt64:
                     case DataType.Single:
                     case DataType.TimeSpan:
+                    case DataType.Guid:
                         break;
 
                     case DataType.String:
@@ -336,6 +350,11 @@ public sealed class MysqlDatabase : SqlDatabase
 
                     default: throw new NotSupportedException($"Uniqueness for tableName {layout.Name} field {fieldProperties.Name} is not supported!");
                 }
+            }
+
+            if (!fieldProperties.Flags.HasFlag(FieldFlags.Nullable))
+            {
+                queryText.Append(" NOT NULL");
             }
 
             if (fieldProperties.Description != null)
@@ -419,6 +438,7 @@ public sealed class MysqlDatabase : SqlDatabase
                         case DataType.UInt32:
                         case DataType.UInt64:
                         case DataType.UInt8:
+                        case DataType.Guid:
                             command =
                                 $"CREATE INDEX `idx_{layout.Name}_{field.Name}` ON {SqlStorage.FQTN(Name, layout.Name)} ({SqlStorage.EscapeFieldName(field)})";
                             break;

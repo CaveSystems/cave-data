@@ -380,8 +380,11 @@ public static class Fields
 
                 return dateTimeType switch
                 {
-                    DateTimeType.BigIntHumanReadable => dt.ToString(Storage.BigIntDateTimeFormat, provider).TrimStart('0'),
                     DateTimeType.Native => dt.ToString(StringExtensions.InteropDateTimeFormat, provider).Box(stringMarker),
+                    DateTimeType.BigIntEpoch => ((dt.Ticks - Storage.EpochTicks) / TimeSpan.TicksPerSecond).ToString(provider),
+                    DateTimeType.BigIntSeconds => (dt.Ticks / TimeSpan.TicksPerSecond).ToString(provider),
+                    DateTimeType.BigIntMilliSeconds => (dt.Ticks / TimeSpan.TicksPerMillisecond).ToString(provider),
+                    DateTimeType.BigIntHumanReadable => dt.ToString(Storage.BigIntDateTimeFormat, provider).TrimStart('0'),
                     DateTimeType.BigIntTicks => dt.Ticks.ToString(provider),
                     DateTimeType.DecimalSeconds => (dt.Ticks / (decimal)TimeSpan.TicksPerSecond).ToString(provider),
                     DateTimeType.DoubleSeconds => (dt.Ticks / (double)TimeSpan.TicksPerSecond).ToString(provider),
@@ -421,6 +424,12 @@ public static class Fields
                     case DateTimeType.BigIntTicks:
                         return ts.Ticks.ToString(provider);
 
+                    case DateTimeType.BigIntSeconds:
+                        return (ts.Ticks / TimeSpan.TicksPerSecond).ToString(provider);
+
+                    case DateTimeType.BigIntMilliSeconds:
+                        return (ts.Ticks / TimeSpan.TicksPerMillisecond).ToString(provider);
+
                     case DateTimeType.DecimalSeconds:
                         return $"{(ts.Ticks / (decimal)TimeSpan.TicksPerSecond).ToString(provider)}";
 
@@ -433,7 +442,7 @@ public static class Fields
                 var f = (float)value;
                 return float.IsNaN(f) || float.IsInfinity(f)
                     ? throw new InvalidDataException($"Cannot serialize float with value {f}!")
-                    : f.ToString(provider);
+                    : f.ToString("R", provider);
             }
             case DataType.Double:
             {
@@ -443,7 +452,7 @@ public static class Fields
                     throw new InvalidDataException($"Cannot serialize double with value {d}!");
                 }
 
-                return d.ToString(provider);
+                return d.ToString("R", provider);
             }
             case DataType.Decimal: return ((decimal)value).ToString(provider);
             case DataType.Int8: return ((sbyte)value).ToString(provider);
@@ -455,6 +464,7 @@ public static class Fields
             case DataType.UInt32: return ((uint)value).ToString(provider);
             case DataType.UInt64: return ((ulong)value).ToString(provider);
             case DataType.Enum: return value.ToString()!.Box(stringMarker);
+            case DataType.Guid: return ((Guid)value).ToString("D")!.Box(stringMarker);
             case DataType.Char: return value.ToString()!.Box(stringMarker);
             case DataType.String:
             case DataType.User:
