@@ -314,14 +314,14 @@ public sealed class CsvWriter : IDisposable
                     }
                     case DataType.Guid:
                     {
-                        if (!Guid.TryParse($"{value}", out var guid) || guid == Guid.Empty)
+                        var guid = new Guid($"{value}");
+                        if (guid == Guid.Empty)
                         {
                             //guid is invalid or empty
                             if (!properties.SaveDefaultValues)
                             {
                                 break;
                             }
-                            guid = Guid.Empty;
                         }
                         var str = guid.ToString("D");
                         if (properties.StringMarker.HasValue)

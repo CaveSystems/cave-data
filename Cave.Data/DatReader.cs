@@ -40,12 +40,6 @@ public sealed class DatReader : IDisposable
         }
     }
 
-    static Guid? ReadGuid(int version, DataReader reader, bool allowNull)
-    {
-        var str = ReadString(version, reader, allowNull);
-        return str is null ? null : Guid.Parse(str);
-    }
-
     static bool? ReadBool(int version, DataReader reader, bool allowNull)
     {
         var b = reader.ReadByte();
@@ -156,6 +150,12 @@ public sealed class DatReader : IDisposable
             }
             default: throw new NotImplementedException();
         }
+    }
+
+    static Guid? ReadGuid(int version, DataReader reader, bool allowNull)
+    {
+        var str = ReadString(version, reader, allowNull);
+        return str is null ? null : new Guid(str);
     }
 
     static short? ReadInt16(int version, DataReader reader, bool allowNull)
@@ -359,9 +359,11 @@ public sealed class DatReader : IDisposable
                 case DataType.Enum:
                     databaseDataType = DataType.Int64;
                     break;
+
                 case DataType.Guid:
                     databaseDataType = DataType.Guid;
                     break;
+
                 case DataType.User:
                 case DataType.String:
                     databaseDataType = DataType.String;

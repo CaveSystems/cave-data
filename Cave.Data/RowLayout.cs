@@ -63,7 +63,7 @@ public sealed class RowLayout : IEquatable<RowLayout>, IEnumerable<IFieldPropert
             var valueText = value.ToString() ?? throw new InvalidOperationException($"Could not get string of {value.GetType()}!");
             value = field.DataType switch
             {
-                DataType.Guid => Guid.Parse(valueText),
+                DataType.Guid => new Guid(valueText),
                 DataType.User => field.ParseValue(valueText),
                 DataType.Enum => Enum.Parse(field.ValueType, valueText, true),
                 _ => Convert.ChangeType(value, field.ValueType, culture)

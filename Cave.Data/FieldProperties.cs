@@ -630,7 +630,7 @@ public class FieldProperties : IFieldProperties
                     return null;
                 }
 
-                return Guid.Parse(text);
+                return new Guid(text);
 
             case DataType.Char:
                 if (stringMarker != null)
@@ -792,6 +792,7 @@ public class FieldProperties : IFieldProperties
                     case DataType.String:
                     case DataType.Guid:
                         break;
+
                     default:
                         throw new NotImplementedException($"DataType Guid cannot use underlying DataType {TypeAtDatabase}!");
                 }
