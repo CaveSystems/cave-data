@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
-using Cave.Data;
 using Cave.IO;
 
 namespace Cave.Data;
 
 /// <summary>Provides an interface for field properties.</summary>
-public interface IFieldProperties : IEquatable<IFieldProperties>
+public interface IFieldProperties
 {
     #region Public Properties
 
@@ -79,12 +78,6 @@ public interface IFieldProperties : IEquatable<IFieldProperties>
     /// <returns>Enum value.</returns>
     object EnumValue(long value);
 
-    /// <summary>Checks another FieldProperties instance for equality.</summary>
-    /// <param name="other">The FieldProperties to check for equality.</param>
-    /// <param name="fieldNameComparison">StringComparison to be used for field names.</param>
-    /// <returns>Returns true if the other instance equals this one, false otherwise.</returns>
-    bool Equals(IFieldProperties other, StringComparison fieldNameComparison);
-
     /// <summary>Retrieves a string for the specified value. The string may be parsed back to a value using <see cref="ParseValue(string, string, IFormatProvider)"/>.</summary>
     /// <param name="value">The value.</param>
     /// <param name="stringMarker">The string marker.</param>
@@ -98,6 +91,12 @@ public interface IFieldProperties : IEquatable<IFieldProperties>
     /// <param name="provider">The format provider (optional, defaults to <see cref="CultureInfo.InvariantCulture"/>).</param>
     /// <returns>The native value.</returns>
     object? ParseValue(string text, string? stringMarker = null, IFormatProvider? provider = null);
+
+    /// <summary>Checks whether another FieldProperties instance is compatible or not.</summary>
+    /// <param name="other">The FieldProperties to check for compatibility.</param>
+    /// <param name="fieldNameComparison">StringComparison to be used for fieldnames.</param>
+    /// <returns>Returns true if the other instance is compatible, false otherwise.</returns>
+    public bool IsCompatible(IFieldProperties? other, StringComparison fieldNameComparison = StringComparison.Ordinal);
 
     #endregion Public Methods
 }

@@ -14,7 +14,6 @@ namespace Cave.Data;
 /// <summary>Code generator for ITable or RowLayout instances.</summary>
 public class TableInterfaceGenerator
 {
-
     #region Private Methods
 
     string GetName(string text) => NamingStrategy.GetNameByStrategy(text);
@@ -158,20 +157,12 @@ public class TableInterfaceGenerator
             }
 
             code.Append("\t\t[Field(");
-            var i = 0;
+            var fieldAttributeVariables = 0;
 
-            void AddAttribute<T>(T value, Func<string> content)
+            void AddAttribute(Func<bool> test, Func<string> content)
             {
-                if (Equals(value, default))
-                {
-                    return;
-                }
-
-                if (i++ > 0)
-                {
-                    code.Append(", ");
-                }
-
+                if (!test()) return;
+                if (fieldAttributeVariables++ > 0) code.Append(", ");
                 code.Append(content());
             }
 
@@ -189,23 +180,22 @@ public class TableInterfaceGenerator
                     code.Append("FieldFlags.");
                     code.Append(flag);
                 }
-
-                code.Append(", ");
+                fieldAttributeVariables++;
             }
 
             var sharpName = fieldNameLookup[field.Index];
             if (sharpName != field.Name)
             {
-                AddAttribute(field.Name, () => $"Name = \"{field.Name}\"");
+                AddAttribute(() => field.Name != string.Empty, () => $"Name = \"{field.Name}\"");
             }
 
             if (field.MaximumLength < int.MaxValue)
             {
-                AddAttribute(field.MaximumLength, () => $"Length = {(int)field.MaximumLength}");
+                AddAttribute(() => field.MaximumLength != 0, () => $"Length = {(int)field.MaximumLength}");
             }
 
-            AddAttribute(field.AlternativeNames, () => $"AlternativeNames = \"{field.AlternativeNames.Join(", ")}\"");
-            AddAttribute(field.DisplayFormat, () => $"DisplayFormat = \"{field.DisplayFormat?.EscapeUtf8()}\"");
+            AddAttribute(() => field.AlternativeNames.Any(), () => $"AlternativeNames = \"{field.AlternativeNames.Join(", ")}\"");
+            AddAttribute(() => field.DisplayFormat is not null, () => $"DisplayFormat = \"{field.DisplayFormat?.EscapeUtf8()}\"");
             code.AppendLine(")]");
             if ((field.DateTimeKind != DateTimeKind.Unspecified) || (field.DateTimeType != DateTimeType.Undefined))
             {
@@ -379,5 +369,4 @@ public class TableInterfaceGenerator
     }
 
     #endregion Public Methods
-
 }

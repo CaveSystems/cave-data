@@ -34,11 +34,12 @@ sealed class TableSorter : IComparer<Row>
             DataType.DateTime => Comparer<DateTime>.Default,
             DataType.Decimal => Comparer<decimal>.Default,
             DataType.Double => Comparer<double>.Default,
-            DataType.Enum => System.Collections.Comparer.Default,
+            DataType.Enum => Comparer.Default,
             DataType.Single => Comparer<float>.Default,
             DataType.String => Comparer<string>.Default,
             DataType.TimeSpan => Comparer<TimeSpan>.Default,
             DataType.User => Comparer<string>.Default,
+            DataType.Guid => Comparer<Guid>.Default,
             _ => throw new NotSupportedException(),
         };
         descending = mode switch

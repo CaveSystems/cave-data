@@ -91,6 +91,10 @@ public static partial class RowSerializer
                     values[i] = reader.Read7BitEncodedInt64();
                     break;
 
+                case DataType.Guid:
+                    values[i] = reader.ReadPrefixedGuid();
+                    break;
+
                 case DataType.User:
                     values[i] = reader.ReadPrefixedString();
                     break;
@@ -188,6 +192,12 @@ public static partial class RowSerializer
                     writer.Write((row[i] as decimal?) ?? 0);
                     break;
 
+                case DataType.Guid:
+                {
+                    var value = row[i] as Guid?;
+                    writer.WritePrefixed(value);
+                    break;
+                }
                 case DataType.String:
                 case DataType.User:
                 {

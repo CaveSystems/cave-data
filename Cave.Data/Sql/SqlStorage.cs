@@ -456,31 +456,14 @@ public abstract class SqlStorage : Storage, IDisposable
             case bool b:
                 return b ? "1" : "0";
 
-            case TimeSpan timeSpan:
-                return timeSpan.TotalSeconds.ToString("R", Culture);
-
-            case DateTime dateTime:
-            {
-                var dt = properties.DateTimeKind switch
-                {
-                    DateTimeKind.Unspecified => dateTime,
-                    DateTimeKind.Utc => dateTime.ToUniversalTime(),
-                    DateTimeKind.Local => dateTime.ToLocalTime(),
-                    _ => throw new NotSupportedException($"DateTimeKind {properties.DateTimeKind} not supported!"),
-                };
-                return properties.DateTimeType switch
-                {
-                    DateTimeType.Undefined or DateTimeType.Native => dt.ToString(NativeDateTimeFormat, Culture),
-                    DateTimeType.BigIntHumanReadable => dt.ToString(BigIntDateTimeFormat, Culture),
-                    DateTimeType.BigIntTicks => $"{dt.Ticks}",
-                    DateTimeType.DecimalSeconds => $"{dt.Ticks / (decimal)TimeSpan.TicksPerSecond}",
-                    DateTimeType.DoubleSeconds => $"{dt.Ticks / (double)TimeSpan.TicksPerSecond}",
-                    DateTimeType.DoubleEpoch => $"{(dt.Ticks - EpochTicks) / (double)TimeSpan.TicksPerSecond}",
-                    _ => throw new NotImplementedException(),
-                };
-            }
+            //case TimeSpan:
+            //case DateTime:
+            //case user
+            //case enum
             default:
-                return value.GetType().IsEnum ? $"{Convert.ToInt64(value, Culture)}" : EscapeString(value.ToString()!);
+            {
+                return EscapeString(Fields.GetString(value, properties.DataType, properties.DateTimeKind, properties.DateTimeType, provider: Culture));
+            }
         }
     }
 
@@ -630,6 +613,9 @@ public abstract class SqlStorage : Storage, IDisposable
                     }
                     case DateTimeType.BigIntHumanReadable:
                     case DateTimeType.BigIntTicks:
+                    case DateTimeType.BigIntSeconds:
+                    case DateTimeType.BigIntMilliSeconds:
+                    case DateTimeType.BigIntEpoch:
                     {
                         var result = field.Clone();
                         result.TypeAtDatabase = DataType.Int64;
@@ -642,6 +628,7 @@ public abstract class SqlStorage : Storage, IDisposable
                         result.MaximumLength = 65.3f;
                         return result;
                     }
+                    case DateTimeType.DoubleEpoch:
                     case DateTimeType.DoubleSeconds:
                     {
                         var result = field.Clone();
@@ -675,6 +662,13 @@ public abstract class SqlStorage : Storage, IDisposable
 
             switch (field.DataType)
             {
+                case DataType.Guid:
+                    if (field.TypeAtDatabase == DataType.String)
+                    {
+                        return (localValue as Guid?)?.ToString("D");
+                    }
+                    return localValue;
+
                 case DataType.Enum:
                     return Convert.ToInt64(localValue, Culture);
 
@@ -687,10 +681,13 @@ public abstract class SqlStorage : Storage, IDisposable
                     return field.DateTimeType switch
                     {
                         DateTimeType.Undefined or DateTimeType.Native => value,
-                        DateTimeType.BigIntHumanReadable => long.Parse(new DateTime(value.Ticks).ToString(BigIntDateTimeFormat, Culture), Culture),
+                        DateTimeType.BigIntHumanReadable => value.Ticks < 0 ? -long.Parse(new DateTime(-value.Ticks).ToString(BigIntDateTimeFormat, Culture), Culture) : long.Parse(new DateTime(value.Ticks).ToString(BigIntDateTimeFormat, Culture), Culture),
                         DateTimeType.BigIntTicks => value.Ticks,
+                        DateTimeType.BigIntSeconds => value.Ticks / TimeSpan.TicksPerSecond,
+                        DateTimeType.BigIntMilliSeconds => value.Ticks / TimeSpan.TicksPerMillisecond,
                         DateTimeType.DecimalSeconds => (decimal)value.Ticks / TimeSpan.TicksPerSecond,
                         DateTimeType.DoubleSeconds => (double)value.Ticks / TimeSpan.TicksPerSecond,
+                        DateTimeType.BigIntEpoch or DateTimeType.DoubleEpoch => throw new NotSupportedException($"DateTimeType {field.DateTimeType} not supported at {field.DataType} field!"),
                         _ => throw new NotImplementedException($"DateTimeType {field.DateTimeType} not implemented!"),
                     };
                 }
@@ -738,6 +735,9 @@ public abstract class SqlStorage : Storage, IDisposable
                         DateTimeType.Undefined or DateTimeType.Native => value,
                         DateTimeType.BigIntHumanReadable => long.Parse(value.ToString(BigIntDateTimeFormat, Culture), Culture),
                         DateTimeType.BigIntTicks => value.Ticks,
+                        DateTimeType.BigIntSeconds => value.Ticks / TimeSpan.TicksPerSecond,
+                        DateTimeType.BigIntMilliSeconds => value.Ticks / TimeSpan.TicksPerMillisecond,
+                        DateTimeType.BigIntEpoch => (value.Ticks - EpochTicks) / TimeSpan.TicksPerSecond,
                         DateTimeType.DecimalSeconds => value.Ticks / (decimal)TimeSpan.TicksPerSecond,
                         DateTimeType.DoubleSeconds => value.Ticks / (double)TimeSpan.TicksPerSecond,
                         DateTimeType.DoubleEpoch => (value.Ticks - EpochTicks) / (double)TimeSpan.TicksPerSecond,
@@ -772,24 +772,26 @@ public abstract class SqlStorage : Storage, IDisposable
         if (databaseValue is DBNull or null) return null;
         if (field.ValueType is null) throw new InvalidOperationException("Field.ValueType has to be set!");
 
-        if (field.DataType != field.TypeAtDatabase)
-        {
-            //local type does not match database.... try to convert...
-            return Convert.ChangeType(databaseValue, field.ValueType);
-        }
-
         switch (field.DataType)
         {
-            case DataType.Double: return (double)databaseValue;
-            case DataType.Single: return (float)databaseValue;
-            case DataType.User:
-            {
-                return field.ParseValue($"{databaseValue}", null, Culture);
-            }
-            case DataType.Enum:
-            {
-                return Enum.ToObject(field.ValueType, reader.GetInt64(field.Index));
-            }
+            case DataType.Int8: return databaseValue is sbyte int8 ? int8 : Convert.ToSByte(databaseValue);
+            case DataType.Int16: return databaseValue is short int16 ? int16 : Convert.ToInt16(field.Index);
+            case DataType.Int32: return databaseValue is int int32 ? int32 : Convert.ToInt32(databaseValue);
+            case DataType.Int64: return databaseValue is long int64 ? int64 : Convert.ToInt64(databaseValue);
+            case DataType.UInt8: return databaseValue is byte uint8 ? uint8 : Convert.ToByte(databaseValue);
+            case DataType.UInt16: return databaseValue is ushort uint16 ? uint16 : Convert.ToUInt16(databaseValue);
+            case DataType.UInt32: return databaseValue is uint uint32 ? uint32 : Convert.ToUInt32(databaseValue);
+            case DataType.UInt64: return databaseValue is ulong uint64 ? uint64 : Convert.ToUInt64(databaseValue);
+            case DataType.String: return databaseValue is string str ? str : throw new InvalidOperationException("Could not retrieve string!");
+            case DataType.Binary: return databaseValue is byte[] buffer ? buffer : throw new InvalidOperationException("Could not retrieve data!");
+            case DataType.Bool: return databaseValue is bool b ? b : Convert.ToBoolean(databaseValue);
+            case DataType.Char: return databaseValue is char c ? c : Convert.ToChar(databaseValue);
+            case DataType.Decimal: return databaseValue is decimal dec ? dec : Convert.ToDecimal(databaseValue);
+            case DataType.Double: return databaseValue is double d ? d : Convert.ToDouble(databaseValue);
+            case DataType.Single: return databaseValue is float f ? f : Convert.ToSingle(databaseValue);
+            case DataType.User: return field.ParseValue($"{databaseValue}", null, Culture);
+            case DataType.Enum: return Enum.ToObject(field.ValueType, reader.GetInt64(field.Index));
+            case DataType.Guid: return databaseValue is Guid guid ? guid : new Guid($"{databaseValue}");
             case DataType.DateTime:
             {
                 long ticks = 0;
@@ -831,6 +833,18 @@ public abstract class SqlStorage : Storage, IDisposable
                         ticks = (long)databaseValue;
                         break;
 
+                    case DateTimeType.BigIntSeconds:
+                        ticks = (long)databaseValue * TimeSpan.TicksPerSecond;
+                        break;
+
+                    case DateTimeType.BigIntMilliSeconds:
+                        ticks = (long)databaseValue * TimeSpan.TicksPerMillisecond;
+                        break;
+
+                    case DateTimeType.BigIntEpoch:
+                        ticks = ((long)databaseValue * TimeSpan.TicksPerSecond) + EpochTicks;
+                        break;
+
                     case DateTimeType.DecimalSeconds:
                         ticks = (long)decimal.Round((decimal)databaseValue * TimeSpan.TicksPerSecond);
                         break;
@@ -855,8 +869,10 @@ public abstract class SqlStorage : Storage, IDisposable
                     default: throw new NotSupportedException($"DateTimeType {field.DateTimeType} is not supported");
                     case DateTimeType.BigIntHumanReadable:
                     {
-                        var text = ((long)databaseValue).ToString(Culture);
+                        var val = (long)databaseValue;
+                        var text = Math.Abs(val).ToString(Culture);
                         ticks = DateTime.ParseExact(text, BigIntDateTimeFormat, Culture).Ticks;
+                        if (val < 0) ticks = -ticks;
                         break;
                     }
                     case DateTimeType.Undefined:
@@ -866,6 +882,18 @@ public abstract class SqlStorage : Storage, IDisposable
 
                     case DateTimeType.BigIntTicks:
                         ticks = (long)databaseValue;
+                        break;
+
+                    case DateTimeType.BigIntSeconds:
+                        ticks = (long)databaseValue * TimeSpan.TicksPerSecond;
+                        break;
+
+                    case DateTimeType.BigIntMilliSeconds:
+                        ticks = (long)databaseValue * TimeSpan.TicksPerMillisecond;
+                        break;
+
+                    case DateTimeType.BigIntEpoch:
+                        ticks = ((long)databaseValue * TimeSpan.TicksPerSecond) + EpochTicks;
                         break;
 
                     case DateTimeType.DecimalSeconds:
@@ -883,19 +911,12 @@ public abstract class SqlStorage : Storage, IDisposable
 
                 return new TimeSpan(ticks);
             }
-            case DataType.Int8: return (sbyte)databaseValue;
-            case DataType.Int16: return (short)databaseValue;
-            case DataType.Int32: return (int)databaseValue;
-            case DataType.Int64: return (long)databaseValue;
-            case DataType.UInt8: return (byte)databaseValue;
-            case DataType.UInt16: return (ushort)databaseValue;
-            case DataType.UInt32: return (uint)databaseValue;
-            case DataType.UInt64: return (ulong)databaseValue;
-            case DataType.String: return (string)databaseValue;
-            case DataType.Binary: return (byte[])reader.GetValue(field.Index);
-            case DataType.Bool: return (bool)databaseValue;
-            case DataType.Char: return (char)databaseValue;
-            case DataType.Decimal: return (decimal)databaseValue;
+        }
+
+        if (field.DataType != field.TypeAtDatabase)
+        {
+            //local type does not match database.... try to convert...
+            return Convert.ChangeType(databaseValue, field.ValueType);
         }
 
         // fallback

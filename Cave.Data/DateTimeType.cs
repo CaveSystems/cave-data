@@ -25,5 +25,14 @@ public enum DateTimeType
     DoubleSeconds = 5,
 
     /// <summary>Use a double field to store the seconds since year 1970, day 1 (unix epoch).</summary>
-    DoubleEpoch = 6
+    DoubleEpoch = 6,
+
+    /// <summary>Uses a bigint value to save the seconds since unix epoch 1970-01-01</summary>
+    BigIntEpoch = 7,
+
+    /// <summary>Uses a bigint value to save the seconds since 0000-01-01</summary>
+    BigIntSeconds = 8,
+
+    /// <summary>Uses a bigint value to save the seconds since 0000-01-01</summary>
+    BigIntMilliSeconds = 9,
 }

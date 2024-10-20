@@ -846,16 +846,16 @@ public abstract class SqlTable : Table
         var commandBuilder = new SqlCommandBuilder(Storage);
         var autoIncrement = CreateInsert(commandBuilder, row, true);
         Row result;
-        if (autoIncrement)
+        //if (autoIncrement)
         {
             CreateLastInsertedRowCommand(commandBuilder, row);
             result = QueryRow(commandBuilder);
         }
-        else
+        /*else
         {
             Execute(commandBuilder);
             result = GetRow(Search.IdentifierMatch(row));
-        }
+        }*/
         IncreaseSequenceNumber();
         return result;
     }
@@ -998,7 +998,12 @@ public abstract class SqlTable : Table
                     case DateTimeType.BigIntTicks:
                         result = Convert.ToDouble(value, CultureInfo.CurrentCulture) / TimeSpan.TicksPerSecond;
                         break;
-
+                    case DateTimeType.BigIntSeconds:
+                        result = Convert.ToDouble(value, CultureInfo.CurrentCulture);
+                        break;
+                    case DateTimeType.BigIntMilliSeconds:
+                        result = Convert.ToDouble(value, CultureInfo.CurrentCulture) / TimeSpan.TicksPerMillisecond;
+                        break;
                     case DateTimeType.DecimalSeconds:
                     case DateTimeType.Native:
                     case DateTimeType.DoubleSeconds:

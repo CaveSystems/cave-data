@@ -167,20 +167,10 @@ public class FieldProperties : IFieldProperties
     }
 
     /// <summary>Checks another FieldProperties instance for equality.</summary>
-    /// <param name="obj">The FieldProperties to check for equality.</param>
-    /// <returns>Returns true if the other instance equals this one, false otherwise.</returns>
-    public override bool Equals(object? obj) => obj is FieldProperties other && Equals(other);
-
-    /// <summary>Checks another FieldProperties instance for equality.</summary>
-    /// <param name="other">The FieldProperties to check for equality.</param>
-    /// <returns>Returns true if the other instance equals this one, false otherwise.</returns>
-    public bool Equals(IFieldProperties? other) => Equals(other, StringComparison.Ordinal);
-
-    /// <summary>Checks another FieldProperties instance for equality.</summary>
     /// <param name="other">The FieldProperties to check for equality.</param>
     /// <param name="fieldNameComparison">StringComparison to be used for fieldnames.</param>
     /// <returns>Returns true if the other instance equals this one, false otherwise.</returns>
-    public bool Equals(IFieldProperties? other, StringComparison fieldNameComparison)
+    public bool IsCompatible(IFieldProperties? other, StringComparison fieldNameComparison)
     {
         if (other == null)
         {
@@ -202,12 +192,14 @@ public class FieldProperties : IFieldProperties
             return other.ValueType == ValueType;
         }
 
+        if (DataType == DataType.User) return other.DataType is DataType.User or DataType.String;
+        if (other.DataType == DataType.User) return DataType is DataType.User or DataType.String;
         if (DataType == other.DataType)
         {
             return true;
         }
 
-        Trace.WriteLine($"FieldProperties.Equals {this} != {other}");
+        Trace.WriteLine($"FieldProperties not compatible: {this} != {other}");
         return false;
     }
 
@@ -266,6 +258,7 @@ public class FieldProperties : IFieldProperties
         FieldInfo = fieldInfo ?? throw new ArgumentNullException(nameof(fieldInfo));
         Index = index;
         Name = fieldInfo.Name;
+        Flags = FieldFlags.None;
 
         if (fieldInfo.FieldType.IsGenericType)
         {
@@ -276,9 +269,9 @@ public class FieldProperties : IFieldProperties
                 ValueType = nullableType;
             }
         }
+
         ValueType ??= fieldInfo.FieldType;
         DataType = RowLayout.DataTypeFromType(ValueType);
-        Flags = FieldFlags.None;
         MaximumLength = 0;
         DisplayFormat = null;
         Description = null;
@@ -290,8 +283,7 @@ public class FieldProperties : IFieldProperties
         TypeAtDatabase = DataType switch
         {
             DataType.Enum => DataType.Int64,
-            DataType.User => !fieldInfo.FieldType.IsArray ? DataType.String : throw new NotSupportedException(
-                "Array types (except byte[]) are not supported!\nPlease define a class with a valid ToString() member and static Parse(string) constructor instead!"),
+            DataType.User => !fieldInfo.FieldType.IsArray ? DataType.String : throw new NotSupportedException("Array types (except byte[]) are not supported!\nPlease define a class with a valid ToString() member and static Parse(string) constructor instead!"),
             _ => DataType
         };
 
@@ -323,7 +315,7 @@ public class FieldProperties : IFieldProperties
                 DateTimeType = dateTimeFormatAttribute.Type;
                 TypeAtDatabase = DateTimeType switch
                 {
-                    DateTimeType.BigIntTicks or DateTimeType.BigIntHumanReadable => DataType.Int64,
+                    DateTimeType.BigIntMilliSeconds or DateTimeType.BigIntSeconds or DateTimeType.BigIntEpoch or DateTimeType.BigIntTicks or DateTimeType.BigIntHumanReadable => DataType.Int64,
                     DateTimeType.DecimalSeconds => DataType.Decimal,
                     DateTimeType.DoubleSeconds or DateTimeType.DoubleEpoch => DataType.Double,
                     DateTimeType.Undefined or DateTimeType.Native => DataType.DateTime,
@@ -337,7 +329,7 @@ public class FieldProperties : IFieldProperties
                 DateTimeType = timeSpanFormatAttribute.Type;
                 TypeAtDatabase = DateTimeType switch
                 {
-                    DateTimeType.BigIntTicks or DateTimeType.BigIntHumanReadable => DataType.Int64,
+                    DateTimeType.BigIntMilliSeconds or DateTimeType.BigIntSeconds or DateTimeType.BigIntEpoch or DateTimeType.BigIntTicks or DateTimeType.BigIntHumanReadable => DataType.Int64,
                     DateTimeType.DecimalSeconds => DataType.Decimal,
                     DateTimeType.DoubleSeconds => DataType.Double,
                     DateTimeType.Undefined or DateTimeType.Native => DataType.TimeSpan,
@@ -355,7 +347,16 @@ public class FieldProperties : IFieldProperties
             if (attribute is DefaultValueAttribute defaultValueAttribute)
             {
                 DefaultValue = defaultValueAttribute.Value;
+                continue;
             }
+
+            if (attribute.GetType().Name == "NullableAttribute")
+            {
+                Flags |= FieldFlags.Nullable;
+                continue;
+            }
+
+            Debugger.Break();
         }
 
         if (TypeAtDatabase == 0)
@@ -402,7 +403,10 @@ public class FieldProperties : IFieldProperties
 
                 switch (DateTimeType)
                 {
+                    case DateTimeType.BigIntEpoch:
+                    case DateTimeType.DoubleEpoch:
                     default: throw new NotSupportedException($"DateTimeType {DateTimeType} is not supported.");
+
                     case DateTimeType.BigIntHumanReadable:
                         return new TimeSpan(DateTime.ParseExact(text, Storage.BigIntDateTimeFormat, provider).Ticks);
 
@@ -419,6 +423,12 @@ public class FieldProperties : IFieldProperties
 #endif
                     case DateTimeType.BigIntTicks:
                         return new TimeSpan(long.Parse(text, provider));
+
+                    case DateTimeType.BigIntMilliSeconds:
+                        return new TimeSpan(long.Parse(text, provider) * TimeSpan.TicksPerMillisecond);
+
+                    case DateTimeType.BigIntSeconds:
+                        return new TimeSpan(long.Parse(text, provider) * TimeSpan.TicksPerSecond);
 
                     case DateTimeType.DecimalSeconds:
                         return new TimeSpan((long)decimal.Round(decimal.Parse(text, provider) * TimeSpan.TicksPerSecond));
@@ -475,6 +485,15 @@ public class FieldProperties : IFieldProperties
 
                     case DateTimeType.DoubleEpoch:
                         return new DateTime((long)Math.Round(double.Parse(text, provider) * TimeSpan.TicksPerSecond) + Storage.EpochTicks, DateTimeKind);
+
+                    case DateTimeType.BigIntEpoch:
+                        return new DateTime((long.Parse(text, provider) * TimeSpan.TicksPerSecond) + Storage.EpochTicks, DateTimeKind);
+
+                    case DateTimeType.BigIntMilliSeconds:
+                        return new DateTime(long.Parse(text, provider) * TimeSpan.TicksPerMillisecond, DateTimeKind);
+
+                    case DateTimeType.BigIntSeconds:
+                        return new DateTime(long.Parse(text, provider) * TimeSpan.TicksPerSecond, DateTimeKind);
                 }
             }
             case DataType.Binary:
@@ -600,6 +619,19 @@ public class FieldProperties : IFieldProperties
 
                 return Enum.Parse(ValueType, text, true);
 
+            case DataType.Guid:
+                if (stringMarker != null)
+                {
+                    text = text.Unbox(stringMarker, false);
+                }
+
+                if (text.Length == 0)
+                {
+                    return null;
+                }
+
+                return new Guid(text);
+
             case DataType.Char:
                 if (stringMarker != null)
                 {
@@ -633,7 +665,7 @@ public class FieldProperties : IFieldProperties
         if (!parserInitialized)
         {
             // lookup static Parse(string) method first
-            staticParse = ValueType.GetMethod("Parse", BindingFlags.Public | BindingFlags.Static, null, [typeof(string)], null);
+            staticParse = ValueType.GetMethod("Parse", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static, null, [typeof(string)], null);
 
             // if there is none, search constructor(string)
             if (staticParse == null)
@@ -750,6 +782,19 @@ public class FieldProperties : IFieldProperties
 #if DEBUG
                     Trace.TraceWarning("Field {0} DatabaseDataType undefined! Using DatabaseDataType {1}!", this, TypeAtDatabase);
 #endif
+                }
+
+                break;
+
+            case DataType.Guid:
+                switch (TypeAtDatabase)
+                {
+                    case DataType.String:
+                    case DataType.Guid:
+                        break;
+
+                    default:
+                        throw new NotImplementedException($"DataType Guid cannot use underlying DataType {TypeAtDatabase}!");
                 }
 
                 break;

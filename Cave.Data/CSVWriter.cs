@@ -304,7 +304,30 @@ public sealed class CsvWriter : IDisposable
                             break;
                         }
 
-                        var str = value.ToString();
+                        var str = $"{value}";
+                        if (properties.StringMarker.HasValue)
+                        {
+                            str = str.Box(properties.StringMarker.Value);
+                        }
+                        result.Append(str);
+                        break;
+                    }
+                    case DataType.Guid:
+                    {
+                        var guid = new Guid($"{value}");
+                        if (guid == Guid.Empty)
+                        {
+                            //guid is invalid or empty
+                            if (!properties.SaveDefaultValues)
+                            {
+                                break;
+                            }
+                        }
+                        var str = guid.ToString("D");
+                        if (properties.StringMarker.HasValue)
+                        {
+                            str = str.Box(properties.StringMarker.Value);
+                        }
                         result.Append(str);
                         break;
                     }

@@ -152,6 +152,12 @@ public sealed class DatReader : IDisposable
         }
     }
 
+    static Guid? ReadGuid(int version, DataReader reader, bool allowNull)
+    {
+        var str = ReadString(version, reader, allowNull);
+        return str is null ? null : new Guid(str);
+    }
+
     static short? ReadInt16(int version, DataReader reader, bool allowNull)
     {
         switch (version)
@@ -354,6 +360,10 @@ public sealed class DatReader : IDisposable
                     databaseDataType = DataType.Int64;
                     break;
 
+                case DataType.Guid:
+                    databaseDataType = DataType.Guid;
+                    break;
+
                 case DataType.User:
                 case DataType.String:
                     databaseDataType = DataType.String;
@@ -462,6 +472,7 @@ public sealed class DatReader : IDisposable
                 case DataType.Decimal: values[i] = ReadDecimal(version, reader, nullable); break;
                 case DataType.String: values[i] = ReadString(version, reader, nullable); break;
                 case DataType.Enum: values[i] = ReadEnum(version, reader, nullable, field.ValueType ?? throw new InvalidOperationException("Parsing enum requires the Field.ValueType to be set!")); break;
+                case DataType.Guid: values[i] = ReadGuid(version, reader, nullable); break;
                 case DataType.User:
                 {
                     var user = ReadString(version, reader, nullable);
