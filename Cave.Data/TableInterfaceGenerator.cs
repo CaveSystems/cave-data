@@ -6,7 +6,6 @@ using System.Text;
 using System.Web;
 using System.Collections;
 using Cave.Collections.Generic;
-using System.Reflection;
 
 
 namespace Cave.Data;
@@ -70,15 +69,6 @@ public class TableInterfaceGenerator
         code.AppendLine("//-----------------------------------------------------------------------");
         code.AppendLine();
         code.AppendLine("#nullable enable");
-        code.AppendLine();
-        code.AppendLine("using System;");
-        code.AppendLine("using System.ComponentModel;");
-        code.AppendLine("using System.Globalization;");
-        code.AppendLine("using System.CodeDom.Compiler;");
-        code.AppendLine("using Cave;");
-        code.AppendLine("using Cave.Collections;");
-        code.AppendLine("using Cave.Data;");
-        code.AppendLine("using Cave.IO;");
 
         if (DatabaseName == null)
         {
@@ -116,14 +106,14 @@ public class TableInterfaceGenerator
         code.AppendLine($"\t/// <summary>Table structure for {Layout.Name}.</summary>");
         if (Options.VersionHeader)
         {
-            code.AppendLine($"\t[GeneratedCode(\"{generator.FullName}\", \"{generator.Assembly.GetName().Version}\")]");
+            code.AppendLine($"\t[System.CodeDom.Compiler.GeneratedCode(\"{generator.FullName}\", \"{generator.Assembly.GetName().Version}\")]");
         }
         else
         {
-            code.AppendLine($"\t[GeneratedCode(\"{generator.FullName}\", null)]");
+            code.AppendLine($"\t[System.CodeDom.Compiler.GeneratedCode(\"{generator.FullName}\", null)]");
         }
-        code.AppendLine($"\t[Table(\"{Layout.Name}\")]");
-        code.AppendLine($"\tpublic partial struct {ClassName} : IEquatable<{ClassName}>");
+        code.AppendLine($"\t[Cave.Data.Table(\"{Layout.Name}\")]");
+        code.AppendLine($"\tpublic partial struct {ClassName} : IEquatable<{ClassName}>, Cave.Data.ICanGetValues");
         code.AppendLine("\t{");
 
         #region static Parse()
@@ -131,13 +121,13 @@ public class TableInterfaceGenerator
         code.AppendLine($"\t\t/// <summary>Converts the string representation of a row to its {ClassName} equivalent.</summary>");
         code.AppendLine("\t\t/// <param name=\"data\">A string that contains a row to convert.</param>");
         code.AppendLine($"\t\t/// <returns>A new {ClassName} instance.</returns>");
-        code.AppendLine($"\t\tpublic static {ClassName} Parse(string data) => Parse(data, CultureInfo.InvariantCulture);");
+        code.AppendLine($"\t\tpublic static {ClassName} Parse(string data) => Parse(data, System.Globalization.CultureInfo.InvariantCulture);");
         code.AppendLine();
         code.AppendLine($"\t\t/// <summary>Converts the string representation of a row to its {ClassName} equivalent.</summary>");
         code.AppendLine("\t\t/// <param name=\"data\">A string that contains a row to convert.</param>");
         code.AppendLine("\t\t/// <param name=\"provider\">The format provider (optional).</param>");
         code.AppendLine($"\t\t/// <returns>A new {ClassName} instance.</returns>");
-        code.AppendLine($"\t\tpublic static {ClassName} Parse(string data, IFormatProvider provider) => CsvReader.ParseRow<{ClassName}>(data, provider);");
+        code.AppendLine($"\t\tpublic static {ClassName} Parse(string data, IFormatProvider provider) => Cave.Data.CsvReader.ParseRow<{ClassName}>(data, provider);");
 
         #endregion
 
@@ -153,10 +143,10 @@ public class TableInterfaceGenerator
             {
                 var description = HttpUtility.HtmlEncode(field.Description).ReplaceNewLine("<br/>");
                 code.AppendLine($"\t\t/// <remarks>{description}</remarks>");
-                code.AppendLine($"\t\t[Description(\"{field.Description!.EscapeUtf8()}\")]");
+                code.AppendLine($"\t\t[System.ComponentModel.Description(\"{field.Description!.EscapeUtf8()}\")]");
             }
 
-            code.Append("\t\t[Field(");
+            code.Append("\t\t[Cave.Data.Field(");
             var fieldAttributeVariables = 0;
 
             void AddAttribute(Func<bool> test, Func<string> content)
@@ -177,7 +167,7 @@ public class TableInterfaceGenerator
                         code.Append(" | ");
                     }
 
-                    code.Append("FieldFlags.");
+                    code.Append("Cave.Data.FieldFlags.");
                     code.Append(flag);
                 }
                 fieldAttributeVariables++;
@@ -199,41 +189,44 @@ public class TableInterfaceGenerator
             code.AppendLine(")]");
             if ((field.DateTimeKind != DateTimeKind.Unspecified) || (field.DateTimeType != DateTimeType.Undefined))
             {
-                code.AppendLine($"\t\t[DateTimeFormat(DateTimeKind.{field.DateTimeKind}, DateTimeType.{field.DateTimeType})]");
+                code.AppendLine($"\t\t[Cave.Data.DateTimeFormat(DateTimeKind.{field.DateTimeKind}, Cave.Data.DateTimeType.{field.DateTimeType})]");
             }
-
             if (field.StringEncoding != 0)
             {
-                code.AppendLine($"\t\t[StringFormat(StringEncoding.{field.StringEncoding})]");
+                code.AppendLine($"\t\t[Cave.Data.StringFormat(Cave.IO.StringEncoding.{field.StringEncoding})]");
             }
 
             var visibility = Options.FieldVisibility?.Invoke(field) ?? FieldVisibility.Public;
             var visibilityString = visibility.GetFlags().Join(" ").ToLowerInvariant();
-            if (field.IsNullable)
-            {
-                code.AppendLine($"\t\t{visibilityString} {field.DotNetTypeName}? {sharpName};");
-            }
-            else
-            {
-                code.AppendLine($"\t\t{visibilityString} {field.DotNetTypeName} {sharpName};");
-            }
+            var typeName = (field.DataType == DataType.User ? field.ValueType?.FullName : null) ?? field.DotNetTypeName;
+            if (field.IsNullable) typeName += "?";
+            code.AppendLine($"\t\t{visibilityString} {typeName} {sharpName};");
         }
 
         #endregion
 
         #region ToString()
-
         {
             code.AppendLine();
             code.AppendLine("\t\t/// <summary>Gets a string representation of this row.</summary>");
             code.AppendLine("\t\t/// <returns>Returns a string that can be parsed by <see cref=\"Parse(string)\"/>.</returns>");
-            code.AppendLine("\t\tpublic override string ToString() => ToString(CultureInfo.InvariantCulture);");
+            code.AppendLine("\t\tpublic override string ToString() => ToString(System.Globalization.CultureInfo.InvariantCulture);");
             code.AppendLine();
             code.AppendLine("\t\t/// <summary>Gets a string representation of this row.</summary>");
-            code.AppendLine("\t\t/// <returns>Returns a string that can be parsed by <see cref=\"Parse(string, IFormatProvider)\"/>.</returns>");
-            code.AppendLine("\t\tpublic string ToString(IFormatProvider provider) => CsvWriter.RowToString(this, provider);");
+            code.AppendLine("\t\t/// <returns>Returns a string that can be parsed by <see cref=\"Parse(string, System.IFormatProvider)\"/>.</returns>");
+            code.AppendLine("\t\tpublic string ToString(System.IFormatProvider provider) => Cave.Data.CsvWriter.RowToString(this, provider);");
         }
 
+        #endregion
+
+        #region GetValues()
+        {
+            code.AppendLine();
+            code.AppendLine("\t\t/// <summary>Gets an array containing the values of all fields of this row</summary>");
+            code.AppendLine("\t\t/// <returns>Returns a new array instance.</returns>");
+            var fieldNames = Layout.Fields.Select(f => fieldNameLookup[f.Index]).Join(", ");
+            code.AppendLine($"\t\tpublic object?[] GetValues() => [{fieldNames}];");
+        }
         #endregion
 
         #region GetHashCode()
@@ -247,38 +240,25 @@ public class TableInterfaceGenerator
                 var idFieldName = fieldNameLookup[idField.Index];
                 code.AppendLine($"\t\t/// <summary>Gets the hash code for the identifier of this row (field {idFieldName}).</summary>");
                 code.AppendLine("\t\t/// <returns>A hash code for the identifier of this row.</returns>");
-                code.Append("\t\tpublic override int GetHashCode() => ");
-                code.Append(idFieldName);
-                code.AppendLine(".GetHashCode();");
+                code.AppendLine($"\t\tpublic override int GetHashCode() => {idFieldName}.GetHashCode();");
             }
             else if (idCount > 0 && Options.IdentifierHashCode)
             {
                 var names = idFields.Select(field => fieldNameLookup[field.Index]).Join(", ");
                 code.AppendLine($"\t\t/// <summary>Gets the hash code for the identifiers of this row (fields {names}).</summary>");
+                code.AppendLine("\t\t/// <remarks>Hashes are created using <see cref=\"Cave.DefaultHashingFunction\"/>. This is done because hashing in .net is not deterministic.");
+                code.AppendLine("\t\t/// You can use your own hashing algorithm by changing <see cref=\"Cave.DefaultHashingFunction.Create\"/> to your own instance.</remarks>");
                 code.AppendLine("\t\t/// <returns>A hash code for the identifiers of this row.</returns>");
-                code.AppendLine("\t\tpublic override int GetHashCode()");
-                code.AppendLine("\t\t{");
-                code.AppendLine("\t\t\tvar hasher = DefaultHashingFunction.Create();");
-                foreach (var idField in idFields)
-                {
-                    code.AppendLine($"\t\t\thasher.Add({fieldNameLookup[idField.Index]});");
-                }
-                code.AppendLine("\t\t\treturn hasher.ToHashCode();");
-                code.AppendLine("\t\t}");
+                var idFieldNames = idFields.Select(f => fieldNameLookup[f.Index]).Join(", ");
+                code.AppendLine($"\t\tpublic override int GetHashCode() => Cave.DefaultHashingFunction.Combine({idFieldNames});");
             }
             else
             {
                 code.AppendLine("\t\t/// <summary>Gets the hash code based on all fields of this row.</summary>");
+                code.AppendLine("\t\t/// <remarks>Hashes are created using <see cref=\"Cave.DefaultHashingFunction\"/>. This is done because hashing in .net is not deterministic.");
+                code.AppendLine("\t\t/// You can use your own hashing algorithm by changing <see cref=\"Cave.DefaultHashingFunction.Create\"/> to your own instance.</remarks>");
                 code.AppendLine("\t\t/// <returns>A hash code for all fields of this row.</returns>");
-                code.AppendLine("\t\tpublic override int GetHashCode()");
-                code.AppendLine("\t\t{");
-                code.AppendLine("\t\t\tvar hasher = DefaultHashingFunction.Create();");
-                foreach (var field in Layout)
-                {
-                    code.AppendLine($"\t\t\thasher.Add({fieldNameLookup[field.Index]});");
-                }
-                code.AppendLine("\t\t\treturn hasher.ToHashCode();");
-                code.AppendLine("\t\t}");
+                code.AppendLine($"\t\tpublic override int GetHashCode() => Cave.DefaultHashingFunction.Calculate(GetValues());");
             }
         }
 
@@ -311,11 +291,11 @@ public class TableInterfaceGenerator
                     var name = fieldNameLookup[field.Index];
                     if (typeof(IEnumerable).IsAssignableFrom(field.ValueType))
                     {
-                        code.Append($"\t\t\t\tDefaultComparer.Equals(other.{name}, {name})");
+                        code.Append($"\t\t\t\tCave.Collections.DefaultComparer.Equals(other.{name}, {name})");
                     }
                     else
                     {
-                        code.Append($"\t\t\t\tEquals(other.{name}, {name})");
+                        code.Append($"\t\t\t\tobject.Equals(other.{name}, {name})");
                     }
                 }
 

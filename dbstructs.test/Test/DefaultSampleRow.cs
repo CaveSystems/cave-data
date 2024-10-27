@@ -7,227 +7,185 @@
 
 #nullable enable
 
-using System;
-using System.ComponentModel;
-using System.Globalization;
-using System.CodeDom.Compiler;
-using Cave;
-using Cave.Collections;
-using Cave.Data;
-using Cave.IO;
-
 namespace dbstructs.test
 {
     /// <summary>Table structure for sample.</summary>
-    [GeneratedCode("Cave.Data.TableInterfaceGenerator", null)]
-    [Table("sample")]
-    public partial struct DefaultSampleRow : IEquatable<DefaultSampleRow>
+    [System.CodeDom.Compiler.GeneratedCode("Cave.Data.TableInterfaceGenerator", null)]
+    [Cave.Data.Table("sample")]
+    public partial struct DefaultSampleRow : IEquatable<DefaultSampleRow>, Cave.Data.ICanGetValues
     {
         /// <summary>Converts the string representation of a row to its DefaultSampleRow equivalent.</summary>
         /// <param name="data">A string that contains a row to convert.</param>
         /// <returns>A new DefaultSampleRow instance.</returns>
-        public static DefaultSampleRow Parse(string data) => Parse(data, CultureInfo.InvariantCulture);
+        public static DefaultSampleRow Parse(string data) => Parse(data, System.Globalization.CultureInfo.InvariantCulture);
 
         /// <summary>Converts the string representation of a row to its DefaultSampleRow equivalent.</summary>
         /// <param name="data">A string that contains a row to convert.</param>
         /// <param name="provider">The format provider (optional).</param>
         /// <returns>A new DefaultSampleRow instance.</returns>
-        public static DefaultSampleRow Parse(string data, IFormatProvider provider) => CsvReader.ParseRow<DefaultSampleRow>(data, provider);
+        public static DefaultSampleRow Parse(string data, IFormatProvider provider) => Cave.Data.CsvReader.ParseRow<DefaultSampleRow>(data, provider);
 
         /// <summary>[ID, AutoIncrement] long Id</summary>
         /// <remarks>Id field</remarks>
-        [Description("Id field")]
-        [Field(Flags = FieldFlags.ID | FieldFlags.AutoIncrement)]
+        [System.ComponentModel.Description("Id field")]
+        [Cave.Data.Field(Flags = Cave.Data.FieldFlags.ID | Cave.Data.FieldFlags.AutoIncrement)]
         public long Id;
 
         /// <summary>byte[] Blob</summary>
-        [Field()]
+        [Cave.Data.Field()]
         public byte[] Blob;
 
         /// <summary>byte Byte</summary>
-        [Field()]
+        [Cave.Data.Field()]
         public byte Byte;
 
         /// <summary>short Short</summary>
-        [Field()]
+        [Cave.Data.Field()]
         public short Short;
 
         /// <summary>int Int</summary>
-        [Field()]
+        [Cave.Data.Field()]
         public int Int;
 
         /// <summary>long Long</summary>
-        [Field()]
+        [Cave.Data.Field()]
         public long Long;
 
         /// <summary>TimeSpan Native Duration</summary>
-        [Field()]
-        [DateTimeFormat(DateTimeKind.Unspecified, DateTimeType.Native)]
+        [Cave.Data.Field()]
+        [Cave.Data.DateTimeFormat(DateTimeKind.Unspecified, Cave.Data.DateTimeType.Native)]
         public TimeSpan Duration;
 
         /// <summary>bool Enabled (4)</summary>
-        [Field(Length = 4)]
+        [Cave.Data.Field(Length = 4)]
         public bool Enabled;
 
-        /// <summary>Guid UTF8 Guid</summary>
-        [Field()]
-        [StringFormat(StringEncoding.UTF8)]
+        /// <summary>Guid Guid</summary>
+        [Cave.Data.Field()]
         public Guid Guid;
 
         /// <summary>sbyte SByte</summary>
-        [Field(Name = "SByte")]
+        [Cave.Data.Field(Name = "SByte")]
         public sbyte Sbyte;
 
         /// <summary>ushort UShort</summary>
-        [Field(Name = "UShort")]
+        [Cave.Data.Field(Name = "UShort")]
         public ushort Ushort;
 
         /// <summary>uint UInt</summary>
-        [Field(Name = "UInt")]
+        [Cave.Data.Field(Name = "UInt")]
         public uint Uint;
 
         /// <summary>ulong ULong</summary>
-        [Field(Name = "ULong")]
+        [Cave.Data.Field(Name = "ULong")]
         public ulong Ulong;
 
         /// <summary>UTF8 UTF8 Text (30)</summary>
-        [Field(Length = 30)]
-        [StringFormat(StringEncoding.UTF8)]
-        public UTF8 Text;
+        [Cave.Data.Field(Length = 30)]
+        [Cave.Data.StringFormat(Cave.IO.StringEncoding.UTF8)]
+        public Cave.UTF8 Text;
 
         /// <summary>string UTF8 String</summary>
-        [Field()]
-        [StringFormat(StringEncoding.UTF8)]
+        [Cave.Data.Field()]
+        [Cave.Data.StringFormat(Cave.IO.StringEncoding.UTF8)]
         public string String;
 
         /// <summary>DateTime Native Timestamp</summary>
-        [Field()]
-        [DateTimeFormat(DateTimeKind.Unspecified, DateTimeType.Native)]
+        [Cave.Data.Field()]
+        [Cave.Data.DateTimeFormat(DateTimeKind.Unspecified, Cave.Data.DateTimeType.Native)]
         public DateTime Timestamp;
 
         /// <summary>Uri UTF8 Uri</summary>
-        [Field()]
-        [StringFormat(StringEncoding.UTF8)]
-        public Uri Uri;
+        [Cave.Data.Field()]
+        [Cave.Data.StringFormat(Cave.IO.StringEncoding.UTF8)]
+        public System.Uri Uri;
 
-        /// <summary>byte[] NullableBlob</summary>
-        [Field()]
-        public byte[] NullableBlob;
+        /// <summary>[Nullable] byte[]?  NullableBlob</summary>
+        [Cave.Data.Field(Flags = Cave.Data.FieldFlags.Nullable)]
+        public byte[]? NullableBlob;
 
-        /// <summary>byte NullableByte</summary>
-        [Field()]
-        public byte NullableByte;
+        /// <summary>[Nullable] byte?  NullableByte</summary>
+        [Cave.Data.Field(Flags = Cave.Data.FieldFlags.Nullable)]
+        public byte? NullableByte;
 
-        /// <summary>short NullableShort</summary>
-        [Field()]
-        public short NullableShort;
+        /// <summary>[Nullable] short?  NullableShort</summary>
+        [Cave.Data.Field(Flags = Cave.Data.FieldFlags.Nullable)]
+        public short? NullableShort;
 
-        /// <summary>int NullableInt</summary>
-        [Field()]
-        public int NullableInt;
+        /// <summary>[Nullable] int?  NullableInt</summary>
+        [Cave.Data.Field(Flags = Cave.Data.FieldFlags.Nullable)]
+        public int? NullableInt;
 
-        /// <summary>long NullableLong</summary>
-        [Field()]
-        public long NullableLong;
+        /// <summary>[Nullable] long?  NullableLong</summary>
+        [Cave.Data.Field(Flags = Cave.Data.FieldFlags.Nullable)]
+        public long? NullableLong;
 
-        /// <summary>TimeSpan Native NullableDuration</summary>
-        [Field()]
-        [DateTimeFormat(DateTimeKind.Unspecified, DateTimeType.Native)]
-        public TimeSpan NullableDuration;
+        /// <summary>[Nullable] TimeSpan?  Native NullableDuration</summary>
+        [Cave.Data.Field(Flags = Cave.Data.FieldFlags.Nullable)]
+        [Cave.Data.DateTimeFormat(DateTimeKind.Unspecified, Cave.Data.DateTimeType.Native)]
+        public TimeSpan? NullableDuration;
 
-        /// <summary>bool NullableEnabled</summary>
-        [Field()]
-        public bool NullableEnabled;
+        /// <summary>[Nullable] bool?  NullableEnabled</summary>
+        [Cave.Data.Field(Flags = Cave.Data.FieldFlags.Nullable)]
+        public bool? NullableEnabled;
 
-        /// <summary>Guid UTF8 NullableGuid</summary>
-        [Field()]
-        [StringFormat(StringEncoding.UTF8)]
-        public Guid NullableGuid;
+        /// <summary>[Nullable] Guid?  NullableGuid</summary>
+        [Cave.Data.Field(Flags = Cave.Data.FieldFlags.Nullable)]
+        public Guid? NullableGuid;
 
-        /// <summary>sbyte NullableSByte</summary>
-        [Field(Name = "NullableSByte")]
-        public sbyte NullableSbyte;
+        /// <summary>[Nullable] sbyte?  NullableSByte</summary>
+        [Cave.Data.Field(Flags = Cave.Data.FieldFlags.Nullable, Name = "NullableSByte")]
+        public sbyte? NullableSbyte;
 
-        /// <summary>ushort NullableUShort</summary>
-        [Field(Name = "NullableUShort")]
-        public ushort NullableUshort;
+        /// <summary>[Nullable] ushort?  NullableUShort</summary>
+        [Cave.Data.Field(Flags = Cave.Data.FieldFlags.Nullable, Name = "NullableUShort")]
+        public ushort? NullableUshort;
 
-        /// <summary>uint NullableUInt</summary>
-        [Field(Name = "NullableUInt")]
-        public uint NullableUint;
+        /// <summary>[Nullable] uint?  NullableUInt</summary>
+        [Cave.Data.Field(Flags = Cave.Data.FieldFlags.Nullable, Name = "NullableUInt")]
+        public uint? NullableUint;
 
-        /// <summary>ulong NullableULong</summary>
-        [Field(Name = "NullableULong")]
-        public ulong NullableUlong;
+        /// <summary>[Nullable] ulong?  NullableULong</summary>
+        [Cave.Data.Field(Flags = Cave.Data.FieldFlags.Nullable, Name = "NullableULong")]
+        public ulong? NullableUlong;
 
-        /// <summary>UTF8 UTF8 NullableText (30)</summary>
-        [Field(Length = 30)]
-        [StringFormat(StringEncoding.UTF8)]
-        public UTF8 NullableText;
+        /// <summary>[Nullable] UTF8?  UTF8 NullableText (30)</summary>
+        [Cave.Data.Field(Flags = Cave.Data.FieldFlags.Nullable, Length = 30)]
+        [Cave.Data.StringFormat(Cave.IO.StringEncoding.UTF8)]
+        public Cave.UTF8? NullableText;
 
-        /// <summary>DateTime Native NullableTimestamp</summary>
-        [Field()]
-        [DateTimeFormat(DateTimeKind.Unspecified, DateTimeType.Native)]
-        public DateTime NullableTimestamp;
+        /// <summary>[Nullable] DateTime?  Native NullableTimestamp</summary>
+        [Cave.Data.Field(Flags = Cave.Data.FieldFlags.Nullable)]
+        [Cave.Data.DateTimeFormat(DateTimeKind.Unspecified, Cave.Data.DateTimeType.Native)]
+        public DateTime? NullableTimestamp;
 
-        /// <summary>string UTF8 NullableString</summary>
-        [Field()]
-        [StringFormat(StringEncoding.UTF8)]
-        public string NullableString;
+        /// <summary>[Nullable] string?  UTF8 NullableString</summary>
+        [Cave.Data.Field(Flags = Cave.Data.FieldFlags.Nullable)]
+        [Cave.Data.StringFormat(Cave.IO.StringEncoding.UTF8)]
+        public string? NullableString;
 
-        /// <summary>Uri UTF8 NullableUri</summary>
-        [Field()]
-        [StringFormat(StringEncoding.UTF8)]
-        public Uri NullableUri;
+        /// <summary>[Nullable] Uri?  UTF8 NullableUri</summary>
+        [Cave.Data.Field(Flags = Cave.Data.FieldFlags.Nullable)]
+        [Cave.Data.StringFormat(Cave.IO.StringEncoding.UTF8)]
+        public System.Uri? NullableUri;
 
         /// <summary>Gets a string representation of this row.</summary>
         /// <returns>Returns a string that can be parsed by <see cref="Parse(string)"/>.</returns>
-        public override string ToString() => ToString(CultureInfo.InvariantCulture);
+        public override string ToString() => ToString(System.Globalization.CultureInfo.InvariantCulture);
 
         /// <summary>Gets a string representation of this row.</summary>
-        /// <returns>Returns a string that can be parsed by <see cref="Parse(string, IFormatProvider)"/>.</returns>
-        public string ToString(IFormatProvider provider) => CsvWriter.RowToString(this, provider);
+        /// <returns>Returns a string that can be parsed by <see cref="Parse(string, System.IFormatProvider)"/>.</returns>
+        public string ToString(System.IFormatProvider provider) => Cave.Data.CsvWriter.RowToString(this, provider);
+
+        /// <summary>Gets an array containing the values of all fields of this row</summary>
+        /// <returns>Returns a new array instance.</returns>
+        public object?[] GetValues() => [Id, Blob, Byte, Short, Int, Long, Duration, Enabled, Guid, Sbyte, Ushort, Uint, Ulong, Text, String, Timestamp, Uri, NullableBlob, NullableByte, NullableShort, NullableInt, NullableLong, NullableDuration, NullableEnabled, NullableGuid, NullableSbyte, NullableUshort, NullableUint, NullableUlong, NullableText, NullableTimestamp, NullableString, NullableUri];
 
         /// <summary>Gets the hash code based on all fields of this row.</summary>
+        /// <remarks>Hashes are created using <see cref="Cave.DefaultHashingFunction"/>. This is done because hashing in .net is not deterministic.
+        /// You can use your own hashing algorithm by changing <see cref="Cave.DefaultHashingFunction.Create"/> to your own instance.</remarks>
         /// <returns>A hash code for all fields of this row.</returns>
-        public override int GetHashCode()
-        {
-            var hasher = DefaultHashingFunction.Create();
-            hasher.Add(Id);
-            hasher.Add(Blob);
-            hasher.Add(Byte);
-            hasher.Add(Short);
-            hasher.Add(Int);
-            hasher.Add(Long);
-            hasher.Add(Duration);
-            hasher.Add(Enabled);
-            hasher.Add(Guid);
-            hasher.Add(Sbyte);
-            hasher.Add(Ushort);
-            hasher.Add(Uint);
-            hasher.Add(Ulong);
-            hasher.Add(Text);
-            hasher.Add(String);
-            hasher.Add(Timestamp);
-            hasher.Add(Uri);
-            hasher.Add(NullableBlob);
-            hasher.Add(NullableByte);
-            hasher.Add(NullableShort);
-            hasher.Add(NullableInt);
-            hasher.Add(NullableLong);
-            hasher.Add(NullableDuration);
-            hasher.Add(NullableEnabled);
-            hasher.Add(NullableGuid);
-            hasher.Add(NullableSbyte);
-            hasher.Add(NullableUshort);
-            hasher.Add(NullableUint);
-            hasher.Add(NullableUlong);
-            hasher.Add(NullableText);
-            hasher.Add(NullableTimestamp);
-            hasher.Add(NullableString);
-            hasher.Add(NullableUri);
-            return hasher.ToHashCode();
-        }
+        public override int GetHashCode() => Cave.DefaultHashingFunction.Calculate(GetValues());
 
         /// <inheritdoc/>
         public override bool Equals(object? other) => other is DefaultSampleRow row && Equals(row);
@@ -236,39 +194,39 @@ namespace dbstructs.test
         public bool Equals(DefaultSampleRow other)
         {
             return
-                Equals(other.Id, Id) &&
-                DefaultComparer.Equals(other.Blob, Blob) &&
-                Equals(other.Byte, Byte) &&
-                Equals(other.Short, Short) &&
-                Equals(other.Int, Int) &&
-                Equals(other.Long, Long) &&
-                Equals(other.Duration, Duration) &&
-                Equals(other.Enabled, Enabled) &&
-                Equals(other.Guid, Guid) &&
-                Equals(other.Sbyte, Sbyte) &&
-                Equals(other.Ushort, Ushort) &&
-                Equals(other.Uint, Uint) &&
-                Equals(other.Ulong, Ulong) &&
-                Equals(other.Text, Text) &&
-                DefaultComparer.Equals(other.String, String) &&
-                Equals(other.Timestamp, Timestamp) &&
-                Equals(other.Uri, Uri) &&
-                DefaultComparer.Equals(other.NullableBlob, NullableBlob) &&
-                Equals(other.NullableByte, NullableByte) &&
-                Equals(other.NullableShort, NullableShort) &&
-                Equals(other.NullableInt, NullableInt) &&
-                Equals(other.NullableLong, NullableLong) &&
-                Equals(other.NullableDuration, NullableDuration) &&
-                Equals(other.NullableEnabled, NullableEnabled) &&
-                Equals(other.NullableGuid, NullableGuid) &&
-                Equals(other.NullableSbyte, NullableSbyte) &&
-                Equals(other.NullableUshort, NullableUshort) &&
-                Equals(other.NullableUint, NullableUint) &&
-                Equals(other.NullableUlong, NullableUlong) &&
-                Equals(other.NullableText, NullableText) &&
-                Equals(other.NullableTimestamp, NullableTimestamp) &&
-                DefaultComparer.Equals(other.NullableString, NullableString) &&
-                Equals(other.NullableUri, NullableUri);
+                object.Equals(other.Id, Id) &&
+                Cave.Collections.DefaultComparer.Equals(other.Blob, Blob) &&
+                object.Equals(other.Byte, Byte) &&
+                object.Equals(other.Short, Short) &&
+                object.Equals(other.Int, Int) &&
+                object.Equals(other.Long, Long) &&
+                object.Equals(other.Duration, Duration) &&
+                object.Equals(other.Enabled, Enabled) &&
+                object.Equals(other.Guid, Guid) &&
+                object.Equals(other.Sbyte, Sbyte) &&
+                object.Equals(other.Ushort, Ushort) &&
+                object.Equals(other.Uint, Uint) &&
+                object.Equals(other.Ulong, Ulong) &&
+                object.Equals(other.Text, Text) &&
+                Cave.Collections.DefaultComparer.Equals(other.String, String) &&
+                object.Equals(other.Timestamp, Timestamp) &&
+                object.Equals(other.Uri, Uri) &&
+                Cave.Collections.DefaultComparer.Equals(other.NullableBlob, NullableBlob) &&
+                object.Equals(other.NullableByte, NullableByte) &&
+                object.Equals(other.NullableShort, NullableShort) &&
+                object.Equals(other.NullableInt, NullableInt) &&
+                object.Equals(other.NullableLong, NullableLong) &&
+                object.Equals(other.NullableDuration, NullableDuration) &&
+                object.Equals(other.NullableEnabled, NullableEnabled) &&
+                object.Equals(other.NullableGuid, NullableGuid) &&
+                object.Equals(other.NullableSbyte, NullableSbyte) &&
+                object.Equals(other.NullableUshort, NullableUshort) &&
+                object.Equals(other.NullableUint, NullableUint) &&
+                object.Equals(other.NullableUlong, NullableUlong) &&
+                object.Equals(other.NullableText, NullableText) &&
+                object.Equals(other.NullableTimestamp, NullableTimestamp) &&
+                Cave.Collections.DefaultComparer.Equals(other.NullableString, NullableString) &&
+                object.Equals(other.NullableUri, NullableUri);
         }
     }
 }

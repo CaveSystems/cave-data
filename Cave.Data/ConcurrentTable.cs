@@ -221,7 +221,7 @@ public class ConcurrentTable : ITable
         ReadLockedFunc(() => BaseTable.GetRows(search, resultOption)) ?? [];
 
     /// <inheritdoc/>
-    public IList<Row> GetRows() => ReadLockedFunc(() => BaseTable.GetRows()) ?? [];
+    public IList<Row> GetRows() => ReadLockedFunc(BaseTable.GetRows) ?? [];
 
     /// <inheritdoc/>
     public IList<TValue> GetValues<TValue>(string fieldName, Search? search) where TValue : IComparable<TValue> => GetValues<TValue>(fieldName, search, null);

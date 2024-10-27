@@ -7,38 +7,33 @@
 
 #nullable enable
 
-using System;
-using System.Globalization;
-using System.CodeDom.Compiler;
-using Cave.Data;
-
 namespace dbstructs.test
 {
 	/// <summary>Provides access to table structures for database Default.</summary>
-	[GeneratedCode("Cave.Data.DatabaseInterfaceGenerator", null)]
+	[System.CodeDom.Compiler.GeneratedCode("Cave.Data.DatabaseInterfaceGenerator", null)]
 	public static partial class SampleV1
 	{
-		static IDatabase? database;
+		static Cave.Data.IDatabase? database;
 
 		/// <summary>Gets the used database instance.</summary>
-		public static IDatabase Database => database ?? throw new InvalidOperationException("Database is not connected!");
+		public static Cave.Data.IDatabase Database => database ?? throw new InvalidOperationException("Database is not connected!");
 
 		/// <summary>Gets or sets the flags used when accessing table instances.</summary>
-		public static TableFlags DefaultTableFlags { get; set; }
+		public static Cave.Data.TableFlags DefaultTableFlags { get; set; }
 
 		/// <summary>Connects to the Default database.</summary>
-		/// <param name="storage">IStorage instance to use.</param>
+		/// <param name="storage">Cave.Data.IStorage instance to use.</param>
 		/// <param name="createIfNotExists">Create the databaseName if its not already present.</param>
-		/// <returns>A new <see cref="IDatabase" /> instance.</returns>
-		public static void Connect(IStorage storage, bool createIfNotExists = false)
+		/// <returns>A new <see cref="Cave.Data.IDatabase" /> instance.</returns>
+		public static void Connect(Cave.Data.IStorage storage, bool createIfNotExists = false)
 		{
 			database = storage.GetDatabase("Default", createIfNotExists);
 		}
 
 		/// <summary>Gets or sets the function used to retrieve tables from the database.</summary>
-		public static Func<string, ITable> GetTable { get; set; } = (tableName) => Database.GetTable(tableName, DefaultTableFlags);
+		public static Func<string, Cave.Data.ITable> GetTable { get; set; } = (tableName) => Database.GetTable(tableName, DefaultTableFlags);
 
-		/// <summary>Gets a new <see cref="ITable{TStruct}"/> (DefaultSampleRow) instance for accessing the <c>sample</c> table.</summary>
-		public static ITable<DefaultSampleRow> Sample => new Table<DefaultSampleRow>(GetTable("sample"));
+		/// <summary>Gets a new <see cref="Cave.Data.ITable{TStruct}"/> (DefaultSampleRow) instance for accessing the <c>sample</c> table.</summary>
+		public static Cave.Data.ITable<DefaultSampleRow> Sample => new Cave.Data.Table<DefaultSampleRow>(GetTable("sample"));
 	}
 }

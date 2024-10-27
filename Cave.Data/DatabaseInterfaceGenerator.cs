@@ -82,43 +82,38 @@ public class DatabaseInterfaceGenerator
         code.AppendLine();
         code.AppendLine("#nullable enable");
         code.AppendLine();
-        code.AppendLine("using System;");
-        code.AppendLine("using System.Globalization;");
-        code.AppendLine("using System.CodeDom.Compiler;");
-        code.AppendLine("using Cave.Data;");
-        code.AppendLine();
         code.AppendLine($"namespace {NameSpace}");
         code.AppendLine("{");
         code.AppendLine($"\t/// <summary>Provides access to table structures for database {Database.Name}.</summary>");
         if (Options.VersionHeader)
         {
-            code.AppendLine($"\t[GeneratedCode(\"{generator.FullName}\", \"{generator.Assembly.GetName().Version}\")]");
+            code.AppendLine($"\t[System.CodeDom.Compiler.GeneratedCode(\"{generator.FullName}\", \"{generator.Assembly.GetName().Version}\")]");
         }
         else
         {
-            code.AppendLine($"\t[GeneratedCode(\"{generator.FullName}\", null)]");
+            code.AppendLine($"\t[System.CodeDom.Compiler.GeneratedCode(\"{generator.FullName}\", null)]");
         }
         code.AppendLine($"\tpublic static partial class {ClassName}");
         code.AppendLine("\t{");
-        code.AppendLine("\t\tstatic IDatabase? database;");
+        code.AppendLine("\t\tstatic Cave.Data.IDatabase? database;");
         code.AppendLine();
         code.AppendLine("\t\t/// <summary>Gets the used database instance.</summary>");
-        code.AppendLine("\t\tpublic static IDatabase Database => database ?? throw new InvalidOperationException(\"Database is not connected!\");");
+        code.AppendLine("\t\tpublic static Cave.Data.IDatabase Database => database ?? throw new InvalidOperationException(\"Database is not connected!\");");
         code.AppendLine();
         code.AppendLine("\t\t/// <summary>Gets or sets the flags used when accessing table instances.</summary>");
-        code.AppendLine("\t\tpublic static TableFlags DefaultTableFlags { get; set; }");
+        code.AppendLine("\t\tpublic static Cave.Data.TableFlags DefaultTableFlags { get; set; }");
         code.AppendLine();
         code.AppendLine($"\t\t/// <summary>Connects to the {Database.Name} database.</summary>");
-        code.AppendLine("\t\t/// <param name=\"storage\">IStorage instance to use.</param>");
+        code.AppendLine("\t\t/// <param name=\"storage\">Cave.Data.IStorage instance to use.</param>");
         code.AppendLine("\t\t/// <param name=\"createIfNotExists\">Create the databaseName if its not already present.</param>");
-        code.AppendLine("\t\t/// <returns>A new <see cref=\"IDatabase\" /> instance.</returns>");
-        code.AppendLine("\t\tpublic static void Connect(IStorage storage, bool createIfNotExists = false)");
+        code.AppendLine("\t\t/// <returns>A new <see cref=\"Cave.Data.IDatabase\" /> instance.</returns>");
+        code.AppendLine("\t\tpublic static void Connect(Cave.Data.IStorage storage, bool createIfNotExists = false)");
         code.AppendLine("\t\t{");
         code.AppendLine($"\t\t\tdatabase = storage.GetDatabase(\"{Database.Name}\", createIfNotExists);");
         code.AppendLine("\t\t}");
         code.AppendLine();
         code.AppendLine("\t\t/// <summary>Gets or sets the function used to retrieve tables from the database.</summary>");
-        code.AppendLine("\t\tpublic static Func<string, ITable> GetTable { get; set; } = (tableName) => Database.GetTable(tableName, DefaultTableFlags);");
+        code.AppendLine("\t\tpublic static Func<string, Cave.Data.ITable> GetTable { get; set; } = (tableName) => Database.GetTable(tableName, DefaultTableFlags);");
         header = code.ToString();
         code = new StringBuilder();
         code.AppendLine("\t}");
@@ -156,8 +151,8 @@ public class DatabaseInterfaceGenerator
             var strongTypedIdentifier = singleIdentifier != null && !Options.DisableKnownIdentifiers;
             var typeString = strongTypedIdentifier ? $"{singleIdentifier!.DotNetTypeName}, {table.ClassName}" : table.ClassName;
             var genericString = strongTypedIdentifier ? $"TKey, TStruct" : "TStruct";
-            result.AppendLine($"\t\t/// <summary>Gets a new <see cref=\"ITable{{{genericString}}}\"/> ({typeString}) instance for accessing the <c>{table.TableNameAtDatabase}</c> table.</summary>");
-            result.AppendLine($"\t\tpublic static ITable<{typeString}> {table.GetterName} => new Table<{typeString}>(GetTable(\"{table.TableNameAtDatabase}\"));");
+            result.AppendLine($"\t\t/// <summary>Gets a new <see cref=\"Cave.Data.ITable{{{genericString}}}\"/> ({typeString}) instance for accessing the <c>{table.TableNameAtDatabase}</c> table.</summary>");
+            result.AppendLine($"\t\tpublic static Cave.Data.ITable<{typeString}> {table.GetterName} => new Cave.Data.Table<{typeString}>(GetTable(\"{table.TableNameAtDatabase}\"));");
         }
 
         result.Append(footer);
