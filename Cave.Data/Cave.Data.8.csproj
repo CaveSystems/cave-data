@@ -1,6 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
+
+		<Version>9.99-future</Version>
+		<AssemblyName>Cave.Data</AssemblyName>
 
 		<!--project-->
         <RootNamespace>Cave.Data</RootNamespace>
