@@ -549,6 +549,13 @@ public sealed class RowLayout : IEquatable<RowLayout>, IEnumerable<IFieldPropert
             return field.Index;
         }
 
+        //test name at database
+        field = fieldProperties.SingleOrDefault(f => f.NameAtDatabase.Equals(fieldName, comparison));
+        if (field != null)
+        {
+            return field.Index;
+        }
+
         return !throwException ? -1 : throw new ArgumentOutOfRangeException(nameof(fieldName), $"FieldName {fieldName} is not present at layout {this}!");
     }
 
