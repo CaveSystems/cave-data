@@ -7,7 +7,7 @@ namespace Cave.Data;
 /// <typeparam name="TKey">Key identifier type.</typeparam>
 /// <typeparam name="TStruct">Row structure type.</typeparam>
 /// <typeparam name="TTarget">Result and cache item type.</typeparam>
-public class RowCache<TKey, TStruct, TTarget> : IRowCache where TKey : IComparable<TKey> where TStruct : struct where TTarget : class
+public class RowCache<TKey, TStruct, TTarget> : IRowCache where TKey : IComparable<TKey> where TStruct : struct where TTarget : class?
 {
     #region Private Fields
 
