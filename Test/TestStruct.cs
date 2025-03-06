@@ -179,6 +179,7 @@ namespace Test
         public decimal Dec;
 
         [Field]
+        [DefaultValue(null)]
         public Uri Uri;
 
         [Field]
@@ -284,6 +285,7 @@ public struct TestStructCleanMissingField
     public decimal Dec;
 
     [Field]
+    [DefaultValue(null)]
     public Uri Uri;
 
     [Field]
