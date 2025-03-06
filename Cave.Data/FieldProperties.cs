@@ -279,7 +279,7 @@ public class FieldProperties : IFieldProperties
         DateTimeType = DateTimeType.Undefined;
         StringEncoding = StringEncoding.Undefined;
         AlternativeNames = [];
-        DefaultValue = null;
+        DefaultValue = Activator.CreateInstance(ValueType);
         TypeAtDatabase = DataType switch
         {
             DataType.Enum => DataType.Int64,

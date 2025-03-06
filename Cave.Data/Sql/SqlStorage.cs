@@ -223,6 +223,7 @@ public abstract class SqlStorage : Storage, IDisposable
                 TypeAtDatabase = dataType,
                 NameAtDatabase = fieldName,
             };
+            properties.DefaultValue = properties.IsNullable ? null : Activator.CreateInstance(valueType);
             fields[i] = GetDatabaseFieldProperties(properties);
         }
 

@@ -86,6 +86,9 @@ public static class Fields
                 case "NO":
                 case "0":
                     return false;
+
+                default:
+                    throw new NotImplementedException($"{value} is not a valid bool representation!");
             }
         }
 
