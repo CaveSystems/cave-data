@@ -1,8 +1,10 @@
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 
@@ -86,6 +88,9 @@ public static class Fields
                 case "NO":
                 case "0":
                     return false;
+
+                default:
+                    throw new NotImplementedException($"{value} is not a valid bool representation!");
             }
         }
 
@@ -553,6 +558,16 @@ public static class Fields
             fields[i].SetValue(obj, value);
         }
     }
+
+    /// <summary>Gets the default value for the specified <paramref name="fieldType"/>.</summary>
+    /// <param name="fieldType"></param>
+    /// <returns></returns>
+    public static object? GetDefault(Type fieldType) =>
+        fieldType.IsArray ? null :
+        fieldType.IsValueType ? Activator.CreateInstance(fieldType) :
+        fieldType == typeof(string) ? string.Empty :
+        fieldType.GetConstructors().FirstOrDefault(c => c.GetParameters().Length == 0)?.Invoke([]) ??
+        throw new NotImplementedException($"Could not determine default value of {fieldType}! You can solve this by creating a default constructor (it can be protected or private) or defining the field with a [DefaultValue()] attribute.");
 
     #endregion Public Methods
 }

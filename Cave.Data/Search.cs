@@ -661,7 +661,7 @@ public sealed class Search
                     {
                         if (field.ValueType != null)
                         {
-                            var defaultValue = Activator.CreateInstance(field.ValueType);
+                            var defaultValue = Fields.GetDefault(field.ValueType);
                             if (Equals(value, defaultValue))
                             {
                                 continue;

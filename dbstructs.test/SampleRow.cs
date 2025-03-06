@@ -61,6 +61,7 @@ public struct SampleRow
     public DateTime Timestamp;
 
     [Field]
+    [DefaultValue(null)]
     public Uri Uri;
 
     [Field]

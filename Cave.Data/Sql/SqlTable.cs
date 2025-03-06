@@ -165,12 +165,7 @@ public abstract class SqlTable : Table
             {
                 //allow user to set the value explicitly even if field is autoincrement
                 var currentValue = Storage.GetDatabaseValue(field, row[i]);
-                var autoIncrement = currentValue == null;
-                if (!autoIncrement)
-                {
-                    var defaultValue = field.DefaultValue;
-                    autoIncrement = Equals(currentValue, defaultValue);
-                }
+                var autoIncrement = (currentValue == null) || Equals(currentValue, field.DefaultValue);
                 if (autoIncrement)
                 {
                     usesAutoIncrement = true;

@@ -279,7 +279,6 @@ public class FieldProperties : IFieldProperties
         DateTimeType = DateTimeType.Undefined;
         StringEncoding = StringEncoding.Undefined;
         AlternativeNames = [];
-        DefaultValue = null;
         TypeAtDatabase = DataType switch
         {
             DataType.Enum => DataType.Int64,
@@ -287,6 +286,7 @@ public class FieldProperties : IFieldProperties
             _ => DataType
         };
 
+        var defaultValueOverride = false;
         foreach (var attribute in fieldInfo.GetCustomAttributes(false))
         {
             if (attribute is FieldAttribute fieldAttribute)
@@ -346,6 +346,7 @@ public class FieldProperties : IFieldProperties
 
             if (attribute is DefaultValueAttribute defaultValueAttribute)
             {
+                defaultValueOverride = true;
                 DefaultValue = defaultValueAttribute.Value;
                 continue;
             }
@@ -364,6 +365,10 @@ public class FieldProperties : IFieldProperties
             TypeAtDatabase = DataType;
         }
 
+        if (!IsNullable && !defaultValueOverride)
+        {
+            DefaultValue ??= Fields.GetDefault(ValueType);
+        }
         NameAtDatabase ??= namingStrategy.GetNameByStrategy(fieldInfo.Name);
 
         Validate();
