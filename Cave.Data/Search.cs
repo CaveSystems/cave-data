@@ -640,7 +640,7 @@ public sealed class Search
             }
 
             var value = fields.GetValue(i);
-            if (checkDefaultValues)
+            if (!checkDefaultValues)
             {
                 if (value == null)
                 {
