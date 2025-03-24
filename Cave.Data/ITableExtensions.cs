@@ -41,6 +41,51 @@ public static class ITableExtensions
         return table.Exist(Search.FieldEquals(field, value));
     }
 
+    /// <summary>Searches for datasets matching the specified <paramref name="value"/>.</summary>
+    /// <typeparam name="TKey"></typeparam>
+    /// <typeparam name="TStruct"></typeparam>
+    /// <param name="table">Table to search at</param>
+    /// <param name="field">The fields name.</param>
+    /// <param name="value">The value.</param>
+    /// <returns>Returns a list of identifiers.</returns>
+    public static IList<TKey> Find<TKey, TStruct>(this ITable<TKey, TStruct> table, string field, object value)
+        where TKey : IComparable<TKey>
+        where TStruct : struct
+    {
+        if (table.Layout.SingleIdentifier is null) throw new InvalidOperationException("Table.Layout.SingleIdentifier needs to be set!");
+        return table.GetValues<TKey>(table.Layout.SingleIdentifier.Name, Search.FieldEquals(field, value));
+    }
+
+    /// <summary>Searches for datasets matching the specified <paramref name="row"/> excluding the ID field.</summary>
+    /// <typeparam name="TKey"></typeparam>
+    /// <typeparam name="TStruct"></typeparam>
+    /// <param name="table">Table to search at</param>
+    /// <param name="row">The row values to match.</param>
+    /// <param name="checkDefaultValues">if set to <c>true</c> [check default values].</param>
+    /// <returns>Returns a list of identifiers.</returns>
+    public static IList<TKey> Find<TKey, TStruct>(this ITable<TKey, TStruct> table, TStruct row, bool checkDefaultValues = false)
+        where TKey : IComparable<TKey>
+        where TStruct : struct
+    {
+        if (table.Layout.SingleIdentifier is null) throw new InvalidOperationException("Table.Layout.SingleIdentifier needs to be set!");
+        return table.GetValues<TKey>(table.Layout.SingleIdentifier.Name, Search.FullMatch(table, row, checkDefaultValues));
+    }
+
+    /// <summary>Searches for datasets matching the specified <paramref name="row"/> excluding the ID field.</summary>
+    /// <typeparam name="TKey"></typeparam>
+    /// <typeparam name="TStruct"></typeparam>
+    /// <param name="table">Table to search at</param>
+    /// <param name="row">The row values to match.</param>
+    /// <param name="checkDefaultValues">if set to <c>true</c> [check default values].</param>
+    /// <returns>Returns a list of identifiers.</returns>
+    public static IList<TKey> Find<TKey, TStruct>(this ITable<TKey, TStruct> table, Row row, bool checkDefaultValues = false)
+        where TKey : IComparable<TKey>
+        where TStruct : struct
+    {
+        if (table.Layout.SingleIdentifier is null) throw new InvalidOperationException("Table.Layout.SingleIdentifier needs to be set!");
+        return table.GetValues<TKey>(table.Layout.SingleIdentifier.Name, Search.FullMatch(table, row, checkDefaultValues));
+    }
+
     /// <summary>Searches for datasets matching the specified <paramref name="search"/>.</summary>
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TStruct"></typeparam>
@@ -55,6 +100,29 @@ public static class ITableExtensions
         if (table.Layout.SingleIdentifier is null) throw new InvalidOperationException("Table.Layout.SingleIdentifier needs to be set!");
         return table.GetValues<TKey>(table.Layout.SingleIdentifier.Name, search, resultOption);
     }
+
+    /// <summary>Searches for datasets matching the specified <paramref name="row"/> excluding the ID field.</summary>
+    /// <param name="table">Table to search at</param>
+    /// <param name="row">The row values to match.</param>
+    /// <param name="checkDefaultValues">if set to <c>true</c> [check default values].</param>
+    /// <returns>Returns a list of identifiers.</returns>
+    public static IList<Row> FindRows(this ITable table, Row row, bool checkDefaultValues = false) => table.GetRows(Search.FullMatch(table, row, checkDefaultValues));
+
+    /// <summary>Searches for datasets matching the specified <paramref name="row"/> excluding the ID field.</summary>
+    /// <typeparam name="TStruct"></typeparam>
+    /// <param name="table">Table to search at</param>
+    /// <param name="row">The row values to match.</param>
+    /// <param name="checkDefaultValues">if set to <c>true</c> [check default values].</param>
+    /// <returns>Returns a list of identifiers.</returns>
+    public static IList<TStruct> FindStructs<TStruct>(this ITable<TStruct> table, TStruct row, bool checkDefaultValues = false) where TStruct : struct => table.GetStructs(Search.FullMatch(table, row, checkDefaultValues));
+
+    /// <summary>Searches for datasets matching the specified <paramref name="row"/> excluding the ID field.</summary>
+    /// <typeparam name="TStruct"></typeparam>
+    /// <param name="table">Table to search at</param>
+    /// <param name="row">The row values to match.</param>
+    /// <param name="checkDefaultValues">if set to <c>true</c> [check default values].</param>
+    /// <returns>Returns a list of identifiers.</returns>
+    public static IList<TStruct> FindStructs<TStruct>(this ITable<TStruct> table, Row row, bool checkDefaultValues = false) where TStruct : struct => table.GetStructs(Search.FullMatch(table, row, checkDefaultValues));
 
     /// <summary>Gets the string comparison to use for field name comparison.</summary>
     /// <param name="tableFlags">Flags to use for setting.</param>
@@ -71,15 +139,7 @@ public static class ITableExtensions
     /// <param name="field">The field name to match.</param>
     /// <param name="value">The value to match.</param>
     /// <returns>The row found.</returns>
-    public static Row GetRow(this ITable table, string field, object value)
-    {
-        if (table == null)
-        {
-            throw new ArgumentNullException(nameof(table));
-        }
-
-        return table.GetRow(Search.FieldEquals(field, value));
-    }
+    public static Row GetRow(this ITable table, string field, object value) => table is not null ? table.GetRow(Search.FieldEquals(field, value)) : throw new ArgumentNullException(nameof(table));
 
     /// <summary>Gets a row using the id field</summary>
     /// <typeparam name="TIdentifier"></typeparam>
