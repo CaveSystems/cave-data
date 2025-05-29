@@ -26,7 +26,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "net_2.0-3.5", "Test\net_2.0
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "net_4.x", "Test\net_4.x.csproj", "{AF3872BD-35F7-4949-9004-6B852273BD69}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "net_5+", "Test\net_5+.csproj", "{DB127854-2283-4CA8-B7C2-E28F236BDCFB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "net_current", "Test\net_current.csproj", "{DB127854-2283-4CA8-B7C2-E28F236BDCFB}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dbstructs", "dbstructs\dbstructs.csproj", "{A9D8595B-7F32-4288-9C15-142EED01E49E}"
 EndProject

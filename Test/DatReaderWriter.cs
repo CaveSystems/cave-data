@@ -7,6 +7,8 @@ namespace Test.Cave.Data
     [TestFixture]
     public class DatReaderWriter
     {
+        #region Public Methods
+
         [Test]
         public void StructReadWrite()
         {
@@ -26,5 +28,7 @@ namespace Test.Cave.Data
                 Assert.AreEqual(t, TestStructClean.Create(i));
             }
         }
+
+        #endregion Public Methods
     }
 }
