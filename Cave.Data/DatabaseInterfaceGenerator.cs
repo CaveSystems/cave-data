@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-
 namespace Cave.Data;
 
 /// <summary>Code generator for IDatabase instances.</summary>
@@ -14,60 +13,15 @@ public class DatabaseInterfaceGenerator
 
     #region Private Fields
 
+    readonly Dictionary<string, TableInfo> tables = new();
     string? footer;
     string? header;
-    readonly Dictionary<string, TableInfo> tables = new();
 
     #endregion Private Fields
 
     #region Private Methods
 
     string GetName(string text) => NamingStrategy.GetNameByStrategy(text);
-
-    #endregion Private Methods
-
-    #region Public Constructors
-
-    /// <summary>Initializes a new instance of the <see cref="DatabaseInterfaceGenerator" /> class.</summary>
-    /// <param name="database">Database to use.</param>
-    /// <param name="className">Name of the class to generate (optional).</param>
-    public DatabaseInterfaceGenerator(IDatabase database, string? className = null) : this(database, className, null) { }
-
-    /// <summary>Initializes a new instance of the <see cref="DatabaseInterfaceGenerator" /> class.</summary>
-    /// <param name="database">Database to use.</param>
-    /// <param name="className">Name of the class to generate (optional).</param>
-    /// <param name="nameSpace">The namespace to use for all classes (defaults to "Database").</param>
-    public DatabaseInterfaceGenerator(IDatabase database, string? className = null, string? nameSpace = null)
-    {
-        Database = database ?? throw new ArgumentNullException(nameof(database));
-        ClassName = className ?? GetName(database.Name) + "Db";
-        NameSpace = nameSpace ?? "Database";
-    }
-
-    #endregion Public Constructors
-
-    #region Public Properties
-
-    /// <summary>Gets the name of the generated class.</summary>
-    public string ClassName { get; set; }
-
-    /// <summary>Gets the used database instance.</summary>
-    public IDatabase Database { get; }
-
-    /// <summary>Gets the filename used at <see cref="Save(string)"/>.</summary>
-    public string? FileName { get; set; }
-    /// <summary>Gets the namespace of the generated class.</summary>
-    public string NameSpace { get; set; }
-
-    /// <summary>Naming strategy for classes, properties, structures and fields.</summary>
-    public NamingStrategy NamingStrategy { get; set; } = NamingStrategy.PascalCase;
-
-    /// <summary>Options for code generation.</summary>
-    public InterfaceGeneratorOptions Options { get; } = new();
-
-    #endregion Public Properties
-
-    #region Public Methods
 
     void WriteHeaderAndFooter()
     {
@@ -121,6 +75,51 @@ public class DatabaseInterfaceGenerator
         footer = code.ToString();
     }
 
+    #endregion Private Methods
+
+    #region Public Constructors
+
+    /// <summary>Initializes a new instance of the <see cref="DatabaseInterfaceGenerator" /> class.</summary>
+    /// <param name="database">Database to use.</param>
+    /// <param name="className">Name of the class to generate (optional).</param>
+    public DatabaseInterfaceGenerator(IDatabase database, string? className = null) : this(database, className, null) { }
+
+    /// <summary>Initializes a new instance of the <see cref="DatabaseInterfaceGenerator" /> class.</summary>
+    /// <param name="database">Database to use.</param>
+    /// <param name="className">Name of the class to generate (optional).</param>
+    /// <param name="nameSpace">The namespace to use for all classes (defaults to "Database").</param>
+    public DatabaseInterfaceGenerator(IDatabase database, string? className = null, string? nameSpace = null)
+    {
+        Database = database ?? throw new ArgumentNullException(nameof(database));
+        ClassName = className ?? GetName(database.Name) + "Db";
+        NameSpace = nameSpace ?? "Database";
+    }
+
+    #endregion Public Constructors
+
+    #region Public Properties
+
+    /// <summary>Gets the name of the generated class.</summary>
+    public string ClassName { get; set; }
+
+    /// <summary>Gets the used database instance.</summary>
+    public IDatabase Database { get; }
+
+    /// <summary>Gets the filename used at <see cref="Save(string)"/>.</summary>
+    public string? FileName { get; set; }
+    /// <summary>Gets the namespace of the generated class.</summary>
+    public string NameSpace { get; set; }
+
+    /// <summary>Naming strategy for classes, properties, structures and fields.</summary>
+    public NamingStrategy NamingStrategy { get; set; } = NamingStrategy.PascalCase;
+
+    /// <summary>Options for code generation.</summary>
+    public InterfaceGeneratorOptions Options { get; } = new();
+
+    #endregion Public Properties
+
+    #region Public Methods
+
     /// <summary>Adds a table to the database interface code. This does not generate the table class!</summary>
     /// <param name="tableLayout">Layout of the table</param>
     /// <param name="tableCodeResult">The table to add.</param>
@@ -151,8 +150,10 @@ public class DatabaseInterfaceGenerator
             var strongTypedIdentifier = singleIdentifier != null && !Options.DisableKnownIdentifiers;
             var typeString = strongTypedIdentifier ? $"{singleIdentifier!.DotNetTypeName}, {table.ClassName}" : table.ClassName;
             var genericString = strongTypedIdentifier ? $"TKey, TStruct" : "TStruct";
+            result.AppendLine($"\t\tstatic Cave.Data.ITable<{typeString}>? table{table.GetterName};");
+            result.AppendLine();
             result.AppendLine($"\t\t/// <summary>Gets a new <see cref=\"Cave.Data.ITable{{{genericString}}}\"/> ({typeString}) instance for accessing the <c>{table.TableNameAtDatabase}</c> table.</summary>");
-            result.AppendLine($"\t\tpublic static Cave.Data.ITable<{typeString}> {table.GetterName} => new Cave.Data.Table<{typeString}>(GetTable(\"{table.TableNameAtDatabase}\"));");
+            result.AppendLine($"\t\tpublic static Cave.Data.ITable<{typeString}> {table.GetterName} => table{table.GetterName} ??= new Cave.Data.Table<{typeString}>(GetTable(\"{table.TableNameAtDatabase}\"));");
         }
 
         result.Append(footer);
