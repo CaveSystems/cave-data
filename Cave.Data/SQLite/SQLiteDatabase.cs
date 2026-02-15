@@ -14,7 +14,7 @@ public sealed class SqliteDatabase : SqlDatabase
     protected override string[] GetTableNames()
     {
         var result = new List<string>();
-        var rows = SqlStorage.Query(database: Name, table: "sqlite_master",
+        var rows = SqlStorage.QueryUnchecked(database: Name, table: "sqlite_master",
             cmd: "SELECT name, type FROM sqlite_master WHERE type='tableName' AND name NOT LIKE 'sqlite_%'");
         foreach (var row in rows)
         {

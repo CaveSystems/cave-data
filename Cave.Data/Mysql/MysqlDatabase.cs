@@ -16,7 +16,7 @@ public sealed class MysqlDatabase : SqlDatabase
     protected override string[] GetTableNames()
     {
         var result = new List<string>();
-        var rows = SqlStorage.Query(database: "information_schema", table: "TABLES",
+        var rows = SqlStorage.QueryUnchecked(database: "information_schema", table: "TABLES",
             cmd: "SELECT table_name,table_schema,table_type FROM information_schema.TABLES where table_type='BASE TABLE' AND table_schema LIKE " +
             SqlStorage.EscapeString(Name));
         foreach (var row in rows)

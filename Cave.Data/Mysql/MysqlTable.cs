@@ -18,7 +18,7 @@ public class MysqlTable : SqlTable
         }
 
         var results = new List<string>();
-        var rows = Storage.Query(database: Database.Name, table: Name, cmd: cmd);
+        var rows = Storage.QueryUnchecked(database: Database.Name, table: Name, cmd: cmd);
         foreach (var row in rows)
         {
             var i = Layout.GetFieldIndex("Msg_text", true);

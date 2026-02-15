@@ -120,7 +120,7 @@ public sealed class MysqlStorage : SqlStorage
         get
         {
             var result = new List<string>();
-            var rows = Query(database: "information_schema", table: "SCHEMATA", cmd: "SELECT SCHEMA_NAME FROM information_schema.SCHEMATA;");
+            var rows = QueryUnchecked(database: "information_schema", table: "SCHEMATA", cmd: "SELECT SCHEMA_NAME FROM information_schema.SCHEMATA;");
             foreach (var row in rows)
             {
                 var db = (row[0]?.ToString()) ?? throw new NullReferenceException("Could not read database names from information_schema!");

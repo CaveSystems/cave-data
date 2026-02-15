@@ -225,16 +225,14 @@ public sealed class SqlSearch
     /// <param name="option">Options to check.</param>
     public void CheckFieldsPresent(ResultOption? option)
     {
-        if (option is null)
+        if (option is not null)
         {
-            throw new ArgumentNullException(nameof(option));
-        }
-
-        foreach (var fieldName in option.FieldNames)
-        {
-            if (!fieldNameSet.Contains(fieldName))
+            foreach (var fieldName in option.FieldNames)
             {
-                fieldNameSet.Add(fieldName);
+                if (!fieldNameSet.Contains(fieldName))
+                {
+                    fieldNameSet.Add(fieldName);
+                }
             }
         }
     }

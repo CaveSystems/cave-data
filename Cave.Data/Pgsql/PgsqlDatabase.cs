@@ -13,7 +13,7 @@ public sealed class PgsqlDatabase : SqlDatabase
 
     /// <inheritdoc/>
     protected override string[] GetTableNames() =>
-        SqlStorage.Query(database: Name, table: "pg_tables", cmd: "SELECT tablename FROM pg_tables").Select(r => r[0]?.ToString()).Where(s => s is not null).ToArray()!;
+        SqlStorage.QueryUnchecked(database: Name, table: "pg_tables", cmd: "SELECT tablename FROM pg_tables").Select(r => r[0]?.ToString()).Where(s => s is not null).ToArray()!;
 
     #endregion Protected Methods
 

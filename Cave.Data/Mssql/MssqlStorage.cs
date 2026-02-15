@@ -91,8 +91,7 @@ public sealed class MssqlStorage : SqlStorage
         get
         {
             var result = new List<string>();
-            RowLayout? layout = null;
-            var rows = Query("EXEC sdatabases;", ref layout, "master", "sdatabases");
+            var rows = QueryUnchecked("EXEC sdatabases;", "master", "sdatabases");
             foreach (var row in rows)
             {
                 var databaseName = row[0]?.ToString() ?? throw new InvalidOperationException("information_schema did not return database name!");

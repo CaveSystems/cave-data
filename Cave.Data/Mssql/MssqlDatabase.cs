@@ -15,7 +15,7 @@ public sealed class MssqlDatabase : SqlDatabase
     protected override string[] GetTableNames()
     {
         var result = new List<string>();
-        var rows = SqlStorage.Query("EXEC stables @table_owner='dbo',@table_qualifier='" + Name + "';");
+        var rows = SqlStorage.QueryUnchecked("EXEC stables @table_owner='dbo',@table_qualifier='" + Name + "';");
         foreach (var row in rows)
         {
             var tableName = row[2]?.ToString();

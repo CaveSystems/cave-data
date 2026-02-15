@@ -6,7 +6,7 @@ namespace Cave.Data;
 /// <summary>Provides an interface for a table of structs (rows).</summary>
 /// <typeparam name="TKey">Key identifier type.</typeparam>
 /// <typeparam name="TStruct">Row structure type.</typeparam>
-public interface ITable<TKey, TStruct> : ITable<TStruct>
+public interface ITable<TKey, TStruct> : ITable<TStruct>, IEnumerable<TStruct>
     where TKey : IComparable<TKey>
     where TStruct : struct
 {
@@ -20,6 +20,10 @@ public interface ITable<TKey, TStruct> : ITable<TStruct>
     #endregion Public Indexers
 
     #region Public Methods
+
+    /// <summary>Searches all keys used at the table.</summary>
+    /// <returns>Returns a list of all keys (identifiers)</returns>
+    IList<TKey> GetKeys();
 
     /// <summary>Removes a row from the table.</summary>
     /// <param name="id">The dataset ID to remove.</param>

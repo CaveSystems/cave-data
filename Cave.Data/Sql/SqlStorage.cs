@@ -244,7 +244,7 @@ public abstract class SqlStorage : Storage, IDisposable
         command.CreateAndAddParameter(table);
         command.Append(" AND table_schema = ");
         command.CreateAndAddParameter(database);
-        var rows = Query(command).ToDictionary(r => r["COLUMN_NAME"]!.ToString()!);
+        var rows = QueryUnchecked(command).ToDictionary(r => r["COLUMN_NAME"]!.ToString()!);
         FieldProperties UpdateProperties(IFieldProperties fieldProperties)
         {
             var row = rows[fieldProperties.NameAtDatabase];
@@ -931,10 +931,18 @@ public abstract class SqlStorage : Storage, IDisposable
     /// <param name="database">The databasename (optional, used with cached connections).</param>
     /// <param name="table">The tablename (optional, used with cached connections).</param>
     /// <returns>The result rows.</returns>
-    public IList<Row> Query(SqlCmd cmd, string? database = null, string? table = null)
+    [Obsolete("Use QueryChecked QueryUnchecked instead!")]
+    public IList<Row> Query(SqlCmd cmd, string? database = null, string? table = null) => QueryUnchecked(cmd, database, table);
+
+    /// <summary>Queries for all matching datasets.</summary>
+    /// <param name="cmd">The database dependent sql statement.</param>
+    /// <param name="database">The databasename (optional, used with cached connections).</param>
+    /// <param name="table">The tablename (optional, used with cached connections).</param>
+    /// <returns>The result rows.</returns>
+    public virtual IList<Row> QueryUnchecked(SqlCmd cmd, string? database = null, string? table = null)
     {
         RowLayout? layout = null;
-        return Query(cmd, ref layout, database, table);
+        return QueryChecked(cmd, ref layout, database, table);
     }
 
     /// <summary>Queries for all matching datasets.</summary>
@@ -943,7 +951,7 @@ public abstract class SqlStorage : Storage, IDisposable
     /// <param name="database">The databasename (optional, used with cached connections).</param>
     /// <param name="table">The tablename (optional, used with cached connections).</param>
     /// <returns>The result rows.</returns>
-    public virtual IList<Row> Query(SqlCmd cmd, ref RowLayout? layout, string? database = null, string? table = null)
+    public virtual IList<Row> QueryChecked(SqlCmd cmd, ref RowLayout? layout, string? database = null, string? table = null)
     {
         if (Closed)
         {
@@ -1015,7 +1023,14 @@ public abstract class SqlStorage : Storage, IDisposable
     /// <param name="database">The affected database (dependent on the storage engine this may be null).</param>
     /// <param name="table">The affected table (dependent on the storage engine this may be null).</param>
     /// <returns>The result row.</returns>
-    public Row QueryRow(SqlCmd cmd, ref RowLayout? layout, string? database = null, string? table = null) => Query(cmd, ref layout, database, table).Single();
+    public Row QueryRowChecked(SqlCmd cmd, ref RowLayout? layout, string? database = null, string? table = null) => QueryChecked(cmd, ref layout, database, table).Single();
+
+    /// <summary>Queries for a dataset (selected fields, one row).</summary>
+    /// <param name="cmd">the database dependent sql statement.</param>
+    /// <param name="database">The affected database (dependent on the storage engine this may be null).</param>
+    /// <param name="table">The affected table (dependent on the storage engine this may be null).</param>
+    /// <returns>The result row.</returns>
+    public Row QueryRowUnchecked(SqlCmd cmd, string? database = null, string? table = null) => QueryUnchecked(cmd, database, table).Single();
 
     /// <summary>Gets the <see cref="RowLayout"/> of the specified database table.</summary>
     /// <param name="database">The affected database (dependent on the storage engine this may be null).</param>
@@ -1097,9 +1112,9 @@ public abstract class SqlStorage : Storage, IDisposable
         where TStruct : struct
     {
         table ??= layout?.Name;
-        var rows = Query(cmd, ref layout, database, table);
+        var rows = QueryChecked(cmd, ref layout, database, table);
         if (layout is null) throw new InvalidOperationException("Layout not given and query could not create it!");
-        return rows.Select(r => r.GetStruct<TStruct>(layout)).ToList();
+        return [.. rows.Select(r => r.GetStruct<TStruct>(layout))];
     }
 
     /// <summary>Querys a single value with a database dependent sql statement.</summary>

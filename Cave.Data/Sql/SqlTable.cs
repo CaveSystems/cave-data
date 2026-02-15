@@ -511,12 +511,25 @@ public abstract class SqlTable : Table
         return Query(new SqlCmd(command.ToString(), [.. search.Parameters]), ref layout);
     }
 
+
     /// <summary>Searches the table for rows with given fieldName value combinations.</summary>
     /// <param name="fieldList">List of escaped database field names or *</param>
     /// <param name="search">The search to run.</param>
     /// <param name="opt">Options for the search and the result set.</param>
     /// <returns>Returns the ID of the row found or -1.</returns>
-    protected internal virtual IList<Row> SqlGetRows(string fieldList, SqlSearch? search, ResultOption? opt)
+    protected internal IList<Row> SqlGetRows(string fieldList, SqlSearch search, ResultOption opt)
+    {
+        var layout = Layout;
+        return SqlGetRows(fieldList, ref layout, search, opt);
+    }
+
+    /// <summary>Searches the table for rows with given fieldName value combinations.</summary>
+    /// <param name="fieldList">List of escaped database field names or *</param>
+    /// <param name="layout">Layout to use. If unset the database layout will be used and returned.</param>
+    /// <param name="search">The search to run.</param>
+    /// <param name="opt">Options for the search and the result set.</param>
+    /// <returns>Returns the ID of the row found or -1.</returns>
+    protected internal virtual IList<Row> SqlGetRows(string fieldList, ref RowLayout? layout, SqlSearch search, ResultOption opt)
     {
         if (search is null)
         {
@@ -586,7 +599,6 @@ public abstract class SqlTable : Table
             command.Append(" OFFSET " + o.Parameter);
         }
 
-        var layout = Layout;
         return Query(new SqlCmd(command.ToString(), [.. search.Parameters]), ref layout);
     }
 
@@ -738,7 +750,7 @@ public abstract class SqlTable : Table
             query = $"SELECT DISTINCT {escapedFieldName} FROM {FQTN} WHERE {s}";
         }
 
-        var rows = Storage.Query(query, Database.Name, Name);
+        var rows = Storage.QueryUnchecked(query, Database.Name, Name);
         var result = new Set<TValue>();
         foreach (var row in rows)
         {
@@ -822,17 +834,18 @@ public abstract class SqlTable : Table
         field.Validate();
 
         search ??= Search.None;
+        resultOption ??= ResultOption.None;
         var s = ToSqlSearch(search);
         s.CheckFieldsPresent(resultOption);
-        var rows = SqlGetRows(escapedFieldName, s, resultOption);
-        var result = new List<TValue>();
+        RowLayout? layout = null;
+        var rows = SqlGetRows(escapedFieldName, ref layout, s, resultOption);
+        var result = new List<TValue>(rows.Count);
         foreach (var row in rows)
         {
-            var value = (TValue?)Fields.ConvertValue(typeof(TValue), row[0], Storage.Culture);
-            if (value is not null) result.Add(value);
+            var dbValue = Fields.ConvertValue(typeof(TValue), row[0], Storage.Culture);
+            if (dbValue is TValue value) result.Add(value);
         }
-
-        return result.AsList();
+        return result;
     }
 
     /// <inheritdoc/>
@@ -891,7 +904,7 @@ public abstract class SqlTable : Table
     /// <param name="cmd">The databaseName dependent sql statement.</param>
     /// <param name="layout">The expected schema layout (if unset the layout is returned).</param>
     /// <returns>The result rows.</returns>
-    public IList<Row> Query(SqlCmd cmd, ref RowLayout? layout) => Storage.Query(cmd, ref layout, Database.Name, Name);
+    public IList<Row> Query(SqlCmd cmd, ref RowLayout? layout) => Storage.QueryChecked(cmd, ref layout, Database.Name, Name);
 
     /// <summary>Queries for all matching datasets.</summary>
     /// <param name="cmd">The databaseName dependent sql statement.</param>
