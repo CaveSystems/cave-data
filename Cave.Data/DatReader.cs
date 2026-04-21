@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.IO;
 using Cave.IO;
 using Cave.Security;
@@ -32,7 +31,7 @@ public sealed class DatReader : IDisposable
             case >= 3:
             {
                 var size = reader.Read7BitEncodedInt32();
-                if (size < 0) return !allowNull ? null : throw new NullReferenceException("Got null value at a not nullable field!");
+                if (size < 0) return allowNull ? null : throw new NullReferenceException("Got null value at a not nullable field!");
                 if (size == 0) return [];
                 return reader.ReadBytes(size);
             }
@@ -49,7 +48,7 @@ public sealed class DatReader : IDisposable
             case 1: return true;
             case 0xFF:
             {
-                return !allowNull ? null : throw new NullReferenceException("Got null value at a not nullable field!");
+                return allowNull ? null : throw new NullReferenceException("Got null value at a not nullable field!");
             }
             default: throw new InvalidDataException("Invalid data at bool value!");
         }
@@ -125,12 +124,12 @@ public sealed class DatReader : IDisposable
         {
             var enumValue = reader.ReadPrefixedInt64();
             if (enumValue is null) return null;
-            return Convert.ChangeType(enumValue, enumType);
+            return Enum.ToObject(enumType, enumValue.Value);
         }
         else
         {
             var enumValue = reader.Read7BitEncodedInt64();
-            return Convert.ChangeType(enumValue, enumType);
+            return Enum.ToObject(enumType, enumValue);
         }
     }
 

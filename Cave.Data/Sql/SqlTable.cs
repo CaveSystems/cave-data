@@ -511,7 +511,6 @@ public abstract class SqlTable : Table
         return Query(new SqlCmd(command.ToString(), [.. search.Parameters]), ref layout);
     }
 
-
     /// <summary>Searches the table for rows with given fieldName value combinations.</summary>
     /// <param name="fieldList">List of escaped database field names or *</param>
     /// <param name="search">The search to run.</param>
