@@ -13,7 +13,7 @@ public sealed class FieldIndex : IFieldIndex
     /// <summary>resolves value to IDs.</summary>
     readonly FakeSortedDictionary<List<object?[]>> index;
 
-    readonly object nullValue = new();
+    static readonly object nullValue = new();
 
     #endregion Private Fields
 
@@ -144,6 +144,21 @@ public sealed class FieldIndex : IFieldIndex
     {
         var obj = value ?? nullValue;
         return index.ContainsKey(obj) ? index[obj].ToArray() : [];
+    }
+
+    /// <summary>
+    /// Creates a new <see cref="FieldIndex"/> that is a copy of the current instance.
+    /// </summary>
+    /// <returns>A new <see cref="FieldIndex"/> instance that is a copy of the current instance.</returns>
+    public FieldIndex Clone()
+    {
+        var clone = new FieldIndex();
+        foreach (var kv in index)
+        {
+            clone.index[kv.Key] = kv.Value.ToList();
+        }
+        clone.Count = Count;
+        return clone;
     }
 
     #endregion Public Methods

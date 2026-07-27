@@ -16,9 +16,14 @@ namespace Cave.Data;
 [DebuggerDisplay("{" + nameof(Name) + "} [{" + nameof(FieldCount) + "}]")]
 public sealed class RowLayout : IEquatable<RowLayout>, IEnumerable<IFieldProperties>
 {
+    #region Internal Fields
+
+    internal static readonly Dictionary<string, RowLayout> LayoutCache = new();
+
+    #endregion Internal Fields
+
     #region Private Fields
 
-    static readonly Dictionary<string, RowLayout> LayoutCache = new();
     readonly IList<IFieldProperties> fieldProperties;
 
     #endregion Private Fields
@@ -160,7 +165,7 @@ public sealed class RowLayout : IEquatable<RowLayout>, IEnumerable<IFieldPropert
     public IList<IFieldProperties> Fields => new ReadOnlyCollection<IFieldProperties>(fieldProperties);
 
     /// <summary>Gets the fields marked with the <see cref="FieldFlags.ID"/>.</summary>
-    public IEnumerable<IFieldProperties> Identifier { get; } = [];
+    public IList<IFieldProperties> Identifier { get; } = [];
 
     /// <summary>Gets a value indicating whether the layout was created from a typed struct or not.</summary>
     public bool IsTyped => RowType != null;

@@ -256,11 +256,13 @@ public static class ITableExtensions
     }
 
     /// <summary>Caches the whole table into memory and provides a new ITable instance.</summary>
+    /// <remarks>This function uses the default <see cref="MemoryDatabase.Default"/> instance.</remarks>
     /// <param name="table">The table.</param>
     /// <returns>Returns a new memory table.</returns>
     public static MemoryTable ToMemory(this ITable table) => ToMemory(table, 0, 0);
 
     /// <summary>Caches the whole table into memory and provides a new ITable instance.</summary>
+    /// <remarks>This function uses the default <see cref="MemoryDatabase.Default"/> instance.</remarks>
     /// <param name="table">The table.</param>
     /// <param name="flags">Flags for the new memory table</param>
     /// <param name="options">Options for the new memory table</param>
@@ -278,13 +280,39 @@ public static class ITableExtensions
         return result;
     }
 
+    /// <summary>Caches the whole table into memory and provides a new ITable instance.</summary>
+    /// <param name="table">The table.</param>
+    /// <param name="database">The database instance to put the table into</param>
+    /// <param name="flags">Flags for the new memory table</param>
+    /// <param name="options">Options for the new memory table</param>
+    /// <returns>Returns a new memory table.</returns>
+    public static MemoryTable ToMemory(this ITable table, MemoryDatabase database, TableFlags flags = 0, MemoryTableOptions options = 0)
+    {
+        if (table == null)
+        {
+            throw new ArgumentNullException(nameof(table));
+        }
+
+        if (database == null)
+        {
+            throw new ArgumentNullException(nameof(database));
+        }
+
+        Trace.TraceInformation("Copy {0} rows to memory table", table.RowCount);
+        var result = MemoryTable.Create(database, table.Layout, flags, options);
+        result.LoadTable(table);
+        return result;
+    }
+
     /// <summary>Caches the whole table into memory and provides a new ITable{TStruct} instance.</summary>
+    /// <remarks>This function uses the default <see cref="MemoryDatabase.Default"/> instance.</remarks>
     /// <typeparam name="TStruct">Structure type.</typeparam>
     /// <param name="table">The table.</param>
     /// <returns>Returns a new memory table.</returns>
     public static ITable<TStruct> ToMemory<TStruct>(this ITable<TStruct> table) where TStruct : struct => ToMemory(table, 0, 0);
 
     /// <summary>Caches the whole table into memory and provides a new ITable{TStruct} instance.</summary>
+    /// <remarks>This function uses the default <see cref="MemoryDatabase.Default"/> instance.</remarks>
     /// <typeparam name="TStruct">Structure type.</typeparam>
     /// <param name="table">The table.</param>
     /// <param name="flags">Flags for the new memory table</param>
@@ -305,6 +333,33 @@ public static class ITableExtensions
     }
 
     /// <summary>Caches the whole table into memory and provides a new ITable{TStruct} instance.</summary>
+    /// <typeparam name="TStruct">Structure type.</typeparam>
+    /// <param name="table">The table.</param>
+    /// <param name="database">The database instance to put the table into</param>
+    /// <param name="flags">Flags for the new memory table</param>
+    /// <param name="options">Options for the new memory table</param>
+    /// <returns>Returns a new memory table.</returns>
+    public static ITable<TStruct> ToMemory<TStruct>(this ITable<TStruct> table, MemoryDatabase database, TableFlags flags = 0, MemoryTableOptions options = 0)
+        where TStruct : struct
+    {
+        if (table == null)
+        {
+            throw new ArgumentNullException(nameof(table));
+        }
+
+        if (database == null)
+        {
+            throw new ArgumentNullException(nameof(database));
+        }
+
+        Trace.TraceInformation("Copy {0} rows to memory table", table.RowCount);
+        var result = MemoryTable.Create(database, table.Layout, flags, options);
+        result.LoadTable(table);
+        return new Table<TStruct>(result);
+    }
+
+    /// <summary>Caches the whole table into memory and provides a new ITable{TStruct} instance.</summary>
+    /// <remarks>This function uses the default <see cref="MemoryDatabase.Default"/> instance.</remarks>
     /// <typeparam name="TKey">Key identifier type.</typeparam>
     /// <typeparam name="TStruct">Row structure type.</typeparam>
     /// <param name="table">The table.</param>
@@ -312,6 +367,7 @@ public static class ITableExtensions
     public static ITable<TKey, TStruct> ToMemory<TKey, TStruct>(this ITable<TKey, TStruct> table) where TKey : IComparable<TKey> where TStruct : struct => ToMemory(table, 0, 0);
 
     /// <summary>Caches the whole table into memory and provides a new ITable{TStruct} instance.</summary>
+    /// <remarks>This function uses the default <see cref="MemoryDatabase.Default"/> instance.</remarks>
     /// <typeparam name="TKey">Key identifier type.</typeparam>
     /// <typeparam name="TStruct">Row structure type.</typeparam>
     /// <param name="table">The table.</param>
@@ -328,6 +384,33 @@ public static class ITableExtensions
         }
 
         var result = MemoryTable.Create(table.Layout, flags, options);
+        result.LoadTable(table);
+        return new Table<TKey, TStruct>(result);
+    }
+
+    /// <summary>Caches the whole table into memory and provides a new ITable{TStruct} instance.</summary>
+    /// <typeparam name="TKey">Key identifier type.</typeparam>
+    /// <typeparam name="TStruct">Row structure type.</typeparam>
+    /// <param name="table">The table.</param>
+    /// <param name="database">The database instance to put the table into</param>
+    /// <param name="flags">Flags for the new memory table</param>
+    /// <param name="options">Options for the new memory table</param>
+    /// <returns>Returns a new memory table.</returns>
+    public static ITable<TKey, TStruct> ToMemory<TKey, TStruct>(this ITable<TKey, TStruct> table, MemoryDatabase database, TableFlags flags = 0, MemoryTableOptions options = 0)
+        where TKey : IComparable<TKey>
+        where TStruct : struct
+    {
+        if (table == null)
+        {
+            throw new ArgumentNullException(nameof(table));
+        }
+
+        if (database == null)
+        {
+            throw new ArgumentNullException(nameof(database));
+        }
+
+        var result = MemoryTable.Create(database, table.Layout, flags, options);
         result.LoadTable(table);
         return new Table<TKey, TStruct>(result);
     }

@@ -14,10 +14,22 @@ public sealed class DatReader : IDisposable
     #region Private Fields
 
     DataReader? reader;
+    readonly Dictionary<Type, RowLayout> typedLayoutCache = [];
 
     #endregion Private Fields
 
     #region Private Methods
+
+    RowLayout GetTypedLayout(Type type)
+    {
+        if (!typedLayoutCache.TryGetValue(type, out var layout))
+        {
+            layout = RowLayout.CreateTyped(type);
+            typedLayoutCache[type] = layout;
+        }
+
+        return layout;
+    }
 
     static byte[]? ReadBinary(int version, DataReader reader, bool allowNull)
     {
@@ -218,7 +230,12 @@ public sealed class DatReader : IDisposable
     {
         switch (version)
         {
-            case 1: return reader.ReadInt8();
+            case 1:
+            case 2:
+            case 3 or 4:
+            {
+                return reader.ReadInt8();
+            }
             case >= 5:
             {
                 if (!allowNull) goto case 1;
@@ -301,7 +318,12 @@ public sealed class DatReader : IDisposable
     {
         switch (version)
         {
-            case 1: return reader.ReadUInt8();
+            case 1:
+            case 2:
+            case 3 or 4:
+            {
+                return reader.ReadUInt8();
+            }
             case >= 5:
             {
                 if (!allowNull) goto case 1;
@@ -572,7 +594,7 @@ public sealed class DatReader : IDisposable
         where TStruct : struct
     {
         if (reader is null) throw new ObjectDisposedException(nameof(DatReader));
-        var layout = RowLayout.CreateTyped(typeof(TStruct));
+        var layout = GetTypedLayout(typeof(TStruct));
         RowLayout.CheckLayout(Layout, layout);
         if (!Layout.IsTyped)
         {
@@ -601,7 +623,7 @@ public sealed class DatReader : IDisposable
         where TStruct : struct
     {
         if (reader is null) throw new ObjectDisposedException(nameof(DatReader));
-        var layout = RowLayout.CreateTyped(typeof(TStruct));
+        var layout = GetTypedLayout(typeof(TStruct));
         if (checkLayout)
         {
             RowLayout.CheckLayout(Layout, layout);

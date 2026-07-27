@@ -21,10 +21,13 @@ public class MemoryTable : Table
     Dictionary<Identifier, object?[]> rows = new();
 
     /// <summary>The indices for fast lookups.</summary>
-    FieldIndex[] indices = [];
+    FieldIndex?[] indices = [];
 
     /// <summary>The memory table options.</summary>
     MemoryTableOptions memoryTableOptions;
+
+    /// <summary>Cache for autoincrement fields</summary>
+    List<IFieldProperties>? autoIncrement;
 
     #endregion fields
 
@@ -527,6 +530,34 @@ public class MemoryTable : Table
     /// <returns>True if the id is found at the table, false otherwise.</returns>
     public bool Exist(Identifier id) => rows.ContainsKey(id);
 
+    /// <summary>
+    /// Efficiently copies all rows of this table to another, empty <see cref="MemoryTable"/> with a compatible layout, bypassing the per-row
+    /// autoincrement, identifier and existence checks performed by <see cref="Insert(IEnumerable{Row})"/>.
+    /// </summary>
+    /// <param name="target">The empty target table to copy the data to.</param>
+    /// <exception cref="ArgumentNullException">target.</exception>
+    /// <exception cref="ReadOnlyException">Table {0} is readonly!.</exception>
+    /// <exception cref="InvalidOperationException">Target table needs to be empty!.</exception>
+    public void CopyTo(MemoryTable target)
+    {
+        if (target == null) throw new ArgumentNullException(nameof(target));
+        if (target.isReadonly) throw new ReadOnlyException($"Table {target} is readonly!");
+        if (target.RowCount != 0) throw new InvalidOperationException("Target table needs to be empty!");
+        if (!Layout.Equals(target.Layout)) throw new InvalidOperationException("Can only copy if target Layout equals my Layout!");
+
+        foreach (var kv in rows)
+        {
+            target.rows.Add(kv.Key, kv.Value);
+        }
+
+        for (var i = 0; i < indices.Length; i++)
+        {
+            target.indices[i] = indices[i]?.Clone()!;
+        }
+
+        target.IncreaseSequenceNumber();
+    }
+
     /// <summary>Gets a row from the table.</summary>
     /// <param name="id">The identifier of the row to be fetched.</param>
     /// <returns>The row.</returns>
@@ -700,6 +731,7 @@ public class MemoryTable : Table
         return sorted;
     }
 
+
     #endregion additional functionality
 
     #region private functions
@@ -716,13 +748,27 @@ public class MemoryTable : Table
             Trace.TraceInformation("Insert {0} at {1}", row, this);
         }
 
-        var autoIncrement = Layout.Identifier.Where(f => f.Flags.HasFlag(FieldFlags.AutoIncrement));
-        if (autoIncrement.Any())
+        if (autoIncrement is null)
+        {
+            autoIncrement = new();
+            foreach (var f in Layout.Identifier)
+            {
+                if ((f.Flags & FieldFlags.AutoIncrement) != 0)
+                {
+                    autoIncrement.Add(f);
+                }
+            }
+        }
+
+        var originalRow = row;
+        if (autoIncrement.Count > 0)
         {
             GetAutoIncrement(ref row, ref id, autoIncrement);
         }
 
-        var values = row.CopyValues();
+        // If GetAutoIncrement replaced the row it already holds a private, freshly cloned values array, so it is safe to
+        // use directly without another copy. Otherwise the row still references the caller's array and must be cloned.
+        var values = ReferenceEquals(row, originalRow) ? row.CopyValues() : row.Values;
         rows.Add(id, values);
         if (indices != null)
         {
@@ -748,12 +794,14 @@ public class MemoryTable : Table
         return row;
     }
 
-    void GetAutoIncrement(ref Row row, ref Identifier id, IEnumerable<IFieldProperties> autoinc)
+    void GetAutoIncrement(ref Row row, ref Identifier id, IList<IFieldProperties> autoinc)
     {
-        var values = row.CopyValues();
-        foreach (var field in autoinc)
+        object?[]? values = null;
+        for (var i = 0; i < autoinc.Count; i++)
         {
-            var value = values[field.Index];
+            var field = autoinc[i];
+            var value = row[field.Index];
+            var needsGeneration = false;
             switch (field.DataType)
             {
                 default:
@@ -762,6 +810,7 @@ public class MemoryTable : Table
                     if ((value == null) || ((DateTime)value == default))
                     {
                         value = DateTime.UtcNow;
+                        needsGeneration = true;
                     }
 
                     break;
@@ -772,6 +821,7 @@ public class MemoryTable : Table
                         if ((value == null) || ((Guid)value == default))
                         {
                             value = Guid.NewGuid();
+                            needsGeneration = true;
                         }
                     }
                     else
@@ -785,6 +835,7 @@ public class MemoryTable : Table
                     if ((value == null) || ((sbyte)value == default(sbyte)))
                     {
                         value = (Maximum<sbyte>(field.Name) ?? 0) + 1;
+                        needsGeneration = true;
                     }
 
                     break;
@@ -793,6 +844,7 @@ public class MemoryTable : Table
                     if ((value == null) || ((byte)value == default(byte)))
                     {
                         value = (Maximum<byte>(field.Name) ?? 0) + 1;
+                        needsGeneration = true;
                     }
 
                     break;
@@ -801,6 +853,7 @@ public class MemoryTable : Table
                     if ((value == null) || ((short)value == default(short)))
                     {
                         value = (Maximum<short>(field.Name) ?? 0) + 1;
+                        needsGeneration = true;
                     }
 
                     break;
@@ -809,6 +862,7 @@ public class MemoryTable : Table
                     if ((value == null) || ((ushort)value == default(ushort)))
                     {
                         value = (Maximum<ushort>(field.Name) ?? 0) + 1;
+                        needsGeneration = true;
                     }
 
                     break;
@@ -817,6 +871,7 @@ public class MemoryTable : Table
                     if ((value == null) || ((int)value == default))
                     {
                         value = (Maximum<int>(field.Name) ?? 0) + 1;
+                        needsGeneration = true;
                     }
 
                     break;
@@ -825,6 +880,7 @@ public class MemoryTable : Table
                     if ((value == null) || ((uint)value == default))
                     {
                         value = (Maximum<uint>(field.Name) ?? 0) + 1;
+                        needsGeneration = true;
                     }
 
                     break;
@@ -833,6 +889,7 @@ public class MemoryTable : Table
                     if ((value == null) || ((long)value == default))
                     {
                         value = (Maximum<long>(field.Name) ?? 0) + 1;
+                        needsGeneration = true;
                     }
 
                     break;
@@ -841,21 +898,33 @@ public class MemoryTable : Table
                     if ((value == null) || ((ulong)value == default))
                     {
                         value = (Maximum<ulong>(field.Name) ?? 0) + 1;
+                        needsGeneration = true;
                     }
 
                     break;
             }
 
-            values[field.Index] = value;
+            if (needsGeneration)
+            {
+                values ??= row.CopyValues();
+                values[field.Index] = value;
+            }
+        }
+
+        if (values is null)
+        {
+            // No autoincrement field required generation (e.g. all values already set, as when cloning), keep row and id unchanged.
+            return;
         }
 
         var newRow = new Row(Layout, values, false);
         var newId = new Identifier(newRow, Layout);
+#if DEBUG
         if (Exist(newId))
         {
-            throw new InvalidDataException("Could not create autoincrement identifier!");
+            throw new InvalidDataException($"Could not create autoincrement identifier! New dataset id {newId} already exists!");
         }
-
+#endif
         id = newId;
         row = newRow;
     }

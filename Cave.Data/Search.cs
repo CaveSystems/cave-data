@@ -796,11 +796,10 @@ public sealed class Search
     /// <param name="indices">FieldIndices or null.</param>
     /// <param name="table">The table to scan.</param>
     /// <returns>All rows matching this search.</returns>
-    public IEnumerable<Row> Scan(IEnumerable<Row>? preselected, RowLayout layout, IFieldIndex[] indices, ITable table)
+    public IEnumerable<Row> Scan(IEnumerable<Row>? preselected, RowLayout layout, IFieldIndex?[] indices, ITable table)
     {
-        if (table == null) { throw new ArgumentNullException(nameof(table)); }
-
-        if (layout == null) { throw new ArgumentNullException(nameof(layout)); }
+        if (table == null) throw new ArgumentNullException(nameof(table));
+        if (layout == null) throw new ArgumentNullException(nameof(layout));
 
         LoadLayout(layout, table.GetFieldNameComparison());
         switch (Mode)
@@ -849,10 +848,10 @@ public sealed class Search
                 if (Mode == SearchMode.Equals)
                 {
                     // check if we can do an index search
-                    if ((indices != null) && (indices[FieldNumber] != null))
+                    if ((indices != null) && (indices[FieldNumber] is IFieldIndex index))
                     {
                         // field has an index
-                        var result = indices[FieldNumber].Find(FieldValue).Select(r => new Row(Layout, r, true));
+                        var result = index.Find(FieldValue).Select(r => new Row(Layout, r, true));
                         if (preselected != null)
                         {
                             result = result.Intersect(preselected);

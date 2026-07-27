@@ -135,7 +135,9 @@ public sealed class DatWriter : IDisposable
     {
         switch (version)
         {
-            case 1: writer.Write(value ?? 0); break;
+            case 1:
+            case 2:
+            case 3 or 4: writer.Write(value ?? 0); break;
             case >= 5:
             {
                 if (!allowNull) goto case 1;
@@ -150,7 +152,9 @@ public sealed class DatWriter : IDisposable
     {
         switch (version)
         {
-            case 1: writer.Write(value ?? 0); break;
+            case 1:
+            case 2:
+            case 3 or 4: writer.Write(value ?? 0); break;
             case >= 5:
             {
                 if (!allowNull) goto case 1;

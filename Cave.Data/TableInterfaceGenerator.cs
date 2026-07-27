@@ -59,7 +59,7 @@ public class TableInterfaceGenerator
 
         var fieldNameLookup = new Dictionary<int, string>();
         var idCount = Layout.Identifier.Count();
-        var idFields = (idCount == 0 ? Layout : Layout.Identifier).ToList();
+        var idFields = (idCount == 0 ? Layout : (IEnumerable<IFieldProperties>)Layout.Identifier).ToList();
         var code = new StringBuilder();
         code.AppendLine("//-----------------------------------------------------------------------");
         code.AppendLine("// <summary>");

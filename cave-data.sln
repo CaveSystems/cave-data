@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.2.32630.192
+# Visual Studio Version 18
+VisualStudioVersion = 18.8.12009.203 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cave.Data", "Cave.Data\Cave.Data.csproj", "{BDD06D0F-057C-4511-BB2F-481010DB637E}"
 EndProject
@@ -38,6 +38,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dbstructs.create", "dbstructs.test\dbstructs.create.csproj", "{24863FFC-935E-432D-BF21-10BD2E9D24A1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dbtest", "dbtest\dbtest.csproj", "{9EA956A8-7AC2-41E8-A05F-B8C02CED6D06}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lib-benchmark", "lib-benchmark\lib-benchmark.csproj", "{47669E82-52FB-04FA-D64F-E4FF7BC79882}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -77,6 +79,10 @@ Global
 		{9EA956A8-7AC2-41E8-A05F-B8C02CED6D06}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9EA956A8-7AC2-41E8-A05F-B8C02CED6D06}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9EA956A8-7AC2-41E8-A05F-B8C02CED6D06}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47669E82-52FB-04FA-D64F-E4FF7BC79882}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47669E82-52FB-04FA-D64F-E4FF7BC79882}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47669E82-52FB-04FA-D64F-E4FF7BC79882}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47669E82-52FB-04FA-D64F-E4FF7BC79882}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

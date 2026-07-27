@@ -145,11 +145,50 @@ public static class IDatabaseExtensions
         table = GetTable<TKey, TStruct>(database, null, flags, excludedFields);
     }
 
+    /// <summary>Copies the whole database into a new <see cref="MemoryDatabase"/> instance.</summary>
+    /// <param name="source">The database to copy.</param>
+    /// <param name="predicate">A function to filter which tables to copy. If <c>null</c>, all tables are copied.</param>
+    /// <param name="storage">The memory storage to create the new database at. If <c>null</c> a new <see cref="MemoryStorage"/> instance is created.</param>
+    /// <param name="databaseName">The name of the new database. If <c>null</c> the name of the <paramref name="source"/> database is used.</param>
+    /// <returns>Returns a new <see cref="MemoryDatabase"/> instance containing all tables and rows of the <paramref name="source"/> database.</returns>
+    public static MemoryDatabase ToMemory(this IDatabase source, Func<ITable, bool>? predicate = null, MemoryStorage? storage = null, string? databaseName = null)
+    {
+        if (source == null)
+        {
+            throw new ArgumentNullException(nameof(source));
+        }
+
+        storage ??= new();
+        databaseName ??= source.Name;
+        var db = (MemoryDatabase)storage.CreateDatabase(databaseName);
+        foreach (var table in source)
+        {
+            if (predicate == null || predicate(table))
+            {
+                table.ToMemory(db);
+            }
+        }
+
+        return db;
+    }
+
     /// <summary>Creates an <see cref="IEnumerator{ITable}"/> for the specified <paramref name="database"/>.</summary>
     /// <param name="database">Database to iterate</param>
     /// <param name="flags">Table flags</param>
     /// <returns>Returns a new <see cref="IEnumerator{ITable}"/> instance</returns>
     public static IEnumerator<ITable> GetTableEnumerator(this IDatabase database, TableFlags flags = TableFlags.None)
+    {
+        foreach (var tableName in database.TableNames)
+        {
+            yield return database.GetTable(tableName, flags);
+        }
+    }
+
+    /// <summary>Creates an <see cref="IEnumerable{ITable}"/> for the specified <paramref name="database"/>.</summary>
+    /// <param name="database">Database to iterate</param>
+    /// <param name="flags">Table flags</param>
+    /// <returns>Returns a new <see cref="IEnumerable{ITable}"/> instance</returns>
+    public static IEnumerable<ITable> GetTables(this IDatabase database, TableFlags flags = TableFlags.None)
     {
         foreach (var tableName in database.TableNames)
         {

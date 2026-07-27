@@ -11,7 +11,7 @@ public static class Connector
 {
     #region Private Fields
 
-    static readonly char[] LocationSeparator = ['/'];
+    internal static readonly char[] LocationSeparator = ['/'];
 
     #endregion Private Fields
 

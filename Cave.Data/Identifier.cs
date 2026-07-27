@@ -45,13 +45,26 @@ public class Identifier : IEquatable<Identifier>
             throw new ArgumentNullException(nameof(row));
         }
 
-        if (!layout.Identifier.Any())
+        if (layout.SingleIdentifier is { } single)
         {
-            data = row.Values;
+            data = new object?[] { row[single.Index] };
         }
         else
         {
-            data = layout.Identifier.Select(field => row[field.Index]).ToArray();
+            if (layout.Identifier.Count == 0)
+            {
+                data = row.Values;
+            }
+            else
+            {
+                var result = new object?[layout.Identifier.Count];
+                for (var i = 0; i < layout.Identifier.Count; i++)
+                {
+                    result[i] = row[layout.Identifier[i].Index];
+                }
+
+                data = result;
+            }
         }
     }
 

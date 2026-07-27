@@ -86,7 +86,7 @@ public sealed class PgsqlStorage : SqlStorage
         get
         {
             var result = new List<string>();
-            var rows = Query(database: "SCHEMATA", cmd: "SELECT datname FROM pg_database;");
+            var rows = QueryUnchecked(database: "SCHEMATA", cmd: "SELECT datname FROM pg_database;");
             foreach (var row in rows)
             {
                 result.Add(row[0]?.ToString() ?? throw new InvalidOperationException("information_schema did not return database name!"));

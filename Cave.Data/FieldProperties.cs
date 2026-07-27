@@ -18,7 +18,7 @@ public class FieldProperties : IFieldProperties
 {
     #region Private Fields
 
-    static readonly char[] NameSeparator = [';', ',', '\t', ' '];
+    internal static readonly char[] NameSeparator = [';', ',', '\t', ' '];
 
     ConstructorInfo? constructor;
     bool parserInitialized;
