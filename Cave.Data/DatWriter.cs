@@ -377,10 +377,10 @@ public sealed class DatWriter : IDisposable
     {
         if (writer is null) throw new ObjectDisposedException(nameof(DatWriter));
         var entrySize = data.Length + BitCoder32.GetByteCount7BitEncoded(data.Length + 10);
-        var start = writer.BaseStream.Position;
+        var start = writer.Stream.Position;
         BitCoder32.Write7BitEncoded(writer, entrySize);
         writer.Write(data);
-        var fill = start + entrySize - writer.BaseStream.Position;
+        var fill = start + entrySize - writer.Stream.Position;
         if (fill > 0)
         {
             writer.Write(new byte[fill]);

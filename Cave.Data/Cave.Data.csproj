@@ -29,8 +29,11 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Cave.Extensions" Version="4.0.9" />
-        <PackageReference Include="Cave.IO" Version="4.0.4" />
+        <PackageReference Include="Cave.Extensions" Version="4.0.11" />
+        <PackageReference Include="Cave.IO" Version="4.0.12" />
+    </ItemGroup>
+    <ItemGroup>
+      <PackageReference Update="Microsoft.SourceLink.GitHub" Version="10.0.403" />
     </ItemGroup>
     
     <Choose>

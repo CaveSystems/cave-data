@@ -13,23 +13,12 @@ public sealed class DatReader : IDisposable
 {
     #region Private Fields
 
-    DataReader? reader;
     readonly Dictionary<Type, RowLayout> typedLayoutCache = [];
+    DataReader? reader;
 
     #endregion Private Fields
 
     #region Private Methods
-
-    RowLayout GetTypedLayout(Type type)
-    {
-        if (!typedLayoutCache.TryGetValue(type, out var layout))
-        {
-            layout = RowLayout.CreateTyped(type);
-            typedLayoutCache[type] = layout;
-        }
-
-        return layout;
-    }
 
     static byte[]? ReadBinary(int version, DataReader reader, bool allowNull)
     {
@@ -333,6 +322,17 @@ public sealed class DatReader : IDisposable
         }
     }
 
+    RowLayout GetTypedLayout(Type type)
+    {
+        if (!typedLayoutCache.TryGetValue(type, out var layout))
+        {
+            layout = RowLayout.CreateTyped(type);
+            typedLayoutCache[type] = layout;
+        }
+
+        return layout;
+    }
+
     void Load(Stream stream)
     {
         if (stream == null)
@@ -460,7 +460,7 @@ public sealed class DatReader : IDisposable
             throw new NotSupportedException("Version not supported!");
         }
 
-        var dataStart = reader.BaseStream.Position;
+        var dataStart = reader.Stream.Position;
         var dataSize = reader.Read7BitEncodedInt32();
         if (dataSize == 0)
         {
@@ -504,7 +504,7 @@ public sealed class DatReader : IDisposable
             }
         }
 
-        var skip = dataStart + dataSize - reader.BaseStream.Position;
+        var skip = dataStart + dataSize - reader.Stream.Position;
         if (skip < 0)
         {
             throw new FormatException();
@@ -512,7 +512,7 @@ public sealed class DatReader : IDisposable
 
         if (skip > 0)
         {
-            reader.BaseStream.Seek(skip, SeekOrigin.Current);
+            reader.Stream.Seek(skip, SeekOrigin.Current);
         }
 
         return new Row(layout, values, false);
@@ -602,7 +602,7 @@ public sealed class DatReader : IDisposable
         }
 
         var result = new List<TStruct>();
-        while (reader.BaseStream.Position < reader.BaseStream.Length)
+        while (reader.Stream.Position < reader.Stream.Length)
         {
             var row = ReadCurrentRow(reader, Version, layout);
             if (row != null)
@@ -634,7 +634,7 @@ public sealed class DatReader : IDisposable
             Layout = layout;
         }
 
-        while (reader.BaseStream.Position < reader.BaseStream.Length)
+        while (reader.Stream.Position < reader.Stream.Length)
         {
             var currentRow = ReadCurrentRow(reader, Version, layout);
             if (currentRow != null)
@@ -667,7 +667,7 @@ public sealed class DatReader : IDisposable
             Layout = table.Layout;
         }
 
-        while (reader.BaseStream.Position < reader.BaseStream.Length)
+        while (reader.Stream.Position < reader.Stream.Length)
         {
             var row = ReadCurrentRow(reader, Version, Layout);
             if (row != null)

@@ -24,7 +24,7 @@ public class CsvReader : IDisposable
     {
         if (disposing)
         {
-            reader?.BaseStream.Dispose();
+            reader?.Stream.Dispose();
             reader = null;
         }
     }

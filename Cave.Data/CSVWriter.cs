@@ -23,7 +23,7 @@ public sealed class CsvWriter : IDisposable
     {
         if (disposing)
         {
-            writer?.BaseStream.Dispose();
+            writer?.Stream.Dispose();
             writer = null;
         }
     }
